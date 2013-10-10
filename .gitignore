@@ -1,0 +1,10 @@
+*.gem
+.bundle
+pkg/*
+.DS_Store
+._*
+.idea/
+.redcar/
+spec/dummy/tmp/
+spec/dummy/db/*.sqlite3
+spec/dummy/log/*.log
