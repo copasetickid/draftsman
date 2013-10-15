@@ -53,7 +53,7 @@ class Draftsman::Draft < ActiveRecord::Base
     dependencies = []
 
     case self.event
-    when 'create'
+    when 'create', 'update'
       associations = self.item.class.reflect_on_all_associations(:belongs_to)
 
       associations.each do |association|
