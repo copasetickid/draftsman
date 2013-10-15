@@ -140,6 +140,18 @@ describe Parent do
       its(:draft_publication_dependencies) { should be_empty }
     end
 
+    context 'parent `update` draft with child `create` draft' do
+      before do
+        parent.save!
+        parent.name = 'Selma'
+        parent.draft_update
+        child.draft_creation
+      end
+
+      subject { parent.draft }
+      its(:draft_publication_dependencies) { should be_empty }
+    end
+
     context 'parent `destroy` draft with child `destroy` draft' do
       before do
         child.save!

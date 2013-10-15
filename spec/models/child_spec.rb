@@ -154,6 +154,19 @@ describe Child do
       its(:draft_publication_dependencies) { should include parent.draft }
     end
 
+    context 'parent `create` draft with child `update` draft' do
+      before do
+        parent.draft_creation
+        child.save!
+        child.name = 'Heather'
+        child.draft_update
+      end
+
+      subject { child.draft }
+      its(:draft_publication_dependencies) { should be_present }
+      its(:draft_publication_dependencies) { should include parent.draft }
+    end
+
     context 'parent `destroy` draft with child `destroy` draft' do
       before do
         child.save!
