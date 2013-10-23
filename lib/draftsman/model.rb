@@ -258,7 +258,7 @@ module Draftsman
             # If there's already a draft, update it
             if send(self.class.draft_association_name).present?
               if track_object_changes_for_draft?
-                data[:object_changes] = Draftsman.serializer.dump(changes_for_draftsman(changed_from: self.send(self.class.draft_association_name).changeset))
+                data[:object_changes] = Draftsman.serializer.dump(changes_for_draftsman)
               end
 
               send(self.class.draft_association_name).update_attributes data
@@ -293,6 +293,17 @@ module Draftsman
         end
       rescue Exception => e
         false
+      end
+
+      # Returns serialized object representing this drafted item.
+      def object_to_string_for_draft(object = nil)
+        object ||= self
+
+        _attrs = object.attributes.except(*self.class.draftsman_options[:skip]).tap do |attributes|
+          self.class.serialize_attributes_for_draftsman attributes
+        end
+
+        Draftsman.serializer.dump(_attrs)
       end
 
       # Returns whether or not this item has been published at any point in its lifecycle.
@@ -336,7 +347,7 @@ module Draftsman
         my_changes = options[:previous_changes] ? self.previous_changes : self.changes
 
         new_changes = my_changes.delete_if do |key, value|
-          !notably_changed_attributes_for_draft(previous_changes: true).include?(key)
+          !notably_changed_attributes_for_draft(previous_changes: options[:previous_changes]).include?(key)
         end.tap do |changes|
           self.class.serialize_draft_attribute_changes(changes) # Use serialized value for attributes when necessary
         end
@@ -384,16 +395,6 @@ module Draftsman
 
         only = self.class.draftsman_options[:only]
         only.empty? ? changed_and_not_ignored_for_draft(previous_changes: options[:previous_changes]) : (changed_and_not_ignored_for_draft(previous_changes: options[:previous_changes]) & only)
-      end
-
-      def object_to_string_for_draft(object = nil)
-        object ||= self
-
-        _attrs = object.attributes.except(*self.class.draftsman_options[:skip]).tap do |attributes|
-          self.class.serialize_attributes_for_draftsman attributes
-        end
-
-        Draftsman.serializer.dump(_attrs)
       end
 
       # Save columns outside of the `only` option directly to master table

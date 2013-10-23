@@ -14,6 +14,7 @@ describe Draftsman::Draft do
       its(:object) { should be_present }
       its(:changeset) { should include :id }
       its(:changeset) { should include :name }
+      its(:changeset) { should_not include :title }
       its(:changeset) { should include :created_at }
       its(:changeset) { should include :updated_at }
       its(:previous_draft) { should be_nil }
@@ -31,6 +32,7 @@ describe Draftsman::Draft do
         its(:object) { should be_present }
         its(:changeset) { should include :id }
         its(:changeset) { should include :name }
+        its(:changeset) { should_not include :title }
         its(:changeset) { should include :created_at }
         its(:changeset) { should include :updated_at }
         its(:previous_draft) { should be_nil }
@@ -41,6 +43,7 @@ describe Draftsman::Draft do
       before do
         trashable.save!
         trashable.name = 'Sam'
+        trashable.title = 'My Title'
         trashable.draft_update
       end
 
@@ -51,9 +54,29 @@ describe Draftsman::Draft do
       its(:object) { should be_present }
       its(:changeset) { should_not include :id }
       its(:changeset) { should include :name }
+      its(:changeset) { should include :title }
       its(:changeset) { should_not include :created_at }
       its(:changeset) { should_not include :updated_at }
       its(:previous_draft) { should be_nil }
+
+      context 'updating the update' do
+        before do
+          trashable.title = nil
+          trashable.draft_update
+        end
+
+        it { should_not be_create }
+        it { should be_update }
+        it { should_not be_destroy }
+        its(:event) { should eql 'update' }
+        its(:object) { should be_present }
+        its(:changeset) { should_not include :id }
+        its(:changeset) { should include :name }
+        its(:changeset) { should_not include :title }
+        its(:changeset) { should_not include :created_at }
+        its(:changeset) { should_not include :updated_at }
+        its(:previous_draft) { should be_nil }
+      end
     end
 
     context 'with `destroy` draft' do
@@ -87,6 +110,7 @@ describe Draftsman::Draft do
         its(:object) { should be_present }
         its(:changeset) { should include :id }
         its(:changeset) { should include :name }
+        its(:changeset) { should_not include :title }
         its(:changeset) { should include :created_at }
         its(:changeset) { should include :updated_at }
         its(:previous_draft) { should be_present }

@@ -78,6 +78,7 @@ ActiveRecord::Schema.define(version: 20110208155312) do
 
   create_table "trashables", force: true do |t|
     t.string   "name"
+    t.string   "title"
     t.integer  "draft_id"
     t.datetime "published_at"
     t.datetime "trashed_at"

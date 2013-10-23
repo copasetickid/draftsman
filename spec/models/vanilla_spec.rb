@@ -83,7 +83,7 @@ describe Vanilla do
         end
 
         it 'has a `create` draft' do
-          subject.draft.create?.should be_true
+          subject.draft.should be_create
         end
       end
 

@@ -26,7 +26,8 @@ class SetUpTestTables < ActiveRecord::Migration
     end
 
     create_table :trashables, :force => true do |t|
-      t.string :name
+      t.string     :name
+      t.string     :title, :null => true
       t.references :draft
       t.datetime   :published_at
       t.datetime   :trashed_at
