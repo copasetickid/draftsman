@@ -4,7 +4,7 @@ require 'draftsman/version'
 Gem::Specification.new do |s|
   s.name          = 'draftsman'
   s.version       = Draftsman::VERSION
-  s.summary       = 'Add drafts to ActiveRecord models.'
+  s.summary       = "Create draft versions of your ActiveRecord models' data."
   s.description   = s.summary
   s.homepage      = 'https://github.com/minimalorange/draftsman'
   s.authors       = ['Chris Peters']

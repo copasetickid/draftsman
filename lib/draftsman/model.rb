@@ -202,7 +202,9 @@ module Draftsman
 
           # Mock `dependent: :destroy` behavior for all trashable associations
           dependent_associations = self.class.reflect_on_all_associations(:has_one) + self.class.reflect_on_all_associations(:has_many)
+
           dependent_associations.each do |association|
+
             if association.klass.draftable? && association.options.has_key?(:dependent) && association.options[:dependent] == :destroy
               dependents = association.macro == :has_one ? [self.send(association.name)] : self.send(association.name)
 

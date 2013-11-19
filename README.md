@@ -1,4 +1,4 @@
-# Draftsman v0.1 (alpha)
+# Draftsman v0.1.0 (alpha)
 
 Draftsman is a Ruby gem that lets you create draft versions of your database records. If you're developing a system in
 need of simple drafts or a publishing approval queue, then Draftsman just might be what you need.
@@ -48,6 +48,12 @@ Works well with Rails, Sinatra, or any other application that depends on ActiveR
 ### Rails 3 & 4
 
 Add Draftsman to your `Gemfile`.
+
+```ruby
+gem 'draftsman', '0.1.0'
+```
+
+Or if you want to grab the latest from `master`:
 
 ```ruby
 gem 'draftsman', :github => 'minimalorange/draftsman'
