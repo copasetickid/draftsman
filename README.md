@@ -11,9 +11,9 @@ need of simple drafts or a publishing approval queue, then Draftsman just might 
 *  The RSpec tests are lacking in some areas, so I will be adding to those over time as well. (Unfortunately, this gem
    was not developed with TDD best practices because it was lifted from PaperTrail and modified from there.)
 
-This gem is inspired by the [Kentouzu][1] gem, which is based heavily on [PaperTrail][2]. In fact, much of the code for
-this gem was lifted line for line from PaperTrail (because it works beautifully). You should definitely check out
-PaperTrail and its source: it's a nice clean example of a gem that hooks into Rails and Sinatra.
+This gem is inspired by the [Kentouzu][1] gem, which is based heavily on [PaperTrail][2]. In fact, much of the structure
+for this gem emulates PaperTrail (because it works beautifully). You should definitely check out PaperTrail and its
+source: it's a nice clean example of a gem that hooks into Rails and Sinatra.
 
 ## Features
 
@@ -77,7 +77,7 @@ Run the migration(s).
 Add `draft_id`, `published_at`, and `trashed_at` attributes to the models you want to have drafts on. `trashed_at` is
 optional if you don't want to store drafts for destroys.
 
-    $ rails g migration add_draft_id_published_at_trashed_at_to_widgets draft_id:integer published_at:timestamp trashed_at:timestamp
+    $ rails g migration add_drafts_to_widgets draft_id:integer published_at:timestamp trashed_at:timestamp
     $ rake db:migrate
 
 Add `has_drafts` to the models you want to have drafts on.
