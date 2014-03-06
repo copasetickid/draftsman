@@ -52,25 +52,27 @@ class Draftsman::Draft < ActiveRecord::Base
   def draft_publication_dependencies
     dependencies = []
 
+    my_item = self.item.draft? ? self.item.draft.reify : self.item
+
     case self.event
     when 'create', 'update'
-      associations = self.item.class.reflect_on_all_associations(:belongs_to)
+      associations = my_item.class.reflect_on_all_associations(:belongs_to)
 
       associations.each do |association|
         association_class =
           if association.polymorphic?
-            self.item.send(association.foreign_key.sub('_id', '_type')).constantize
+            my_item.send(association.foreign_key.sub('_id', '_type')).constantize
           else
             association.klass
           end
 
         if association_class.draftable? && association.name != association_class.draft_association_name.to_sym
-          dependency = self.item.send(association.name)
+          dependency = my_item.send(association.name)
           dependencies << dependency.draft if dependency.present? && dependency.draft? && dependency.draft.create?
         end
       end
     when 'destroy'
-      associations = self.item.class.reflect_on_all_associations(:has_one) + self.item.class.reflect_on_all_associations(:has_many)
+      associations = my_item.class.reflect_on_all_associations(:has_one) + my_item.class.reflect_on_all_associations(:has_many)
 
       associations.each do |association|
         if association.klass.draftable?
@@ -78,9 +80,9 @@ class Draftsman::Draft < ActiveRecord::Base
           associated_dependencies =
             case association.macro
             when :has_one
-              self.item.send(association.name).present? ? [self.item.send(association.name)] : []
+              my_item.send(association.name).present? ? [my_item.send(association.name)] : []
             when :has_many
-              self.item.send(association.name)
+              my_item.send(association.name)
             end
 
           associated_dependencies.each do |dependency|

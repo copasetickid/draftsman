@@ -150,7 +150,7 @@ describe Child do
       end
 
       subject { child.draft }
-      its(:draft_publication_dependencies) { should be_present }
+      its(:draft_publication_dependencies) { should_not be_empty }
       its(:draft_publication_dependencies) { should include parent.draft }
     end
 
@@ -163,8 +163,24 @@ describe Child do
       end
 
       subject { child.draft }
-      its(:draft_publication_dependencies) { should be_present }
+      its(:draft_publication_dependencies) { should_not be_empty }
       its(:draft_publication_dependencies) { should include parent.draft }
+    end
+
+    context 'parent `create` draft with child `update` draft pointing to new parent' do
+      let(:new_parent) { Parent.new(:name => 'Patty') }
+      before do
+        parent.draft_creation
+        child.save!
+        new_parent.draft_creation
+        child.parent = new_parent
+        child.draft_update
+      end
+
+      subject { child.draft }
+      its(:draft_publication_dependencies) { should_not be_empty }
+      its(:draft_publication_dependencies) { should_not include parent.draft}
+      its(:draft_publication_dependencies) { should include new_parent.draft }
     end
 
     context 'parent `destroy` draft with child `destroy` draft' do
