@@ -9,6 +9,7 @@ Gem::Specification.new do |s|
   s.homepage      = 'https://github.com/minimalorange/draftsman'
   s.authors       = ['Chris Peters']
   s.email         = 'chris@minimalorange.com'
+  s.license       = 'MIT'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

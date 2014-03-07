@@ -496,6 +496,10 @@ Rails guide:
 This gem is a work in progress. I am adding specs as I need features in my application. Please add missing ones as you
 work on features or find bugs!
 
+## License
+
+Draftsman is released under the [MIT License][9].
+
 
 [1]: https://github.com/seaneshbaugh/kentouzu
 [2]: https://github.com/airblade/paper_trail
@@ -504,3 +508,4 @@ work on features or find bugs!
 [6]: https://github.com/janko-m/sinatra-activerecord
 [7]: https://raw.github.com/minimalorange/draftsman/master/lib/generators/draftsman/templates/create_drafts.rb
 [8]: http://www.sinatrarb.com/intro.html#Modular%20vs.%20Classic%20Style
+[9]: http://www.opensource.org/licenses/MIT
