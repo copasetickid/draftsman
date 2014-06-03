@@ -159,14 +159,8 @@ describe Vanilla do
     describe :drafted do
       subject { Vanilla.drafted }
       its(:count) { should eql 1 }
-
-      it 'includes the unpublished item' do
-        subject.should include drafted_vanilla
-      end
-
-      it 'does not include the published item' do
-        subject.should_not include published_vanilla
-      end
+      it { should include drafted_vanilla }
+      it { should_not include published_vanilla }
     end
 
     describe :live do
@@ -180,14 +174,8 @@ describe Vanilla do
     describe :published do
       subject { Vanilla.published }
       its(:count) { should eql 1 }
-
-      it 'does not include the unpublished item' do
-        subject.should_not include drafted_vanilla
-      end
-
-      it 'includes the published item' do
-        subject.should include published_vanilla
-      end
+      it { should_not include drafted_vanilla }
+      it { subject.should include published_vanilla }
     end
 
     describe :trashed do

@@ -223,6 +223,14 @@ Widget.trashed    # Limits to items that have been drafted for deletion (but not
 Widget.live       # Limits to items that have not been drafted for deletion. Best used in an "admin" area in your application.
 ```
 
+These scopes optionally take a `referenced_table_name` argument for constructing more advanced queries using `includes`
+eager loading or `joins`. This reduces ambiguity both for SQL queries and for your Ruby code.
+
+```ruby
+# Query live widgets and gears without ambiguity.
+Widget.live.includes(:gears, :sprockets).live(:gears)
+```
+
 ### Draft Class Methods
 
 The `Draftsman::Draft` class has the following methods:
@@ -497,6 +505,8 @@ This gem is a work in progress. I am adding specs as I need features in my appli
 work on features or find bugs!
 
 ## License
+
+Copyright 2013-2014 Minimal Orange, LLC.
 
 Draftsman is released under the [MIT License][9].
 

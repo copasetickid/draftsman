@@ -74,15 +74,50 @@ module Draftsman
         belongs_to self.draft_association_name, :class_name => self.draft_class_name, :dependent => :destroy
 
         # Scopes
-        scope :drafted,   lambda { where("#{self.draft_association_name}_id IS NOT NULL") }
-        scope :published, lambda { where("#{self.published_at_attribute_name} IS NOT NULL") }
-        scope :trashed,   lambda { where("#{self.trashed_at_attribute_name} IS NOT NULL") }
-        scope :live,      lambda { where("#{self.trashed_at_attribute_name} IS NULL") }
+        scope :drafted, (lambda do |referenced_table_name = nil|
+          referenced_table_name = referenced_table_name.present? ? referenced_table_name : table_name
+
+          if where_not?
+            where.not(referenced_table_name => { "#{self.draft_association_name}_id" => nil })
+          else
+            where("#{referenced_table_name}.#{self.draft_association_name}_id IS NOT NULL")
+          end
+        end)
+
+        scope :published, (lambda do |referenced_table_name = nil|
+          referenced_table_name = referenced_table_name.present? ? referenced_table_name : table_name
+
+          if where_not?
+            where.not(referenced_table_name => { self.published_at_attribute_name => nil })
+          else
+            where("#{self.published_at_attribute_name} IS NOT NULL")
+          end
+        end)
+
+        scope :trashed, (lambda do |referenced_table_name = nil|
+          referenced_table_name = referenced_table_name.present? ? referenced_table_name : table_name
+
+          if where_not?
+            where.not(referenced_table_name => { self.trashed_at_attribute_name => nil })
+          else
+            where("#{self.trashed_at_attribute_name} IS NOT NULL")
+          end
+        end)
+
+        scope :live, (lambda do |referenced_table_name = nil|
+          referenced_table_name = referenced_table_name.present? ? referenced_table_name : table_name
+          where(referenced_table_name => { self.trashed_at_attribute_name => nil })
+        end)
       end
 
       # Returns whether or not `has_drafts` has been called on this model.
       def draftable?
         method_defined?(:draftsman_options)
+      end
+
+      # Returns whether or not the included ActiveRecord can do `where.not(...)` style queries.
+      def where_not?
+        ActiveRecord::VERSION::STRING.to_f >= 4.0
       end
 
       # Serializes attribute changes for `Draft#object_changes` attribute.

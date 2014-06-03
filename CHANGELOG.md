@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.2 - June 3, 2014
+
+-  Fixed [#4](https://github.com/live-editor/draftsman/issues/4) - Added `referenced_table_name` argument to scopes.
+
 ## v0.1.1 - March 7, 2014
 
 -  Fixed [#3](https://github.com/minimalorange/draftsman/issues/3) - draft_publication_dependencies not honoring drafts
