@@ -50,13 +50,13 @@ Works well with Rails, Sinatra, or any other application that depends on ActiveR
 Add Draftsman to your `Gemfile`.
 
 ```ruby
-gem 'draftsman', '0.2'
+gem 'draftsman', '0.2.0'
 ```
 
 Or if you want to grab the latest from `master`:
 
 ```ruby
-gem 'draftsman', :github => 'minimalorange/draftsman'
+gem 'draftsman', :github => 'live-editor/draftsman'
 ```
 
 Generate a migration which will add a `drafts` table to your database.
@@ -92,7 +92,7 @@ ActiveRecord Extension, steps for setting up your app with Draftsman will look s
 Add Draftsman to your `Gemfile`.
 
 ```ruby
-gem 'draftsman', :github => 'minimalorange/draftsman'
+gem 'draftsman', :github => 'live-editor/draftsman'
 ```
 
 Generate a migration to add a `drafts` table to your database.
@@ -516,6 +516,6 @@ Draftsman is released under the [MIT License][9].
 [4]: http://railscasts.com/episodes/416-form-objects
 [5]: http://www.sinatrarb.com/
 [6]: https://github.com/janko-m/sinatra-activerecord
-[7]: https://raw.github.com/minimalorange/draftsman/master/lib/generators/draftsman/templates/create_drafts.rb
+[7]: https://raw.github.com/live-editor/draftsman/master/lib/generators/draftsman/templates/create_drafts.rb
 [8]: http://www.sinatrarb.com/intro.html#Modular%20vs.%20Classic%20Style
 [9]: http://www.opensource.org/licenses/MIT
