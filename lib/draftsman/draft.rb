@@ -186,7 +186,9 @@ class Draftsman::Draft < ActiveRecord::Base
   #     `@category = @category.reify if @category.draft?`
   def reify
     without_identity_map do
-      unless self.object.nil?
+      if !self.previous_draft.nil?
+        reify_previous_draft.reify
+      elsif !self.object.nil?
         # This appears to be necessary if for some reason the draft's model hasn't been loaded (such as when done in the console).
         require self.item_type.underscore
 
@@ -228,6 +230,8 @@ class Draftsman::Draft < ActiveRecord::Base
         # Restore previous draft if one was stashed away
         if self.previous_draft.present?
           prev_draft = reify_previous_draft
+          prev_draft.save!
+
           self.item.class.where(:id => self.item).update_all "#{self.item.class.draft_association_name}_id".to_sym => prev_draft.id,
                                                              self.item.class.trashed_at_attribute_name => nil
         else
@@ -261,7 +265,6 @@ private
       end
     end
 
-    draft.save!
     draft
   end
 

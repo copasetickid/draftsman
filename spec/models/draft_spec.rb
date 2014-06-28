@@ -294,4 +294,81 @@ describe Draftsman::Draft do
       end
     end
   end
+
+  describe :reify do
+    subject { trashable.draft.reify }
+
+    context 'with `create` draft' do
+      before { trashable.draft_creation }
+      its(:title) { should eql trashable.title }
+
+      context 'updated create' do
+        before do
+          trashable.name = 'Sam'
+          trashable.draft_update
+        end
+
+        its(:name) { should eql 'Sam' }
+        its(:title) { should be_nil }
+      end
+    end
+
+    context 'with `update` draft' do
+      before do
+        trashable.save!
+        trashable.name = 'Sam'
+        trashable.title = 'My Title'
+        trashable.draft_update
+      end
+
+      its(:name) { should eql 'Sam' }
+      its(:title) { should eql 'My Title' }
+
+      context 'updating the update' do
+        before do
+          trashable.title = nil
+          trashable.draft_update
+        end
+
+        its(:name) { should eql 'Sam' }
+        its(:title) { should be_nil }
+      end
+    end
+
+    context 'with `destroy` draft' do
+      context 'without previous draft' do
+        before do
+          trashable.save!
+          trashable.draft_destroy
+        end
+
+        its(:name) { should eql 'Bob' }
+        its(:title) { should be_nil }
+      end
+
+      context 'with previous `create` draft' do
+        before do
+          trashable.draft_creation
+          trashable.draft_destroy
+        end
+
+        its(:name) { should eql 'Bob' }
+        its(:title) { should be_nil }
+      end
+
+      context 'with previous `update` draft' do
+        before do
+          trashable.save!
+          trashable.name = 'Sam'
+          trashable.title = 'My Title'
+          trashable.draft_update
+          # Typically, 2 draft operations won't happen in the same request, so reload before draft-destroying.
+          trashable.reload.draft_destroy
+        end
+
+        its(:name) { should eql 'Sam' }
+        its(:title) { should eql 'My Title' }
+      end
+    end
+  end
 end
