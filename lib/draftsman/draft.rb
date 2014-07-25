@@ -179,7 +179,7 @@ class Draftsman::Draft < ActiveRecord::Base
     end
   end
 
-  # Returns instance of item restored to its pre-draft state.
+  # Returns instance of item converted to its drafted state.
   #
   # Example usage:
   #
@@ -211,9 +211,9 @@ class Draftsman::Draft < ActiveRecord::Base
 
   # Reverts this draft.
   # -  For create drafts, destroys the draft and the item.
-  # -  For update drafts, destyors the draft only.
-  # -  For destroy drafts, destroys the draft and undoes the `trashed_at` timestamp on the item. If a draft was drafted
-  #    for destroy, restores the draft.
+  # -  For update drafts, destroys the draft only.
+  # -  For destroy drafts, destroys the draft and undoes the `trashed_at` timestamp on the item. If a previous draft was
+  #    drafted for destroy, restores the draft.
   def revert!
     ActiveRecord::Base.transaction do
       case self.event
