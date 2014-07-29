@@ -110,6 +110,11 @@ module Draftsman
         end)
       end
 
+      # Returns draft class.
+      def draft_class
+        @draft_class ||= draft_class_name.constantize
+      end
+
       # Returns whether or not `has_drafts` has been called on this model.
       def draftable?
         method_defined?(:draftsman_options)
@@ -122,6 +127,9 @@ module Draftsman
 
       # Serializes attribute changes for `Draft#object_changes` attribute.
       def serialize_draft_attribute_changes(changes)
+        # Don't serialize values before inserting into columns of type `JSON` on PostgreSQL databases.
+        return changes if self.draft_class.object_changes_col_is_json?
+
         serialized_attributes.each do |key, coder|
           if changes.key?(key)
             coder = Draftsman::Serializers::Yaml unless coder.respond_to?(:dump) # Fall back to YAML if `coder` has no `dump` method
@@ -133,6 +141,9 @@ module Draftsman
 
       # Used for `Draft#object` attribute
       def serialize_attributes_for_draftsman(attributes)
+        # Don't serialize values before inserting into columns of type `JSON` on PostgreSQL databases.
+        return attributes if self.draft_class.object_col_is_json?
+
         serialized_attributes.each do |key, coder|
           if attributes.key?(key)
             coder = Draftsman::Serializers::Yaml unless coder.respond_to?(:dump) # Fall back to YAML if `coder` has no `dump` method
@@ -148,6 +159,9 @@ module Draftsman
 
       # Unserializes attribute changes for `Draft#object_changes` attribute.
       def unserialize_draft_attribute_changes(changes)
+        # Don't serialize values before inserting into columns of type `JSON` on PostgreSQL databases.
+        return changes if self.draft_class.object_changes_col_is_json?
+
         serialized_attributes.each do |key, coder|
           if changes.key?(key)
             coder = Draftsman::Serializers::Yaml unless coder.respond_to?(:dump)
@@ -159,6 +173,9 @@ module Draftsman
 
       # Used for `Draft#object` attribute
       def unserialize_attributes_for_draftsman(attributes)
+        # Don't serialize values before inserting into columns of type `JSON` on PostgreSQL databases.
+        return attributes if self.draft_class.object_col_is_json?
+
         serialized_attributes.each do |key, coder|
           if attributes.key?(key)
             coder = Draftsman::Serializers::Yaml unless coder.respond_to?(:dump)
@@ -190,9 +207,9 @@ module Draftsman
             :item      => self,
             :event     => 'create',
             :whodunnit => Draftsman.whodunnit,
-            :object    => object_to_string_for_draft
+            :object    => object_attrs_for_draft_record
           }
-          data[:object_changes] = Draftsman.serializer.dump(changes_for_draftsman(previous_changes: true)) if track_object_changes_for_draft?
+          data[:object_changes] = changes_for_draftsman(previous_changes: true) if track_object_changes_for_draft?
           data = merge_metadata_for_draft(data)
 
           send "build_#{self.class.draft_association_name}", data
@@ -214,7 +231,7 @@ module Draftsman
             :item      => self,
             :event     => 'destroy',
             :whodunnit => Draftsman.whodunnit,
-            :object    => object_to_string_for_draft
+            :object    => object_attrs_for_draft_record
           }
 
           # Stash previous draft in case it needs to be reverted later
@@ -266,11 +283,11 @@ module Draftsman
             data = {
               :item      => self,
               :whodunnit => Draftsman.whodunnit,
-              :object    => object_to_string_for_draft
+              :object    => object_attrs_for_draft_record
             }
 
             if track_object_changes_for_draft?
-              data[:object_changes] = Draftsman.serializer.dump(changes_for_draftsman(changed_from: self.send(self.class.draft_association_name).changeset))
+              data[:object_changes] = changes_for_draftsman(changed_from: self.send(self.class.draft_association_name).changeset)
             end
 
             data = merge_metadata_for_draft(data)
@@ -288,21 +305,18 @@ module Draftsman
             data = {
               :item      => self,
               :whodunnit => Draftsman.whodunnit,
-              :object    => object_to_string_for_draft
+              :object    => object_attrs_for_draft_record
             }
             data = merge_metadata_for_draft(data)
 
             # If there's already a draft, update it
             if send(self.class.draft_association_name).present?
-              if track_object_changes_for_draft?
-                data[:object_changes] = Draftsman.serializer.dump(changes_for_draftsman)
-              end
-
+              data[:object_changes] = changes_for_draftsman if track_object_changes_for_draft?
               send(self.class.draft_association_name).update_attributes data
             # If there's not draft, create an update draft
             else
               data[:event]          = 'update'
-              data[:object_changes] = Draftsman.serializer.dump(changes_for_draftsman) if track_object_changes_for_draft?
+              data[:object_changes] = changes_for_draftsman if track_object_changes_for_draft?
               send "build_#{self.class.draft_association_name}", data
               
               if send(self.class.draft_association_name).save
@@ -317,9 +331,9 @@ module Draftsman
             data = {
               :item      => self,
               :whodunnit => Draftsman.whodunnit,
-              :object    => object_to_string_for_draft
+              :object    => object_attrs_for_draft_record
             }
-            data[:object_changes] = Draftsman.serializer.dump(changes_for_draftsman(changed_from: @object.draft.changeset)) if track_object_changes_for_draft?
+            data[:object_changes] = changes_for_draftsman(changed_from: @object.draft.changeset) if track_object_changes_for_draft?
             data = merge_metadata_for_draft(data)
 
             send(self.class.draft_association_name).update_attributes data
@@ -333,14 +347,14 @@ module Draftsman
       end
 
       # Returns serialized object representing this drafted item.
-      def object_to_string_for_draft(object = nil)
+      def object_attrs_for_draft_record(object = nil)
         object ||= self
 
         _attrs = object.attributes.except(*self.class.draftsman_options[:skip]).tap do |attributes|
           self.class.serialize_attributes_for_draftsman attributes
         end
 
-        Draftsman.serializer.dump(_attrs)
+        self.class.draft_class.object_col_is_json? ? _attrs : Draftsman.serializer.dump(_attrs)
       end
 
       # Returns whether or not this item has been published at any point in its lifecycle.
@@ -395,12 +409,9 @@ module Draftsman
 
         # We need to merge any previous changes so they are not lost on further updates before committing or
         # reverting
-        options[:changed_from].merge new_changes
-      end
+        my_changes = options[:changed_from].merge new_changes
 
-      # Returns draft class.
-      def draft_class
-        self.draft_class_name.constantize
+        self.class.draft_class.object_changes_col_is_json? ? my_changes : Draftsman.serializer.dump(my_changes)
       end
 
       # Merges model-level metadata from `meta` and `controller_info` into draft object.
@@ -450,7 +461,7 @@ module Draftsman
 
       # Returns whether or not the draft class includes an `object_changes` attribute.
       def track_object_changes_for_draft?
-        draft_class.column_names.include? 'object_changes'
+        self.class.draft_class.column_names.include? 'object_changes'
       end
 
       # Sets `trashed_at` attribute to now and saves to the database immediately.

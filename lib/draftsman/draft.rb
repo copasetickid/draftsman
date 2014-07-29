@@ -22,6 +22,16 @@ class Draftsman::Draft < ActiveRecord::Base
     where :event => 'destroy'
   end
 
+  # Returns whether the `object` column is using the `json` type supported by PostgreSQL.
+  def self.object_col_is_json?
+    @object_col_is_json ||= columns_hash['object'].type == :json
+  end
+
+  # Returns whether the `object_changes` column is using the `json` type supported by PostgreSQL.
+  def self.object_changes_col_is_json?
+    @object_changes_col_is_json ||= columns_hash['object_changes'].type == :json
+  end
+
   def self.updates
     where :event => 'update'
   end
@@ -31,7 +41,9 @@ class Draftsman::Draft < ActiveRecord::Base
   def changeset
     return nil unless self.class.column_names.include? 'object_changes'
 
-    HashWithIndifferentAccess.new(Draftsman.serializer.load(object_changes)).tap do |changes|
+    _changes = self.class.object_changes_col_is_json? ? self.object_changes : Draftsman.serializer.load(self.object_changes)
+
+    @changeset ||= HashWithIndifferentAccess.new(_changes).tap do |changes|
       item_type.constantize.unserialize_draft_attribute_changes(changes)
     end
   rescue
@@ -194,7 +206,10 @@ class Draftsman::Draft < ActiveRecord::Base
 
         model = item.reload
 
-        Draftsman.serializer.load(self.object).each do |key, value|
+        attrs = self.class.object_col_is_json? ? self.object : Draftsman.serializer.load(object)
+        model.class.unserialize_attributes_for_draftsman attrs
+
+        attrs.each do |key, value|
           # Skip counter_cache columns
           if model.respond_to?("#{key}=") && !key.end_with?('_count')
             model.send "#{key}=", value
@@ -256,7 +271,9 @@ private
     draft = self.class.new
 
     without_identity_map do
-      Draftsman.serializer.load(self.previous_draft).each do |key, value|
+      attrs = self.class.object_col_is_json? ? self.previous_draft : Draftsman.serializer.load(self.previous_draft)
+
+      attrs.each do |key, value|
         if key.to_sym != :id && draft.respond_to?("#{key}=")
           draft.send "#{key}=", value
         elsif key.to_sym != :id
@@ -267,22 +284,6 @@ private
 
     draft
   end
-
-  # Saves associated draft dependencies by reflecting `belongs_to` associations and identifying which ones are
-  # draftable.
-  #def save_draft_dependencies
-  #  self.item.class.reflect_on_all_associations(:belongs_to).each do |association|
-  #    associated_object = self.item.send(association.name)
-  #
-  #    if associated_object.present? && associated_object.respond_to?(:draft?)
-  #      if associated_object.reload.draft?
-  #        Draftsman::DraftDependency.create(:draft_id => self.id, :dependency_id => associated_object.id)
-  #      else
-  #        Draftsman::DraftDependency.where(:draft_id => self.id, :dependency_id => associated_object.id).delete_all
-  #      end
-  #    end
-  #  end
-  #end
 
   def without_identity_map(&block)
     if defined?(ActiveRecord::IdentityMap) && ActiveRecord::IdentityMap.respond_to?(:without)

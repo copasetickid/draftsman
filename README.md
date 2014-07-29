@@ -61,14 +61,16 @@ gem 'draftsman', :github => 'live-editor/draftsman'
 
 Generate a migration which will add a `drafts` table to your database.
 
-    rails g draftsman:install
+    $ rails g draftsman:install
 
-You can pass zero, one, or both of these options to the generator:
+You can pass zero or any combination of these options to the generator:
 
     $ rails g draftsman:install --skip-initializer  # Skip generation of the boilerplate initializer at
                                                     # `config/initializers/draftsman.rb`.
 
-    $ rails g draftsman:install --with-changes      # Store changeset (diff) with each draft
+    $ rails g draftsman:install --with-changes      # Store changeset (diff) with each draft.
+
+    $ rails g draftsman:install --with-pg-json      # Use PostgreSQL JSON data type for serialized data.
 
 Run the migration(s).
 
