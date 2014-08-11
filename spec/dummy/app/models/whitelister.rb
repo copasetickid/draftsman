@@ -1,3 +1,3 @@
 class Whitelister < ActiveRecord::Base
-  has_drafts only: [:name]
+  has_drafts :only => [:name]
 end
