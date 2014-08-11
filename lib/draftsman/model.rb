@@ -191,11 +191,6 @@ module Draftsman
         send(self.class.draft_association_name).present?
       end
 
-      def draft_at(timestamp, reify_options = {})
-        v = send(self.class.versions_association_name).following(timestamp).first
-        v ? v.reify(reify_options) : self
-      end
-
       # Creates object and records a draft for the object's creation. Returns `true` or `false` depending on whether or not
       # the objects passed validation and the save was successful.
       def draft_creation
