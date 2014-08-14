@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.3.1 - August 14, 2014
+
+-  Commit [aae737fcdf](https://github.com/live-editor/draftsman/commit/aae737fcdf48604bc480b1c9c141bf642c0f581c) - `skip` option not persisting skipped values correctly
+
 ## 0.3.0 - July 29, 2014
 
 -  Commit [1e2a59f678](https://github.com/live-editor/draftsman/commit/1e2a59f678cc4d88222dfc1976d564b5649cd329) - Add support for PostgreSQL JSON data type for `object`, `object_changes`, and `previous_draft` columns.

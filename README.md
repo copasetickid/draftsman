@@ -1,4 +1,4 @@
-# Draftsman v0.3.0 (alpha)
+# Draftsman v0.3.1 (alpha)
 
 Draftsman is a Ruby gem that lets you create draft versions of your database records. If you're developing a system in
 need of simple drafts or a publishing approval queue, then Draftsman just might be what you need.
@@ -50,7 +50,7 @@ Works well with Rails, Sinatra, or any other application that depends on ActiveR
 Add Draftsman to your `Gemfile`.
 
 ```ruby
-gem 'draftsman', '0.3.0'
+gem 'draftsman', '0.3.1'
 ```
 
 Or if you want to grab the latest from `master`:
@@ -474,6 +474,16 @@ However, there are some differences:
    as it was _before_ it was destroyed (in case you want the option of reverting the destroy later and restoring the
    drafted item back to its original state).
 
+## Semantic Versioning
+
+Like many Ruby gems, Draftsman honors the concepts behind [semantic versioning][10]:
+
+> Given a version number MAJOR.MINOR.PATCH, increment the:
+>
+> 1.  MAJOR version when you make incompatible API changes,
+> 2.  MINOR version when you add functionality in a backwards-compatible manner, and
+> 3.  PATCH version when you make backwards-compatible bug fixes.
+
 ## Contributing
 
 If you feel like you can add something useful to Draftsman, then don't hesitate to contribute! To make sure your
@@ -521,3 +531,4 @@ Draftsman is released under the [MIT License][9].
 [7]: https://raw.github.com/live-editor/draftsman/master/lib/generators/draftsman/templates/create_drafts.rb
 [8]: http://www.sinatrarb.com/intro.html#Modular%20vs.%20Classic%20Style
 [9]: http://www.opensource.org/licenses/MIT
+[10]: http://semver.org/
