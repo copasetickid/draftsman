@@ -1,14 +1,13 @@
 require 'spec_helper'
 
-# A Vanilla has a simple call to `has_drafts` without any options specified.
-describe Vanilla do
-  let(:vanilla) { Vanilla.new :name => 'Bob' }
+describe Skipper do
+  let(:skipper) { Skipper.new :name => 'Bob', :skip_me => 'Skipped 1' }
   it { should be_draftable }
 
   describe :draft_creation do
     subject do
-      vanilla.draft_creation
-      vanilla.reload
+      skipper.draft_creation
+      skipper.reload
     end
 
     it { should be_persisted }
@@ -17,18 +16,20 @@ describe Vanilla do
     its(:draft) { should be_present }
     its(:draft) { should be_create }
     its(:name) { should eql 'Bob' }
+    its(:skip_me) { should eql 'Skipped 1' }
   end
 
   describe :draft_update do
     subject do
-      vanilla.draft_update
-      vanilla.reload
+      skipper.draft_update
+      skipper.reload
     end
 
     context 'without existing draft' do
       before do
-        vanilla.save!
-        vanilla.name = 'Sam'
+        skipper.save!
+        skipper.name = 'Sam'
+        skipper.skip_me = 'Skipped 2'
       end
 
       it { should be_persisted }
@@ -37,6 +38,7 @@ describe Vanilla do
       its(:draft) { should be_present }
       its(:draft) { should be_update }
       its(:name) { should eql 'Bob' }
+      its(:skip_me) { should eql 'Skipped 2' }
 
       it 'creates a new draft' do
         expect { subject }.to change(Draftsman::Draft, :count).by(1)
@@ -45,45 +47,49 @@ describe Vanilla do
 
     describe 'changing back to initial state' do
       before do
-        vanilla.published_at = Time.now
-        vanilla.save!
-        vanilla.name = 'Sam'
-        vanilla.draft_update
-        vanilla.reload
-        vanilla.name = 'Bob'
+        skipper.published_at = Time.now
+        skipper.save!
+        skipper.name = 'Sam'
+        skipper.draft_update
+        skipper.reload
+        skipper.name = 'Bob'
+        skipper.skip_me = 'Skipped 2'
       end
 
       it { should_not be_draft }
-      its(:name) { should eql 'Bob' }
       its(:draft_id) { should be_nil }
       its(:draft) { should be_nil }
+      its(:name) { should eql 'Bob' }
+      its(:skip_me) { should eql 'Skipped 2' }
 
       it 'destroys the draft' do
-        expect { subject }.to change(Draftsman::Draft.where(:id => vanilla.draft_id), :count).by(-1)
+        expect { subject }.to change(Draftsman::Draft.where(:id => skipper.draft_id), :count).by(-1)
       end
     end
 
     context 'with existing `create` draft' do
-      before { vanilla.draft_creation }
+      before { skipper.draft_creation }
 
       context 'with changes' do
-        before { vanilla.name = 'Sam' }
+        before do
+          skipper.name = 'Sam'
+          skipper.skip_me = 'Skipped 2'
+        end
+
         it { should be_persisted }
         it { should be_draft }
         its(:draft_id) { should be_present }
         its(:draft) { should be_present }
+        its(:draft) { should be_create }
         its(:name) { should eql 'Sam' }
+        its(:skip_me) { should eql 'Skipped 2' }
 
         it 'updates the existing draft' do
-          expect { subject }.to_not change(Draftsman::Draft.where(:id => vanilla.draft_id), :count)
+          expect { subject }.to_not change(Draftsman::Draft.where(:id => skipper.draft_id), :count)
         end
 
         its "draft's `name` is updated" do
           subject.draft.reify.name.should eql 'Sam'
-        end
-
-        it 'has a `create` draft' do
-          subject.draft.should be_create
         end
       end
 
@@ -94,40 +100,40 @@ describe Vanilla do
         its(:draft) { should be_present }
         its(:draft) { should be_create }
         its(:name) { should eql 'Bob' }
+        its(:skip_me) { should eql 'Skipped 1' }
 
         it "doesn't change the number of drafts" do
-          expect { subject }.to_not change(Draftsman::Draft.where(:id => vanilla.draft_id), :count)
+          expect { subject }.to_not change(Draftsman::Draft.where(:id => skipper.draft_id), :count)
         end
       end
     end
 
     context 'with existing `update` draft' do
       before do
-        vanilla.save!
-        vanilla.name = 'Sam'
-        vanilla.draft_update
-        vanilla.reload
-        vanilla.attributes = vanilla.draft.reify.attributes
+        skipper.save!
+        skipper.name = 'Sam'
+        skipper.skip_me = 'Skipped 2'
+        skipper.draft_update
+        skipper.reload
+        skipper.attributes = skipper.draft.reify.attributes
       end
 
       context 'with changes' do
-        before { vanilla.name = 'Steve' }
+        before { skipper.name = 'Steve' }
         it { should be_persisted }
         it { should be_draft }
         its(:draft_id) { should be_present }
         its(:draft) { should be_present }
+        its(:draft) { should be_update }
         its(:name) { should eql 'Bob' }
+        its(:skip_me) { should eql 'Skipped 2' }
 
         it 'updates the existing draft' do
-          expect { subject }.to_not change(Draftsman::Draft.where(:id => vanilla.draft_id), :count)
+          expect { subject }.to_not change(Draftsman::Draft.where(:id => skipper.draft_id), :count)
         end
 
         its "draft's `name` is updated" do
           subject.draft.reify.name.should eql 'Steve'
-        end
-
-        it 'has a `create` draft' do
-          subject.draft.update?.should be_true
         end
       end
 
@@ -138,9 +144,10 @@ describe Vanilla do
         its(:draft) { should be_present }
         its(:draft) { should be_update }
         its(:name) { should eql 'Bob' }
+        its(:skip_me) { should eql 'Skipped 2' }
 
         it "doesn't change the number of drafts" do
-          expect { subject }.to_not change(Draftsman::Draft.where(:id => vanilla.draft_id), :count)
+          expect { subject }.to_not change(Draftsman::Draft.where(:id => skipper.draft_id), :count)
         end
 
         its "draft's `name` is not updated" do
@@ -154,38 +161,7 @@ describe Vanilla do
   describe :draft_destroy do
   end
 
+  # Not applicable to this customization
   describe 'scopes' do
-    let!(:drafted_vanilla)   { vanilla.draft_creation; return vanilla }
-    let!(:published_vanilla) { Vanilla.create :name => 'Jane', :published_at => Time.now }
-
-    describe :drafted do
-      subject { Vanilla.drafted }
-      its(:count) { should eql 1 }
-      it { should include drafted_vanilla }
-      it { should_not include published_vanilla }
-    end
-
-    describe :live do
-      subject { Vanilla.live }
-
-      it 'raises an exception' do
-        expect { subject.load }.to raise_exception
-      end
-    end
-
-    describe :published do
-      subject { Vanilla.published }
-      its(:count) { should eql 1 }
-      it { should_not include drafted_vanilla }
-      it { subject.should include published_vanilla }
-    end
-
-    describe :trashed do
-      subject { Vanilla.trashed }
-
-      it 'raises an exception' do
-        expect { subject.load }.to raise_exception
-      end
-    end
   end
 end

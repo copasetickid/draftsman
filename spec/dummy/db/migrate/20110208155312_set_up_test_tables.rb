@@ -71,6 +71,15 @@ class SetUpTestTables < ActiveRecord::Migration
       t.references :parent
       t.timestamps
     end
+
+    create_table :skippers, :force => true do |t|
+      t.string     :name
+      t.string     :skip_me
+      t.references :draft
+      t.datetime   :trashed_at
+      t.datetime   :published_at
+      t.timestamps
+    end
   end
 
   def self.down

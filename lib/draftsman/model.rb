@@ -287,14 +287,12 @@ module Draftsman
 
             data = merge_metadata_for_draft(data)
             send(self.class.draft_association_name).update_attributes data
-
             self.save
           # Destroy the draft if this record has changed back to the original record
           elsif changed_to_original_for_draft?
             send(self.class.draft_association_name).destroy
             send "#{self.class.draft_association_name}_id=", nil
-            self.update_column "#{self.class.draft_association_name}_id", nil
-            true
+            self.save
           # Save a draft if record is changed notably
           elsif changed_notably_for_draft?
             data = {
@@ -304,24 +302,24 @@ module Draftsman
             }
             data = merge_metadata_for_draft(data)
 
-            # If there's already a draft, update it
+            # If there's already a draft, update it.
             if send(self.class.draft_association_name).present?
               data[:object_changes] = changes_for_draftsman if track_object_changes_for_draft?
               send(self.class.draft_association_name).update_attributes data
-            # If there's not draft, create an update draft
+            # If there's not draft, create an update draft.
             else
               data[:event]          = 'update'
               data[:object_changes] = changes_for_draftsman if track_object_changes_for_draft?
               send "build_#{self.class.draft_association_name}", data
               
               if send(self.class.draft_association_name).save
-                write_attribute "#{self.class.draft_association_name}_id", send(self.class.draft_association_name).id
-                self.update_column "#{self.class.draft_association_name}_id", send(self.class.draft_association_name).id
+                update_column "#{self.class.draft_association_name}_id", send(self.class.draft_association_name).id
+                update_skipped_attributes
               else
                 raise ActiveRecord::Rollback and return false
               end
             end
-          # If record is a draft and not changed notably, then update the draft
+          # If record is a draft and not changed notably, then update the draft.
           elsif self.draft?
             data = {
               :item      => self,
@@ -330,8 +328,8 @@ module Draftsman
             }
             data[:object_changes] = changes_for_draftsman(changed_from: @object.draft.changeset) if track_object_changes_for_draft?
             data = merge_metadata_for_draft(data)
-
             send(self.class.draft_association_name).update_attributes data
+            update_skipped_attributes
           # Otherwise, just save the record
           else
             self.save
@@ -463,6 +461,21 @@ module Draftsman
       def trash!
         write_attribute self.class.trashed_at_attribute_name, Time.now
         self.update_column self.class.trashed_at_attribute_name, send(self.class.trashed_at_attribute_name)
+      end
+
+      # Updates skipped attributes' values on this model.
+      def update_skipped_attributes
+        if draftsman_options[:skip].present?
+          changed_and_skipped_keys = self.changed.select { |key| draftsman_options[:skip].include?(key) }
+          changed_and_skipped_attrs = {}
+          changed_and_skipped_keys.each { |key| changed_and_skipped_attrs[key] = self.changes[key].last }
+
+          self.reload
+          self.attributes = changed_and_skipped_attrs
+          self.save
+        else
+          true
+        end
       end
     end
   end

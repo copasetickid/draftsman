@@ -34,6 +34,15 @@ ActiveRecord::Schema.define(version: 20110208155312) do
     t.datetime "updated_at"
   end
 
+  create_table "clingy_parents", force: true do |t|
+    t.string   "name"
+    t.integer  "draft_id"
+    t.datetime "trashed_at"
+    t.datetime "published_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "draft_as_sketches", force: true do |t|
     t.string   "name"
     t.integer  "sketch_id"
@@ -67,8 +76,38 @@ ActiveRecord::Schema.define(version: 20110208155312) do
     t.string   "user_agent"
   end
 
+  create_table "hopeless_children", force: true do |t|
+    t.string   "name"
+    t.integer  "clingy_parent_id"
+    t.integer  "draft_id"
+    t.datetime "trashed_at"
+    t.datetime "published_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "mortgages", force: true do |t|
+    t.float    "amount"
+    t.integer  "parent_id"
+    t.integer  "draft_id"
+    t.datetime "trashed_at"
+    t.datetime "published_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "parents", force: true do |t|
     t.string   "name"
+    t.integer  "draft_id"
+    t.datetime "trashed_at"
+    t.datetime "published_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "skippers", force: true do |t|
+    t.string   "name"
+    t.string   "skip_me"
     t.integer  "draft_id"
     t.datetime "trashed_at"
     t.datetime "published_at"
