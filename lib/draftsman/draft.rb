@@ -1,7 +1,7 @@
 class Draftsman::Draft < ActiveRecord::Base
   # Mass assignment (for <= ActiveRecord 3.x)
   if Draftsman.active_record_protected_attributes?
-    attr_accessible :item_type, :item_id, :event, :whodunnit, :object, :object_changes
+    attr_accessible :item_type, :item_id, :item, :event, :whodunnit, :object, :object_changes
   end
 
   # Associations
@@ -72,7 +72,7 @@ class Draftsman::Draft < ActiveRecord::Base
 
       associations.each do |association|
         association_class =
-          if association.polymorphic?
+          if association.options.key?(:polymorphic)
             my_item.send(association.foreign_key.sub('_id', '_type')).constantize
           else
             association.klass
@@ -136,7 +136,7 @@ class Draftsman::Draft < ActiveRecord::Base
 
       associations.each do |association|
         association_class =
-          if association.polymorphic?
+          if association.options.key?(:polymorphic)
             self.item.send(association.foreign_key.sub('_id', '_type')).constantize
           else
             association.klass
@@ -180,7 +180,11 @@ class Draftsman::Draft < ActiveRecord::Base
         attributes_to_change = attributes_to_change - ignore + ['published_at', "#{self.item.class.draft_association_name}_id"] - skip
 
         # Save without validations or callbacks
-        self.item.update_columns self.item.attributes.slice(*attributes_to_change)
+        self.item.attributes.slice(*attributes_to_change).each do |key, value|
+          self.item.send("#{key}=", value)
+        end
+        self.item.save(:validate => false)
+        
         self.item.reload
 
         # Destroy draft
