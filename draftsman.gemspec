@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.version       = Draftsman::VERSION
   s.summary       = "Create draft versions of your ActiveRecord models' data. Works with Ruby on Rails and Sinatra."
   s.description   = s.summary
-  s.homepage      = 'https://github.com/live-editor/draftsman'
+  s.homepage      = 'https://github.com/liveeditor/draftsman'
   s.authors       = ['Chris Peters']
   s.email         = 'chris@minimalorange.com'
   s.license       = 'MIT'
@@ -18,12 +18,10 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'activerecord', ['>= 3.0', '< 5.0']
 
-  s.add_development_dependency 'capybara'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'railties', ['>= 3.0', '< 5.0']
   s.add_development_dependency 'sinatra', '~> 1.0'
-  s.add_development_dependency 'rspec-rails'
-  s.add_development_dependency 'shoulda-matchers'
+  s.add_development_dependency 'rspec-rails', '3.2.1'
 
   # JRuby support for the test ENV
   if defined?(JRUBY_VERSION)

@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-describe Child do
+describe Child, :type => :model do
   let(:parent) { Parent.new(:name => 'Marge') }
   let(:child)  { Child.new(:name => 'Lisa', :parent => parent) }
 
-  describe :publish! do
+  describe 'publish!' do
     context 'parent `create` draft with child `create` draft' do
       before do
         parent.draft_creation
@@ -13,27 +13,27 @@ describe Child do
 
       subject { child.draft.publish! }
 
-      its 'child should not be a draft' do
+      it "destroys the child's draft" do
         subject
-        child.reload.should_not be_draft
+        expect(child.reload).to_not be_draft
       end
 
-      its 'child should be published' do
+      it 'publishes the child' do
         subject
-        child.reload.should be_published
+        expect(child.reload).to be_published
       end
 
-      its 'parent should be published' do
+      it 'publishes the parent' do
         subject
-        parent.reload.should be_published
+        expect(parent.reload).to be_published
       end
 
-      its 'parent should not be a draft' do
+      it "destroys the parent's draft" do
         subject
-        parent.reload.should_not be_draft
+        expect(parent.reload).to_not be_draft
       end
 
-      it 'destroys both drafts' do
+      it 'destroys 2 drafts overall' do
         expect { subject }.to change(Draftsman::Draft, :count).by(-2)
       end
 
@@ -64,7 +64,7 @@ describe Child do
         expect { subject }.to_not change(Parent, :count)
       end
 
-      it 'destroys 1 draft' do
+      it 'destroys 1 draft overall' do
         expect { subject }.to change(Draftsman::Draft, :count).by(-1)
       end
 
@@ -74,7 +74,7 @@ describe Child do
     end
   end
 
-  describe :revert! do
+  describe 'revert!' do
     context 'parent `create` draft with child `create` draft' do
       before do
         parent.draft_creation
@@ -84,18 +84,18 @@ describe Child do
       subject { child.draft.revert! }
 
       it 'destroys the parent' do
-        expect { subject }.to_not change(Parent, :count).by(-1)
+        expect { subject }.to_not change(Parent, :count)
       end
 
       it 'destroys the child' do
         expect { subject }.to change(Child, :count).by(-1)
       end
 
-      it 'only destroys 1 draft overall' do
+      it 'destroys 1 draft overall' do
         expect { subject }.to change(Draftsman::Draft, :count).by(-1)
       end
 
-      it 'destroys the child draft' do
+      it "destroys the child's draft" do
         expect { subject }.to change(Draftsman::Draft.where(:item_type => 'Child'), :count).by(-1)
       end
     end
@@ -114,35 +114,43 @@ describe Child do
         child.reload 
       end
 
-      it { should be_persisted }
-      it { should_not be_trashed }
-      it { should_not be_draft }
+      it 'does not persist the child' do
+        expect(subject.persisted?).to eql true
+      end
 
-      it 'deletes both drafts' do
+      it 'removes the child from the trash' do
+        expect(subject.trashed?).to eql false
+      end
+
+      it "destroys the child's draft" do
+        expect(subject.draft?).to eql false
+      end
+
+      it 'destroys 2 drafts overall' do
         expect { subject }.to change(Draftsman::Draft, :count).by(-2)
       end
 
-      it "deletes the parent's draft" do
+      it "destroys the parent's draft" do
         expect { subject }.to change(Draftsman::Draft.where(:item_type => 'Parent'), :count).by(-1)
       end
 
-      it "deletes the child's draft" do
+      it "destroys the child's draft" do
         expect { subject }.to change(Draftsman::Draft.where(:item_type => 'Child'), :count).by(-1)
       end
 
-      its 'parent should not be trashed anymore' do
+      it 'removes the parent from the trash' do
         subject
-        parent.should_not be_trashed
+        expect(parent).to_not be_trashed
       end
 
-      its 'child should not be a draft anymore' do
+      it "destroys the child's draft" do
         subject
-        child.should_not be_draft
+        expect(child).to_not be_draft
       end
     end
   end
 
-  describe :draft_publication_dependencies do
+  describe 'draft_publication_dependencies' do
     context 'parent `create` draft with child `create` draft' do
       before do
         parent.draft_creation
@@ -150,8 +158,14 @@ describe Child do
       end
 
       subject { child.draft }
-      its(:draft_publication_dependencies) { should_not be_empty }
-      its(:draft_publication_dependencies) { should include parent.draft }
+
+      it "creates publication dependencies for the child's draft" do
+        expect(subject.draft_publication_dependencies).to_not be_empty
+      end
+
+      it "includes the parent as a publication dependency for the child's draft" do
+        expect(subject.draft_publication_dependencies).to include parent.draft
+      end
     end
 
     context 'parent `create` draft with child `update` draft' do
@@ -163,12 +177,19 @@ describe Child do
       end
 
       subject { child.draft }
-      its(:draft_publication_dependencies) { should_not be_empty }
-      its(:draft_publication_dependencies) { should include parent.draft }
+
+      it "creates publication dependencies for the child's draft" do
+        expect(subject.draft_publication_dependencies).to_not be_empty
+      end
+
+      it "includes the parent as a publication dependency for the child's draft" do
+        expect(subject.draft_publication_dependencies).to include parent.draft
+      end
     end
 
     context 'parent `create` draft with child `update` draft pointing to new parent' do
       let(:new_parent) { Parent.new(:name => 'Patty') }
+
       before do
         parent.draft_creation
         child.save!
@@ -178,9 +199,18 @@ describe Child do
       end
 
       subject { child.draft }
-      its(:draft_publication_dependencies) { should_not be_empty }
-      its(:draft_publication_dependencies) { should_not include parent.draft}
-      its(:draft_publication_dependencies) { should include new_parent.draft }
+
+      it "creates publication dependencies for the child's draft" do
+        expect(subject.draft_publication_dependencies).to_not be_empty
+      end
+
+      it "removes the old parent as a publication dependency for the child's draft" do
+        expect(subject.draft_publication_dependencies).to_not include parent.draft
+      end
+
+      it "includes the new parent as a publication dependency for the child's draft" do
+        expect(subject.draft_publication_dependencies).to include new_parent.draft
+      end
     end
 
     context 'parent `destroy` draft with child `destroy` draft' do
@@ -191,11 +221,14 @@ describe Child do
       end
 
       subject { child.draft }
-      its(:draft_publication_dependencies) { should be_empty }
+
+      it "has no publication dependencies for the child's draft" do
+        expect(subject.draft_publication_dependencies).to be_empty
+      end
     end
   end
 
-  describe :draft_reversion_dependencies do
+  describe 'draft_reversion_dependencies' do
     context 'parent `create` draft with child `create` draft' do
       before do
         parent.draft_creation
@@ -203,7 +236,10 @@ describe Child do
       end
 
       subject { child.draft }
-      its(:draft_reversion_dependencies) { should be_empty }
+
+      it "has no reversion dependencies for the child's draft" do
+        expect(subject.draft_reversion_dependencies).to be_empty
+      end
     end
 
     context 'parent `destroy` draft with child `destroy` draft' do
@@ -214,8 +250,14 @@ describe Child do
       end
 
       subject { child.draft }
-      its(:draft_reversion_dependencies) { should be_present }
-      its(:draft_reversion_dependencies) { should include parent.draft }
+
+      it "creates reversion dependencies for the child's draft" do
+        expect(subject.draft_reversion_dependencies).to be_present
+      end
+
+      it "includes the parent as a reversion dependency for the child's draft" do
+        expect(subject.draft_reversion_dependencies).to include parent.draft
+      end
     end
   end
 end

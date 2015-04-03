@@ -5,21 +5,38 @@ describe Vanilla do
   let(:vanilla) { Vanilla.new :name => 'Bob' }
   it { should be_draftable }
 
-  describe :draft_creation do
+  describe 'draft_creation' do
     subject do
       vanilla.draft_creation
       vanilla.reload
     end
 
-    it { should be_persisted }
-    it { should be_draft }
-    its(:draft_id) { should be_present }
-    its(:draft) { should be_present }
-    its(:draft) { should be_create }
-    its(:name) { should eql 'Bob' }
+    it 'is persisted' do
+      expect(subject).to be_persisted
+    end
+
+    it 'is a draft' do
+      expect(subject.draft?).to eql true
+    end
+
+    it 'has a `draft_id`' do
+      expect(subject.draft_id).to be_present
+    end
+
+    it 'has a `draft`' do
+      expect(subject.draft).to be_present
+    end
+
+    it 'has a `create` draft' do
+      expect(subject.draft.create?).to eql true
+    end
+
+    it 'saves the `name`' do
+      expect(subject.name).to eql 'Bob'
+    end
   end
 
-  describe :draft_update do
+  describe 'draft_update' do
     subject do
       vanilla.draft_update
       vanilla.reload
@@ -31,12 +48,29 @@ describe Vanilla do
         vanilla.name = 'Sam'
       end
 
-      it { should be_persisted }
-      it { should be_draft }
-      its(:draft_id) { should be_present }
-      its(:draft) { should be_present }
-      its(:draft) { should be_update }
-      its(:name) { should eql 'Bob' }
+      it 'is persisted' do
+        expect(subject).to be_persisted
+      end
+
+      it 'is a draft' do
+        expect(subject.draft?).to eql true
+      end
+
+      it 'has a `draft_id`' do
+        expect(subject.draft_id).to be_present
+      end
+
+      it 'has a `draft`' do
+        expect(subject.draft).to be_present
+      end
+
+      it 'has an `update` draft' do
+        expect(subject.draft.update?).to eql true
+      end
+
+      it 'has the original `name`' do
+        expect(subject.name).to eql 'Bob'
+      end
 
       it 'creates a new draft' do
         expect { subject }.to change(Draftsman::Draft, :count).by(1)
@@ -53,10 +87,21 @@ describe Vanilla do
         vanilla.name = 'Bob'
       end
 
-      it { should_not be_draft }
-      its(:name) { should eql 'Bob' }
-      its(:draft_id) { should be_nil }
-      its(:draft) { should be_nil }
+      it 'is no longer a draft' do
+        expect(subject.draft?).to eql false
+      end
+
+      it 'has the original `name`' do
+        expect(subject.name).to eql 'Bob'
+      end
+
+      it 'does not have a `draft_id`' do
+        expect(subject.draft_id).to be_nil
+      end
+
+      it 'has no `draft`' do
+        expect(subject.draft).to be_nil
+      end
 
       it 'destroys the draft' do
         expect { subject }.to change(Draftsman::Draft.where(:id => vanilla.draft_id), :count).by(-1)
@@ -68,32 +113,64 @@ describe Vanilla do
 
       context 'with changes' do
         before { vanilla.name = 'Sam' }
-        it { should be_persisted }
-        it { should be_draft }
-        its(:draft_id) { should be_present }
-        its(:draft) { should be_present }
-        its(:name) { should eql 'Sam' }
+        
+        it 'is persisted' do
+          expect(subject).to be_persisted
+        end
+
+        it 'is a draft' do
+          expect(subject.draft?).to eql true
+        end
+
+        it 'has a `draft_id`' do
+          expect(subject.draft_id).to be_present
+        end
+
+        it 'has a `draft`' do
+          expect(subject.draft).to be_present
+        end
+
+        it 'records the new `name`' do
+          expect(subject.name).to eql 'Sam'
+        end
 
         it 'updates the existing draft' do
           expect { subject }.to_not change(Draftsman::Draft.where(:id => vanilla.draft_id), :count)
         end
 
-        its "draft's `name` is updated" do
-          subject.draft.reify.name.should eql 'Sam'
+        it "updates the draft's `name`" do
+          expect(subject.draft.reify.name).to eql 'Sam'
         end
 
         it 'has a `create` draft' do
-          subject.draft.should be_create
+          expect(subject.draft.create?).to eql true
         end
       end
 
       context 'with no changes' do
-        it { should be_persisted }
-        it { should be_draft }
-        its(:draft_id) { should be_present }
-        its(:draft) { should be_present }
-        its(:draft) { should be_create }
-        its(:name) { should eql 'Bob' }
+        it 'is persisted' do
+          expect(subject).to be_persisted
+        end
+
+        it 'is a draft' do
+          expect(subject.draft?).to eql true
+        end
+
+        it 'has a `draft_id`' do
+          expect(subject.draft_id).to be_present
+        end
+
+        it 'has a `draft`' do
+          expect(subject.draft).to be_present
+        end
+
+        it 'has a `create` draft' do
+          expect(subject.draft.create?).to eql true
+        end
+
+        it 'has the same `name`' do
+          expect(subject.name).to eql 'Bob'
+        end
 
         it "doesn't change the number of drafts" do
           expect { subject }.to_not change(Draftsman::Draft.where(:id => vanilla.draft_id), :count)
@@ -112,60 +189,101 @@ describe Vanilla do
 
       context 'with changes' do
         before { vanilla.name = 'Steve' }
-        it { should be_persisted }
-        it { should be_draft }
-        its(:draft_id) { should be_present }
-        its(:draft) { should be_present }
-        its(:name) { should eql 'Bob' }
+        
+        it 'is persisted' do
+          expect(subject).to be_persisted
+        end
+
+        it 'is a draft' do
+          expect(subject.draft?).to eql true
+        end
+
+        it 'has a `draft_id`' do
+          expect(subject.draft_id).to be_present
+        end
+
+        it 'has a `draft`' do
+          expect(subject.draft).to be_present
+        end
+
+        it 'has the original `name`' do
+          expect(subject.name).to eql 'Bob'
+        end
 
         it 'updates the existing draft' do
           expect { subject }.to_not change(Draftsman::Draft.where(:id => vanilla.draft_id), :count)
         end
 
-        its "draft's `name` is updated" do
-          subject.draft.reify.name.should eql 'Steve'
+        it "updates the draft's `name`" do
+          expect(subject.draft.reify.name).to eql 'Steve'
         end
 
         it 'has a `create` draft' do
-          subject.draft.update?.should be_true
+          expect(subject.draft.update?).to eql true
         end
       end
 
       context 'with no changes' do
-        it { should be_persisted }
-        it { should be_draft }
-        its(:draft_id) { should be_present }
-        its(:draft) { should be_present }
-        its(:draft) { should be_update }
-        its(:name) { should eql 'Bob' }
+        it 'is persisted' do
+          expect(subject).to be_persisted
+        end
+
+        it 'is a draft' do
+          expect(subject.draft?).to eql true
+        end
+
+        it 'has a `draft_id`' do
+          expect(subject.draft_id).to be_present
+        end
+
+        it 'has a `draft`' do
+          expect(subject.draft).to be_present
+        end
+
+        it 'has an `update` draft' do
+          expect(subject.draft.update?).to eql true
+        end
+
+        it 'has the original `name`' do
+          expect(subject.name).to eql 'Bob'
+        end
 
         it "doesn't change the number of drafts" do
           expect { subject }.to_not change(Draftsman::Draft.where(:id => vanilla.draft_id), :count)
         end
 
-        its "draft's `name` is not updated" do
-          subject.draft.reify.name.should eql 'Sam'
+        it "does not update the draft's `name`" do
+          expect(subject.draft.reify.name).to eql 'Sam'
         end
       end
     end
   end
 
   # Not applicable to this customization
-  describe :draft_destroy do
+  describe 'draft_destroy' do
   end
 
   describe 'scopes' do
     let!(:drafted_vanilla)   { vanilla.draft_creation; return vanilla }
     let!(:published_vanilla) { Vanilla.create :name => 'Jane', :published_at => Time.now }
 
-    describe :drafted do
+    describe 'drafted' do
       subject { Vanilla.drafted }
-      its(:count) { should eql 1 }
-      it { should include drafted_vanilla }
-      it { should_not include published_vanilla }
+
+      it 'returns 1 record' do
+        expect(subject.count).to eql 1
+      end
+
+      it 'includes the drafted record' do
+        expect(subject).to include drafted_vanilla
+      end
+
+      it 'does not include the published record' do
+        expect(subject).to_not include published_vanilla
+      end
     end
 
-    describe :live do
+    describe 'live' do
       subject { Vanilla.live }
 
       it 'raises an exception' do
@@ -173,14 +291,23 @@ describe Vanilla do
       end
     end
 
-    describe :published do
+    describe 'published' do
       subject { Vanilla.published }
-      its(:count) { should eql 1 }
-      it { should_not include drafted_vanilla }
-      it { subject.should include published_vanilla }
+
+      it 'returns 1 record' do
+        expect(subject.count).to eql 1
+      end
+
+      it 'does not include the drafted record' do
+        expect(subject).to_not include drafted_vanilla
+      end
+
+      it 'includes the published record' do
+        expect(subject).to include published_vanilla
+      end
     end
 
-    describe :trashed do
+    describe 'trashed' do
       subject { Vanilla.trashed }
 
       it 'raises an exception' do

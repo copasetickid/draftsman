@@ -5,10 +5,10 @@ describe Whitelister do
   it { should be_draftable }
 
   # Not affected by this customization
-  describe :draft_creation do
+  describe 'draft_creation' do
   end
 
-  describe :draft_update do
+  describe 'draft_update' do
     subject do
       whitelister.draft_update
       whitelister.reload
@@ -21,24 +21,44 @@ describe Whitelister do
           whitelister.attributes = { :name => 'Sam', :ignored => 'Meh.' }
         end
 
-        it { should be_persisted }
-        it { should be_draft }
-        its(:draft_id) { should be_present }
-        its(:draft) { should be_present }
-        its(:draft) { should be_update }
-        its(:name) { should eql 'Bob' }
-        its(:ignored) { should eql 'Meh.' }
+        it 'is persisted' do
+          expect(subject).to be_persisted
+        end
+
+        it 'is a draft' do
+          expect(subject.draft?).to eql true
+        end
+
+        it 'has a `draft_id`' do
+          expect(subject.draft_id).to be_present
+        end
+
+        it 'has a `draft`' do
+          expect(subject.draft).to be_present
+        end
+
+        it 'has an `update` draft' do
+          expect(subject.draft.update?).to eql true
+        end
+
+        it 'has its original `name`' do
+          expect(subject.name).to eql 'Bob'
+        end
+
+        it 'has the ignored value' do
+          expect(subject.ignored).to eql 'Meh.'
+        end
 
         it 'creates a new draft' do
           expect { subject }.to change(Draftsman::Draft, :count).by(1)
         end
 
         it 'has an `update` draft' do
-          subject.draft.update?.should be_true
+          expect(subject.draft.update?).to eql true
         end
 
-        its "draft's name should be `Sam`" do
-          subject.draft.reify.name.should eql 'Sam'
+        it "updates the draft's name to `Sam`" do
+          expect(subject.draft.reify.name).to eql 'Sam'
         end
 
         context 'changing back to initial state' do
@@ -47,11 +67,25 @@ describe Whitelister do
             whitelister.attributes = { :name => 'Bob', :ignored => 'Huzzah!' }
           end
           
-          it { should_not be_draft }
-          its(:name) { should eql 'Bob' }
-          its(:ignored) { should eql 'Huzzah!' }
-          its(:draft_id) { should be_nil }
-          its(:draft) { should be_nil }
+          it 'is no longer a draft' do
+            expect(subject.draft?).to eql false
+          end
+
+          it 'has its original `name`' do
+            expect(subject.name).to eql 'Bob'
+          end
+
+          it 'updates the ignored attribute' do
+            expect(subject.ignored).to eql 'Huzzah!'
+          end
+
+          it 'does not have a `draft_id`' do
+            expect(subject.draft_id).to be_nil
+          end
+
+          it 'does not have a `draft`' do
+            expect(subject.draft).to be_nil
+          end
 
           it 'destroys the draft' do
             expect { subject }.to change(Draftsman::Draft.where(:id => whitelister.draft_id), :count).by(-1)
@@ -64,33 +98,68 @@ describe Whitelister do
 
         context 'with changes' do
           before { whitelister.attributes = { :name => 'Sam', :ignored => 'Meh.' } }
-          it { should be_persisted }
-          it { should be_draft }
-          its(:draft_id) { should be_present }
-          its(:draft) { should be_present }
-          its(:draft) { should be_create }
-          its(:name) { should eql 'Sam' }
+          
+          it 'is persisted' do
+            expect(subject).to be_persisted
+          end
+
+          it 'is a draft' do
+            expect(subject.draft?).to eql true
+          end
+
+          it 'has a `draft_id`' do
+            expect(subject.draft_id).to be_present
+          end
+
+          it 'has a `draft`' do
+            expect(subject.draft).to be_present
+          end
+
+          it 'has a `create` draft' do
+            expect(subject.draft.create?).to eql true
+          end
+
+          it 'updates the `name`' do
+            expect(subject.name).to eql 'Sam'
+          end
 
           it 'updates the existing draft' do
             expect { subject }.to_not change(Draftsman::Draft.where(:id => whitelister.draft_id), :count)
           end
 
-          its "draft's `name` is updated" do
-            subject.draft.reify.name.should eql 'Sam'
+          it "updates the draft's `name`" do
+            expect(subject.draft.reify.name).to eql 'Sam'
           end
 
-          its "draft's `ignored` is updated" do
-            subject.draft.reify.ignored.should eql 'Meh.'
+          it "updates the draft's ignored attribute" do
+            expect(subject.draft.reify.ignored).to eql 'Meh.'
           end
         end
 
         context 'with no changes' do
-          it { should be_persisted }
-          it { should be_draft }
-          its(:draft_id) { should be_present }
-          its(:draft) { should be_present }
-          its(:draft) { should be_create }
-          its(:name) { should eql 'Bob' }
+          it 'is persisted' do
+            expect(subject).to be_persisted
+          end
+
+          it 'is a draft' do
+            expect(subject.draft?).to eql true
+          end
+
+          it 'has a `draft_id`' do
+            expect(subject.draft_id).to be_present
+          end
+
+          it 'has a `draft`' do
+            expect(subject.draft).to be_present
+          end
+
+          it 'has a `create` draft' do
+            expect(subject.draft.create?).to eql true
+          end
+
+          it 'keeps its original `name`' do
+            expect(subject.name).to eql 'Bob'
+          end
 
           it "doesn't change the number of drafts" do
             expect { subject }.to_not change(Draftsman::Draft.where(:id => whitelister.draft_id), :count)
@@ -106,44 +175,79 @@ describe Whitelister do
         
         context 'with changes' do
           before { whitelister.attributes = { :name => 'Steve', :ignored => 'Huzzah!' } }
-          it { should be_persisted }
-          it { should be_draft }
-          its(:draft_id) { should be_present }
-          its(:draft) { should be_present }
-          its(:draft) { should be_update }
-          its(:name) { should eql 'Bob' }
-          its(:ignored) { should eql 'Huzzah!' }
+          
+          it 'is persisted' do
+            expect(subject).to be_persisted
+          end
+
+          it 'is a draft' do
+            expect(subject.draft?).to eql true
+          end
+
+          it 'has a `draft_id`' do
+            expect(subject.draft_id).to be_present
+          end
+
+          it 'has a `draft`' do
+            expect(subject.draft).to be_present
+          end
+
+          it 'has an `update` draft' do
+            expect(subject.draft.update?).to eql true
+          end
+
+          it 'has its original `name`' do
+            expect(subject.name).to eql 'Bob'
+          end
+
+          it 'has the updated ignored attribute' do
+            expect(subject.ignored).to eql 'Huzzah!'
+          end
 
           it 'updates the existing draft' do
             expect { subject }.to_not change(Draftsman::Draft.where(:id => whitelister.draft_id), :count)
           end
 
-          its "draft's `name` is updated" do
-            subject.draft.reify.name.should eql 'Steve'
+          it "updates its draft's `name`" do
+            expect(subject.draft.reify.name).to eql 'Steve'
           end
 
-          its "draft's `ignored` is 'Huzzah!'" do
-            subject.draft.reify.ignored.should eql 'Huzzah!'
+          it "updates its draft's `ignored` attribute" do
+            expect(subject.draft.reify.ignored).to eql 'Huzzah!'
           end
         end
 
         context 'with no changes' do
-          it { should be_persisted }
-          it { should be_draft }
-          its(:draft_id) { should be_present }
-          its(:draft) { should be_present }
-          its(:name) { should eql 'Bob' }
+          it 'is persisted' do
+            expect(subject).to be_persisted
+          end
+
+          it 'is a draft' do
+            expect(subject.draft?).to eql true
+          end
+
+          it 'has a `draft_id`' do
+            expect(subject.draft_id).to be_present
+          end
+
+          it 'has a `draft`' do
+            expect(subject.draft).to be_present
+          end
+
+          it 'has its original `name`' do
+            expect(subject.name).to eql 'Bob'
+          end
 
           it "doesn't change the number of drafts" do
             expect { subject }.to_not change(Draftsman::Draft.where(:id => whitelister.draft_id), :count)
           end
 
-          its "draft's `name` is not updated" do
-            subject.draft.reify.name.should eql 'Sam'
+          it "does not update its draft's `name`" do
+            expect(subject.draft.reify.name).to eql 'Sam'
           end
 
           it 'still has an `update` draft' do
-            subject.draft.update?.should be_true
+            expect(subject.draft.update?).to eql true
           end
         end
       end
@@ -156,12 +260,29 @@ describe Whitelister do
           whitelister.ignored = 'Huzzah!'
         end
 
-        it { should be_persisted }
-        it { should_not be_draft }
-        its(:draft_id) { should be_nil }
-        its(:draft) { should be_nil }
-        its(:name) { should eql 'Bob' }
-        its(:ignored) { should eql 'Huzzah!' }
+        it 'is persisted' do
+          expect(subject).to be_persisted
+        end
+
+        it 'is not a draft' do
+          expect(subject.draft?).to eql false
+        end
+
+        it 'does not have a `draft_id`' do
+          expect(subject.draft_id).to be_nil
+        end
+
+        it 'does not create a `draft`' do
+          expect(subject.draft).to be_nil
+        end
+
+        it 'has the same `name`' do
+          expect(subject.name).to eql 'Bob'
+        end
+
+        it 'has an updated ignored attribute' do
+          expect(subject.ignored).to eql 'Huzzah!'
+        end
 
         it 'does not create a draft' do
           expect { subject }.to_not change(Draftsman::Draft, :count)
@@ -178,23 +299,40 @@ describe Whitelister do
           whitelister.ignored = 'Huzzah!'
         end
 
-        it { should be_persisted }
-        it { should be_draft }
-        its(:draft_id) { should be_present }
-        its(:draft) { should be_present }
-        its(:name) { should eql 'Bob' }
-        its(:ignored) { should eql 'Huzzah!' }
+        it 'is persisted' do
+          expect(subject).to be_persisted
+        end
+
+        it 'is a draft' do
+          expect(subject.draft?).to eql true
+        end
+
+        it 'has a `draft_id`' do
+          expect(subject.draft_id).to be_present
+        end
+
+        it 'has a `draft`' do
+          expect(subject.draft).to be_present
+        end
+
+        it 'has the same `name`' do
+          expect(subject.name).to eql 'Bob'
+        end
+
+        it 'has an updated ignored attribute' do
+          expect(subject.ignored).to eql 'Huzzah!'
+        end
 
         it 'updates the existing draft' do
           expect { subject }.to_not change(Draftsman::Draft.where(:id => whitelister.draft_id), :count)
         end
 
-        its "draft's `ignored` is updated" do
-          subject.draft.reify.ignored.should eql 'Huzzah!'
+        it "updates its draft's `ignored` attribute" do
+          expect(subject.draft.reify.ignored).to eql 'Huzzah!'
         end
 
         it 'has a `create` draft' do
-          subject.draft.should be_create
+          expect(subject.draft.create?).to eql true
         end
       end
 
@@ -206,46 +344,87 @@ describe Whitelister do
 
         context 'with changes' do
           before { whitelister.ignored = 'Huzzah!' }
-          it { should be_persisted }
-          it { should be_draft }
-          its(:draft_id) { should be_present }
-          its(:draft) { should be_present }
-          its(:draft) { should be_update }
-          its(:name) { should eql 'Bob' }
-          its(:ignored) { should eql 'Huzzah!' }
+          
+          it 'is persisted' do
+            expect(subject).to be_persisted
+          end
+
+          it 'is a draft' do
+            expect(subject.draft?).to eql true
+          end
+
+          it 'has a `draft_id`' do
+            expect(subject.draft_id).to be_present
+          end
+
+          it 'has a `draft`' do
+            expect(subject.draft).to be_present
+          end
+
+          it 'has an `update` draft' do
+            expect(subject.draft.update?).to eql true
+          end
+
+          it 'has its original `name`' do
+            expect(subject.name).to eql 'Bob'
+          end
+
+          it 'has an updated ignored attribute' do
+            expect(subject.ignored).to eql 'Huzzah!'
+          end
 
           it 'updates the existing draft' do
             expect { subject }.to_not change(Draftsman::Draft.where(:id => whitelister.draft_id), :count)
           end
 
-          its "draft's `name` is not changed" do
-            subject.draft.reify.name.should eql 'Sam'
+          it "updates its draft's `name`" do
+            expect(subject.draft.reify.name).to eql 'Sam'
           end
 
-          its "draft's `ignored` is updated" do
-            subject.draft.reify.ignored.should eql 'Huzzah!'
+          it "updated its draft's `ignored` attribute" do
+            expect(subject.draft.reify.ignored).to eql 'Huzzah!'
           end
         end
 
         context 'with no changes' do
-          it { should be_persisted }
-          it { should be_draft }
-          its(:draft_id) { should be_present }
-          its(:draft) { should be_present }
-          its(:draft) { should be_update }
-          its(:name) { should eql 'Bob' }
-          its(:ignored) { should eql 'Meh.' }
+          it 'is persisted' do
+            expect(subject).to be_persisted
+          end
+
+          it 'is a draft' do
+            expect(subject.draft?).to eql true
+          end
+
+          it 'has a `draft_id`' do
+            expect(subject.draft_id).to be_present
+          end
+
+          it 'has a `draft`' do
+            expect(subject.draft).to be_present
+          end
+
+          it 'has an `update` draft' do
+            expect(subject.draft.update?).to eql true
+          end
+
+          it 'has its original `name`' do
+            expect(subject.name).to eql 'Bob'
+          end
+
+          it 'has its original `ignored` attribute' do
+            expect(subject.ignored).to eql 'Meh.'
+          end
 
           it "doesn't change the number of drafts" do
             expect { subject }.to_not change(Draftsman::Draft.where(:id => whitelister.draft_id), :count)
           end
 
-          its "draft's `name` is not updated" do
-            subject.draft.reify.name.should eql 'Sam'
+          it "does not update its draft's `name`" do
+            expect(subject.draft.reify.name).to eql 'Sam'
           end
 
-          its "draft's `ignored` is not updated" do
-            subject.draft.reify.ignored.should eql 'Meh.'
+          it "does not update its draft's `ignored` attribute" do
+            expect(subject.draft.reify.ignored).to eql 'Meh.'
           end
         end
       end
@@ -253,7 +432,7 @@ describe Whitelister do
   end
 
   # Not affected by this customization
-  describe :draft_destroy do
+  describe 'draft_destroy' do
   end
 
   # Not affected by this customization

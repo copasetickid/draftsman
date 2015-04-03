@@ -2,24 +2,47 @@ require 'spec_helper'
 
 describe Skipper do
   let(:skipper) { Skipper.new :name => 'Bob', :skip_me => 'Skipped 1' }
-  it { should be_draftable }
 
-  describe :draft_creation do
+  it 'is draftable' do
+    expect(subject.class.draftable?).to eql true
+  end
+
+  describe 'draft_creation' do
     subject do
       skipper.draft_creation
       skipper.reload
     end
 
-    it { should be_persisted }
-    it { should be_draft }
-    its(:draft_id) { should be_present }
-    its(:draft) { should be_present }
-    its(:draft) { should be_create }
-    its(:name) { should eql 'Bob' }
-    its(:skip_me) { should eql 'Skipped 1' }
+    it 'is persisted' do
+      expect(subject).to be_persisted
+    end
+
+    it 'is a draft' do
+      expect(subject.draft?).to eql true
+    end
+
+    it 'has a `draft_id`' do
+      expect(subject.draft_id).to be_present
+    end
+
+    it 'has a draft' do
+      expect(subject.draft).to be_present
+    end
+
+    it 'has a `create` draft' do
+      expect(subject.draft.create?).to eql true
+    end
+
+    it 'has a `name`' do
+      expect(subject.name).to eql 'Bob'
+    end
+
+    it 'has a value for `skip_me`' do
+      expect(subject.skip_me).to eql 'Skipped 1'
+    end
   end
 
-  describe :draft_update do
+  describe 'draft_update' do
     subject do
       skipper.draft_update
       skipper.reload
@@ -32,13 +55,33 @@ describe Skipper do
         skipper.skip_me = 'Skipped 2'
       end
 
-      it { should be_persisted }
-      it { should be_draft }
-      its(:draft_id) { should be_present }
-      its(:draft) { should be_present }
-      its(:draft) { should be_update }
-      its(:name) { should eql 'Bob' }
-      its(:skip_me) { should eql 'Skipped 2' }
+      it 'is persisted' do
+        expect(subject).to be_persisted
+      end
+
+      it 'is a draft' do
+        expect(subject.draft?).to eql true
+      end
+
+      it 'has a `draft_id`' do
+        expect(subject.draft_id).to be_present
+      end
+
+      it 'has a `draft`' do
+        expect(subject.draft).to be_present
+      end
+
+      it 'identifies as an `update` draft' do
+        expect(subject.draft.update?).to eql true
+      end
+
+      it 'has the original name' do
+        expect(subject.name).to eql 'Bob'
+      end
+
+      it 'has the updated skipped attribute' do
+        expect(subject.skip_me).to eql 'Skipped 2'
+      end
 
       it 'creates a new draft' do
         expect { subject }.to change(Draftsman::Draft, :count).by(1)
@@ -56,11 +99,25 @@ describe Skipper do
         skipper.skip_me = 'Skipped 2'
       end
 
-      it { should_not be_draft }
-      its(:draft_id) { should be_nil }
-      its(:draft) { should be_nil }
-      its(:name) { should eql 'Bob' }
-      its(:skip_me) { should eql 'Skipped 2' }
+      it 'is no longer a draft' do
+        expect(subject.draft?).to eql false
+      end
+
+      it 'no longer has a `draft_id`' do
+        expect(subject.draft_id).to be_nil
+      end
+
+      it 'no longer has a `draft`' do
+        expect(subject.draft).to be_nil
+      end
+
+      it 'has its original `name`' do
+        expect(subject.name).to eql 'Bob'
+      end
+
+      it "retains the updated skipped attribute's value" do
+        expect(subject.skip_me).to eql 'Skipped 2'
+      end
 
       it 'destroys the draft' do
         expect { subject }.to change(Draftsman::Draft.where(:id => skipper.draft_id), :count).by(-1)
@@ -76,31 +133,71 @@ describe Skipper do
           skipper.skip_me = 'Skipped 2'
         end
 
-        it { should be_persisted }
-        it { should be_draft }
-        its(:draft_id) { should be_present }
-        its(:draft) { should be_present }
-        its(:draft) { should be_create }
-        its(:name) { should eql 'Sam' }
-        its(:skip_me) { should eql 'Skipped 2' }
+        it 'is persisted' do
+          expect(subject).to be_persisted
+        end
+
+        it 'is a draft' do
+          expect(subject.draft?).to eql true
+        end
+
+        it 'has a `draft_id`' do
+          expect(subject.draft_id).to be_present
+        end
+
+        it 'has a `draft`' do
+          expect(subject.draft).to be_present
+        end
+
+        it 'has a `create` draft' do
+          expect(subject.draft.create?).to eql true
+        end
+
+        it 'has the updated `name`' do
+          expect(subject.name).to eql 'Sam'
+        end
+
+        it "retains the updated skipped attribute's value" do
+          expect(subject.skip_me).to eql 'Skipped 2'
+        end
 
         it 'updates the existing draft' do
           expect { subject }.to_not change(Draftsman::Draft.where(:id => skipper.draft_id), :count)
         end
 
-        its "draft's `name` is updated" do
-          subject.draft.reify.name.should eql 'Sam'
+        it "updates the draft's `name`" do
+          expect(subject.draft.reify.name).to eql 'Sam'
         end
       end
 
       context 'with no changes' do
-        it { should be_persisted }
-        it { should be_draft }
-        its(:draft_id) { should be_present }
-        its(:draft) { should be_present }
-        its(:draft) { should be_create }
-        its(:name) { should eql 'Bob' }
-        its(:skip_me) { should eql 'Skipped 1' }
+        it 'is persisted' do
+          expect(subject).to be_persisted
+        end
+
+        it 'is a draft' do
+          expect(subject.draft?).to eql true
+        end
+
+        it 'has a `draft_id`' do
+          expect(subject.draft_id).to be_present
+        end
+
+        it 'has a `draft`' do
+          expect(subject.draft).to be_present
+        end
+
+        it 'has a `create` draft' do
+          expect(subject.draft.create?).to eql true
+        end
+
+        it 'has the original `name`' do
+          expect(subject.name).to eql 'Bob'
+        end
+
+        it "has the original skipped attribute's value" do
+          expect(subject.skip_me).to eql 'Skipped 1'
+        end
 
         it "doesn't change the number of drafts" do
           expect { subject }.to_not change(Draftsman::Draft.where(:id => skipper.draft_id), :count)
@@ -120,45 +217,86 @@ describe Skipper do
 
       context 'with changes' do
         before { skipper.name = 'Steve' }
-        it { should be_persisted }
-        it { should be_draft }
-        its(:draft_id) { should be_present }
-        its(:draft) { should be_present }
-        its(:draft) { should be_update }
-        its(:name) { should eql 'Bob' }
-        its(:skip_me) { should eql 'Skipped 2' }
+
+        it 'is persisted' do
+          expect(subject).to be_persisted
+        end
+
+        it 'is a draft' do
+          expect(subject.draft?).to eql true
+        end
+
+        it 'has a `draft_id`' do
+          expect(subject.draft_id).to be_present
+        end
+
+        it 'has a `draft`' do
+          expect(subject.draft).to be_present
+        end
+
+        it 'has an `update` draft' do
+          expect(subject.draft.update?).to eql true
+        end
+
+        it 'has the original `name`' do
+          expect(subject.name).to eql 'Bob'
+        end
+
+        it "has the updated skipped attribute's value" do
+          expect(subject.skip_me).to eql 'Skipped 2'
+        end
 
         it 'updates the existing draft' do
           expect { subject }.to_not change(Draftsman::Draft.where(:id => skipper.draft_id), :count)
         end
 
-        its "draft's `name` is updated" do
-          subject.draft.reify.name.should eql 'Steve'
+        it "updates the draft's `name`" do
+          expect(subject.draft.reify.name).to eql 'Steve'
         end
       end
 
       context 'with no changes' do
-        it { should be_persisted }
-        it { should be_draft }
-        its(:draft_id) { should be_present }
-        its(:draft) { should be_present }
-        its(:draft) { should be_update }
-        its(:name) { should eql 'Bob' }
-        its(:skip_me) { should eql 'Skipped 2' }
+        it 'is persisted' do
+          expect(subject).to be_persisted
+        end
+
+        it 'is a draft' do
+          expect(subject.draft?).to eql true
+        end
+
+        it 'has a `draft_id`' do
+          expect(subject.draft_id).to be_present
+        end
+
+        it 'has a `draft`' do
+          expect(subject.draft).to be_present
+        end
+
+        it 'has an `update` draft' do
+          expect(subject.draft.update?).to eql true
+        end
+
+        it 'has the original `name`' do
+          expect(subject.name).to eql 'Bob'
+        end
+
+        it "has the updated skipped attributes' value" do
+          expect(subject.skip_me).to eql 'Skipped 2'
+        end
 
         it "doesn't change the number of drafts" do
           expect { subject }.to_not change(Draftsman::Draft.where(:id => skipper.draft_id), :count)
         end
 
-        its "draft's `name` is not updated" do
-          subject.draft.reify.name.should eql 'Sam'
+        it "does not update the draft's `name`" do
+          expect(subject.draft.reify.name).to eql 'Sam'
         end
       end
     end
   end
 
   # Not applicable to this customization
-  describe :draft_destroy do
+  describe 'draft_destroy' do
   end
 
   # Not applicable to this customization
