@@ -231,10 +231,12 @@ module Draftsman
 
           # Stash previous draft in case it needs to be reverted later
           if self.draft?
+            attrs = send(self.class.draft_association_name).attributes
+
             data[:previous_draft] = if self.class.draft_class.previous_changes_col_is_json?
-              send(self.class.draft_association_name).attributes
+              attrs
             else
-              Draftsman.serializer.dump(send(self.class.draft_association_name).attributes)
+              Draftsman.serializer.dump(attrs)
             end
           end
 
