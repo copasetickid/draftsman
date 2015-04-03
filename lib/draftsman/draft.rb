@@ -32,6 +32,11 @@ class Draftsman::Draft < ActiveRecord::Base
     @object_changes_col_is_json ||= columns_hash['object_changes'].type == :json
   end
 
+  # Returns whether the `previous_draft` column is using the `json` type supported by PostgreSQL.
+  def self.previous_changes_col_is_json?
+    @previous_changes_col_is_json ||= columns_hash['object_changes'].type == :json
+  end
+
   def self.updates
     where :event => 'update'
   end

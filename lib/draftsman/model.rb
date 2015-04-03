@@ -120,11 +120,6 @@ module Draftsman
         method_defined?(:draftsman_options)
       end
 
-      # Returns whether or not the included ActiveRecord can do `where.not(...)` style queries.
-      def where_not?
-        ActiveRecord::VERSION::STRING.to_f >= 4.0
-      end
-
       # Serializes attribute changes for `Draft#object_changes` attribute.
       def serialize_draft_attribute_changes(changes)
         # Don't serialize values before inserting into columns of type `JSON` on PostgreSQL databases.
@@ -183,6 +178,11 @@ module Draftsman
           end
         end
       end
+
+      # Returns whether or not the included ActiveRecord can do `where.not(...)` style queries.
+      def where_not?
+        ActiveRecord::VERSION::STRING.to_f >= 4.0
+      end
     end
 
     module InstanceMethods
@@ -231,7 +231,11 @@ module Draftsman
 
           # Stash previous draft in case it needs to be reverted later
           if self.draft?
-            data[:previous_draft] = Draftsman.serializer.dump(send(self.class.draft_association_name).attributes)
+            data[:previous_draft] = if self.class.draft_class.previous_changes_col_is_json?
+              send(self.class.draft_association_name).attributes
+            else
+              Draftsman.serializer.dump(send(self.class.draft_association_name).attributes)
+            end
           end
 
           data = merge_metadata_for_draft(data)
