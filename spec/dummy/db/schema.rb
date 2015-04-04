@@ -95,6 +95,18 @@ ActiveRecord::Schema.define(version: 20150408234937) do
     t.datetime "updated_at"
   end
 
+  create_table "talkatives", force: :cascade do |t|
+    t.string   "before_comment"
+    t.string   "around_early_comment"
+    t.string   "around_late_comment"
+    t.string   "after_comment"
+    t.integer  "draft_id"
+    t.datetime "trashed_at"
+    t.datetime "published_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "vanillas", force: :cascade do |t|
     t.string   "name"
     t.integer  "draft_id"
