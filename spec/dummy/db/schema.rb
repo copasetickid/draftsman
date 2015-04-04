@@ -11,20 +11,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20110208155312) do
+ActiveRecord::Schema.define(version: 20150404203627) do
 
-  create_table "bastards", force: true do |t|
+  create_table "bastards", force: :cascade do |t|
     t.string   "name"
     t.integer  "parent_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  create_table "change_hoarders", force: true do |t|
-    t.integer "draft_id"
-  end
-
-  create_table "children", force: true do |t|
+  create_table "children", force: :cascade do |t|
     t.string   "name"
     t.integer  "parent_id"
     t.integer  "draft_id"
@@ -34,16 +30,7 @@ ActiveRecord::Schema.define(version: 20110208155312) do
     t.datetime "updated_at"
   end
 
-  create_table "clingy_parents", force: true do |t|
-    t.string   "name"
-    t.integer  "draft_id"
-    t.datetime "trashed_at"
-    t.datetime "published_at"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "draft_as_sketches", force: true do |t|
+  create_table "draft_as_sketches", force: :cascade do |t|
     t.string   "name"
     t.integer  "sketch_id"
     t.datetime "published_at"
@@ -51,17 +38,7 @@ ActiveRecord::Schema.define(version: 20110208155312) do
     t.datetime "updated_at"
   end
 
-  create_table "draft_dependencies", force: true do |t|
-    t.integer "draft_id",      null: false
-    t.integer "dependency_id", null: false
-  end
-
-  create_table "draft_dependents", force: true do |t|
-    t.integer "draft_id",     null: false
-    t.integer "dependent_id", null: false
-  end
-
-  create_table "drafts", force: true do |t|
+  create_table "drafts", force: :cascade do |t|
     t.string   "item_type"
     t.integer  "item_id"
     t.string   "event",          null: false
@@ -76,27 +53,7 @@ ActiveRecord::Schema.define(version: 20110208155312) do
     t.string   "user_agent"
   end
 
-  create_table "hopeless_children", force: true do |t|
-    t.string   "name"
-    t.integer  "clingy_parent_id"
-    t.integer  "draft_id"
-    t.datetime "trashed_at"
-    t.datetime "published_at"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "mortgages", force: true do |t|
-    t.float    "amount"
-    t.integer  "parent_id"
-    t.integer  "draft_id"
-    t.datetime "trashed_at"
-    t.datetime "published_at"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "parents", force: true do |t|
+  create_table "parents", force: :cascade do |t|
     t.string   "name"
     t.integer  "draft_id"
     t.datetime "trashed_at"
@@ -105,7 +62,7 @@ ActiveRecord::Schema.define(version: 20110208155312) do
     t.datetime "updated_at"
   end
 
-  create_table "skippers", force: true do |t|
+  create_table "skippers", force: :cascade do |t|
     t.string   "name"
     t.string   "skip_me"
     t.integer  "draft_id"
@@ -115,7 +72,19 @@ ActiveRecord::Schema.define(version: 20110208155312) do
     t.datetime "updated_at"
   end
 
-  create_table "trashables", force: true do |t|
+  create_table "talkatives", force: :cascade do |t|
+    t.string   "before_comment"
+    t.string   "around_early_comment"
+    t.string   "around_late_comment"
+    t.string   "after_comment"
+    t.integer  "draft_id"
+    t.datetime "trashed_at"
+    t.datetime "published_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "trashables", force: :cascade do |t|
     t.string   "name"
     t.string   "title"
     t.integer  "draft_id"
@@ -125,7 +94,7 @@ ActiveRecord::Schema.define(version: 20110208155312) do
     t.datetime "updated_at"
   end
 
-  create_table "vanillas", force: true do |t|
+  create_table "vanillas", force: :cascade do |t|
     t.string   "name"
     t.integer  "draft_id"
     t.datetime "published_at"
@@ -133,7 +102,7 @@ ActiveRecord::Schema.define(version: 20110208155312) do
     t.datetime "updated_at"
   end
 
-  create_table "whitelisters", force: true do |t|
+  create_table "whitelisters", force: :cascade do |t|
     t.string   "name"
     t.string   "ignored"
     t.integer  "draft_id"
