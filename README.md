@@ -35,6 +35,7 @@ source: it's a nice clean example of a gem that hooks into Rails and Sinatra.
    for separate models.
 -  Supports custom draft classes so different models' drafts can have different behavior.
 -  Supports custom name for `draft` association.
+-  Supports `before`, `after`, and `around` callbacks on each draft persistence method, such as `before_draft_creation` or `around_draft_update`
 -  Threadsafe.
 
 ## Compatibility
@@ -292,6 +293,29 @@ draft.draft_publication_dependencies
 draft.draft_reversion_dependencies
 ```
 
+### Callbacks
+
+Draftsman supports callbacks for draft creation, update, and destroy.  These callbacks can be defined in any model that `has_drafts`.
+
+Draft callbacks work similarly to ActiveRecord callbacks; pass any functions you would like called before/around/after a draft persistence method.
+
+Available callbacks:
+```ruby
+before_draft_creation   # called before draft is created
+around_draft_creation   # called function must yield to `draft_creation`
+after_draft_creation    # called after draft is created
+
+before_draft_update     # called before draft is updated
+around_draft_update     # called function must yield to `draft_update`
+after_draft_update      # called after draft is updated
+
+before_draft_destroy    # called before draft is destroyed
+around_draft_destroy    # called function must yield to `draft_destroy`
+after_draft_destroy     # called after draft is destroyed
+```
+
+Note that callbacks must be defined after your call to `has_drafts`.
+
 ## Basic Usage
 
 A basic `widgets` admin controller in Rails that saves all of the user's actions as drafts would look something like
@@ -457,6 +481,31 @@ private
 end
 
 ```
+
+If you would like your Widget to have callbacks, it might look something like this:
+
+```ruby
+class Widget < ActiveRecord::Base
+  has_drafts
+
+  before_draft_creation :say_hi
+  around_draft_update :surround_update
+
+
+  private
+
+  def say_hi
+    self.some_attr = 'Hi!'
+  end
+
+  def surround_update
+    # do something before update
+    yield
+    # do something after update
+  end
+end
+```
+
 
 ## Differences from PaperTrail
 
