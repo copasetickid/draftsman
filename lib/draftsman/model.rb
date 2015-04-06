@@ -233,7 +233,7 @@ module Draftsman
           if self.draft?
             attrs = send(self.class.draft_association_name).attributes
 
-            data[:previous_draft] = if self.class.draft_class.previous_changes_col_is_json?
+            data[:previous_draft] = if self.class.draft_class.previous_draft_col_is_json?
               attrs
             else
               Draftsman.serializer.dump(attrs)
