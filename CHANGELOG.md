@@ -1,16 +1,22 @@
 # CHANGELOG
 
+## 0.3.2 - April 6, 2015
+
+-  Fixed [#8](https://github.com/liveeditor/draftsman/issues/8) - Update specs to use new community standards
+-  Fixed [#9](https://github.com/liveeditor/draftsman/issues/9) - Sinatra extension should not use Sinatra base namespace
+-  Fixed [#12](https://github.com/liveeditor/draftsman/issues/12) - JSON::ParserError when draft_destroying a widget which was just created
+
 ## 0.3.1 - August 14, 2014
 
--  Commit [aae737fcdf](https://github.com/live-editor/draftsman/commit/aae737fcdf48604bc480b1c9c141bf642c0f581c) - `skip` option not persisting skipped values correctly
+-  Commit [aae737f](https://github.com/live-editor/draftsman/commit/aae737fcdf48604bc480b1c9c141bf642c0f581c) - `skip` option not persisting skipped values correctly
 
 ## 0.3.0 - July 29, 2014
 
--  Commit [1e2a59f678](https://github.com/live-editor/draftsman/commit/1e2a59f678cc4d88222dfc1976d564b5649cd329) - Add support for PostgreSQL JSON data type for `object`, `object_changes`, and `previous_draft` columns.
+-  Commit [1e2a59f](https://github.com/live-editor/draftsman/commit/1e2a59f678cc4d88222dfc1976d564b5649cd329) - Add support for PostgreSQL JSON data type for `object`, `object_changes`, and `previous_draft` columns.
 
 ## v0.2.1 - June 28, 2014
 
--  Commit [dbc6c83abb](https://github.com/live-editor/draftsman/commit/dbc6c83abbea5211f67ad883f4a2d18a9f5ac181) - Reifying a record that was drafted for destruction uses data from a drafted update before that if that's what happened.
+-  Commit [dbc6c83](https://github.com/live-editor/draftsman/commit/dbc6c83abbea5211f67ad883f4a2d18a9f5ac181) - Reifying a record that was drafted for destruction uses data from a drafted update before that if that's what happened.
 
 ## v0.2.0 - June 3, 2014
 
