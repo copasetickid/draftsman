@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.3.3 - April 8, 2015
+
+-  Fixed regression [#18](https://github.com/liveeditor/draftsman/pull/19) - Exception when destroying drafts
+
 ## 0.3.2 - April 6, 2015
 
 -  Fixed [#8](https://github.com/liveeditor/draftsman/issues/8) - Update specs to use new community standards
