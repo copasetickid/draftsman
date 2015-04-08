@@ -11,6 +11,10 @@ describe Draftsman::Draft do
     it 'does not have a JSON object_changes column' do
       expect(subject.object_changes_col_is_json?).to eql false
     end
+
+    it 'does not have a JSON previous_draft column' do
+      expect(subject.previous_draft_col_is_json?).to eql false
+    end
   end
 
   describe 'instance methods' do
