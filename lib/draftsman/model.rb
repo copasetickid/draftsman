@@ -259,11 +259,12 @@ module Draftsman
           dependent_associations.each do |association|
 
             if association.klass.draftable? && association.options.has_key?(:dependent) && association.options[:dependent] == :destroy
-              dependents = association.macro == :has_one ? [self.send(association.name)] : self.send(association.name)
+              dependents = self.send(association.name)
+              dependents = [dependents] if (dependents && association.macro == :has_one)
 
               dependents.each do |dependent|
                 dependent.draft_destroy unless dependent.draft? && dependent.send(dependent.class.draft_association_name).destroy?
-              end
+              end if dependents
             end
           end
         end
