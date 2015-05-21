@@ -5,6 +5,7 @@ pkg/*
 ._*
 .idea/
 .redcar/
+bin/
 spec/dummy/tmp/
 spec/dummy/db/*.sqlite3
 spec/dummy/log/*.log
