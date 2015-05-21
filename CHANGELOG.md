@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## 0.3.4 - May 21, 2015
+
+- [@npafundi](https://github.com/npafundi)
+  [Fixed](https://github.com/liveeditor/draftsman/pull/21)
+  [#13](https://github.com/liveeditor/draftsman/issues/13) -
+  LoadError when trying to run migrations
+
+- [@npafundi](https://github.com/npafundi)
+  [Fixed](https://github.com/liveeditor/draftsman/pull/23)
+  [#22](https://github.com/liveeditor/draftsman/issues/22) -
+  Exception on draft_destroy when has_one association is nil
+
+- [@chrisdpeters](https://github.com/chrisdpeters)
+  [Fixed](https://github.com/liveeditor/draftsman/commit/32b13375f4e50bafc3b4516d731d2fcf51a5fb2b)
+  [#24](https://github.com/liveeditor/draftsman/issues/24) -
+  Stack too deep: Error when running `bundle exec rails c` in app including draftsman
+
 ## 0.3.3 - April 8, 2015
 
 -  Fixed regression [#18](https://github.com/liveeditor/draftsman/pull/19) - Exception when destroying drafts
