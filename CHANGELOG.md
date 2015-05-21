@@ -6,12 +6,10 @@
   [Fixed](https://github.com/liveeditor/draftsman/pull/21)
   [#13](https://github.com/liveeditor/draftsman/issues/13) -
   LoadError when trying to run migrations
-
 - [@npafundi](https://github.com/npafundi)
   [Fixed](https://github.com/liveeditor/draftsman/pull/23)
   [#22](https://github.com/liveeditor/draftsman/issues/22) -
   Exception on draft_destroy when has_one association is nil
-
 - [@chrisdpeters](https://github.com/chrisdpeters)
   [Fixed](https://github.com/liveeditor/draftsman/commit/32b13375f4e50bafc3b4516d731d2fcf51a5fb2b)
   [#24](https://github.com/liveeditor/draftsman/issues/24) -
