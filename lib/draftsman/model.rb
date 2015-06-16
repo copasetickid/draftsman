@@ -455,7 +455,9 @@ module Draftsman
             only_changes[attribute] = self.changes[attribute].last
           end
 
-          self.update_columns only_changes if only_changes.any?
+          if only_changes.any?
+            self.assign_attributes(only_changes)
+            self.save(validate: false)
         end
       end
 
