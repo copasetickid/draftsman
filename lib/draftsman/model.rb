@@ -458,6 +458,7 @@ module Draftsman
           if only_changes.any?
             self.assign_attributes(only_changes)
             self.save(validate: false)
+          end
         end
       end
 
