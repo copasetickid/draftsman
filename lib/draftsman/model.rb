@@ -275,8 +275,6 @@ module Draftsman
       # was successful.
       def draft_update
         transaction do
-          save_only_columns_for_draft
-
           # We want to save the draft before update
           return false unless self.valid?
 
@@ -342,6 +340,7 @@ module Draftsman
             self.save
           end
         end
+        save_only_columns_for_draft
       rescue Exception => e
         false
       end
@@ -387,7 +386,9 @@ module Draftsman
 
       # Returns whether or not the updates change this draft back to the original state
       def changed_to_original_for_draft?
-        send(self.draft_association_name).present? && send(self.class.draft_association_name).update? && !changed_notably_for_draft?
+        send(self.draft_association_name).present? && send(self.class.draft_association_name).update? && send(self.draft_association_name).changeset.all?{ |attr, change| 
+          self.send(attr) == change.first
+        }
       end
 
       # Returns array of attributes that have changed for the object.
@@ -456,8 +457,9 @@ module Draftsman
           end
 
           if only_changes.any?
-            self.assign_attributes(only_changes)
-            self.save(validate: false)
+            model = self.class.find_by_id(self.id)
+            model.assign_attributes(only_changes)
+            model.save(validate: false)
           end
         end
       end
