@@ -274,7 +274,7 @@ module Draftsman
       # state, the draft is destroyed. Returns `true` or `false` depending on if the object passed validation and the save
       # was successful.
       def draft_update
-        transaction do
+        result = transaction do
           # We want to save the draft before update
           return false unless self.valid?
 
@@ -341,6 +341,7 @@ module Draftsman
           end
         end
         save_only_columns_for_draft
+        result
       rescue Exception => e
         false
       end
