@@ -253,6 +253,16 @@ describe Skipper do
         it "updates the draft's `name`" do
           expect(subject.draft.reify.name).to eql 'Steve'
         end
+        
+        it "updates skipped attribute while also updating draft attribute" do
+          subject.name = 'Tom'
+          subject.skip_me = 'Skip and save'
+          subject.draft_update
+
+          subject.reload
+          
+          expect(subject.skip_me).to eql 'Skip and save'
+        end
       end
 
       context 'with no changes' do

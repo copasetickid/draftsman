@@ -313,6 +313,7 @@ module Draftsman
             if send(self.class.draft_association_name).present?
               data[:object_changes] = changes_for_draftsman if track_object_changes_for_draft?
               send(self.class.draft_association_name).update_attributes data
+              update_skipped_attributes
             # If there's not draft, create an update draft.
             else
               data[:event]          = 'update'
