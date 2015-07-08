@@ -215,7 +215,7 @@ describe Skipper do
         skipper.attributes = skipper.draft.reify.attributes
       end
 
-      context 'with changes' do
+      context 'with changes to drafted attribute' do
         before { skipper.name = 'Steve' }
 
         it 'is persisted' do
@@ -253,15 +253,54 @@ describe Skipper do
         it "updates the draft's `name`" do
           expect(subject.draft.reify.name).to eql 'Steve'
         end
-        
-        it "updates skipped attribute while also updating draft attribute" do
-          subject.name = 'Tom'
-          subject.skip_me = 'Skip and save'
-          subject.draft_update
+      end
 
-          subject.reload
-          
+      context 'with changes to skipped attributes' do
+        before do
+          skipper.skip_me = 'Skip and save'
+          skipper.draft_update
+          skipper.reload
+          skipper.attributes = skipper.draft.reify.attributes
+        end
+
+        it 'is persisted' do
+          expect(subject).to be_persisted
+        end
+
+        it 'is a draft' do
+          expect(subject.draft?).to eql true
+        end
+
+        it 'has a `draft_id`' do
+          expect(subject.draft_id).to be_present
+        end
+
+        it 'has a `draft`' do
+          expect(subject.draft).to be_present
+        end
+
+        it 'has an `update` draft' do
+          expect(subject.draft.update?).to eql true
+        end
+
+        it 'has the original `name`' do
+          expect(subject.name).to eql 'Bob'
+        end
+
+        it "updates skipped attribute's value" do
           expect(subject.skip_me).to eql 'Skip and save'
+        end
+
+        it 'updates the existing draft' do
+          expect { subject }.to_not change(Draftsman::Draft.where(:id => skipper.draft_id), :count)
+        end
+
+        it "keeps the draft's `name`" do
+          expect(subject.draft.reify.name).to eql 'Sam'
+        end
+
+        it 'updates skipped attribute on draft' do
+          expect(subject.draft.reify.skip_me).to eql 'Skip and save'
         end
       end
 
