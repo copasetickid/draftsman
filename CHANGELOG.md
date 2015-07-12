@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.3.5 - July 12, 2015
+
+- [@npafundi](https://github.com/npafundi)
+  [Fixed](https://github.com/liveeditor/draftsman/pull/29)
+  [#28](https://github.com/liveeditor/draftsman/issues/28) -
+  Skipped attributes aren't updated if a model has a draft
+
 ## 0.3.4 - May 21, 2015
 
 - [@npafundi](https://github.com/npafundi)
