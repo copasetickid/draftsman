@@ -50,7 +50,7 @@ Works well with Rails, Sinatra, or any other application that depends on ActiveR
 Add Draftsman to your `Gemfile`.
 
 ```ruby
-gem 'draftsman', '0.3.1'
+gem 'draftsman', '0.3.5'
 ```
 
 Or if you want to grab the latest from `master`:
