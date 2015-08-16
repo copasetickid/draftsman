@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.3.6 - August 16, 2015
+
+- [@chrisdpeters](https://github.com/chrisdpeters)
+  [Fixed](https://github.com/liveeditor/draftsman/commit/971b3d945e9190fbb103acac09c9d006db7a2a31) -
+  Fix loading of Rails controller module for Rails 4.2+
+
 ## 0.3.5 - July 12, 2015
 
 - [@npafundi](https://github.com/npafundi)
