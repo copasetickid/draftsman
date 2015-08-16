@@ -3,9 +3,7 @@ module Draftsman
     module Controller
 
       def self.included(base)
-        if defined?(ActionController) && base == ActionController::Base
-          base.before_filter :set_draftsman_whodunnit, :set_draftsman_controller_info
-        end
+        base.before_filter :set_draftsman_whodunnit, :set_draftsman_controller_info
       end
 
     protected
@@ -54,5 +52,9 @@ module Draftsman
       end
 
     end
+  end
+
+  if defined?(::ActionController)
+    ::ActiveSupport.on_load(:action_controller) { include Draftsman::Rails::Controller }
   end
 end
