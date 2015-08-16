@@ -56,7 +56,7 @@ gem 'draftsman', '0.3.5'
 Or if you want to grab the latest from `master`:
 
 ```ruby
-gem 'draftsman', :github => 'live-editor/draftsman'
+gem 'draftsman', :github => 'liveeditor/draftsman'
 ```
 
 Generate a migration which will add a `drafts` table to your database.
