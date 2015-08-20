@@ -211,7 +211,7 @@ class Draftsman::Draft < ActiveRecord::Base
         reify_previous_draft.reify
       elsif !self.object.nil?
         # This appears to be necessary if for some reason the draft's model hasn't been loaded (such as when done in the console).
-        require self.item_type.underscore
+        # require self.item_type.underscore
 
         model = item.reload
 
@@ -227,6 +227,12 @@ class Draftsman::Draft < ActiveRecord::Base
           end
         end
 
+        object_changes.select{ |prop, change| !attrs.keys.include?(prop) }.each do |prop, change|
+          if model.respond_to?("#{prop}=") && !prop.end_with?('_count')
+            model.send "#{prop}=", change.last
+          end
+        end
+        
         model.send "#{model.class.draft_association_name}=", self
         model
       end
