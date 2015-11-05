@@ -297,9 +297,10 @@ module Draftsman
             self.save
           # Destroy the draft if this record has changed back to the original record
           elsif changed_to_original_for_draft?
-            send(self.class.draft_association_name).destroy
+            nilified_draft = send(self.class.draft_association_name)
             send "#{self.class.draft_association_name}_id=", nil
             self.save
+            nilified_draft.destroy
           # Save a draft if record is changed notably
           elsif changed_notably_for_draft?
             data = {

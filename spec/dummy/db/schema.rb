@@ -13,6 +13,9 @@
 
 ActiveRecord::Schema.define(version: 20150408234937) do
 
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "bastards", force: :cascade do |t|
     t.string   "name"
     t.integer  "parent_id"
@@ -109,4 +112,11 @@ ActiveRecord::Schema.define(version: 20150408234937) do
     t.datetime "updated_at"
   end
 
+  add_foreign_key "children", "drafts"
+  add_foreign_key "only_children", "drafts"
+  add_foreign_key "parents", "drafts"
+  add_foreign_key "skippers", "drafts"
+  add_foreign_key "trashables", "drafts"
+  add_foreign_key "vanillas", "drafts"
+  add_foreign_key "whitelisters", "drafts"
 end

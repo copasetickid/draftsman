@@ -20,7 +20,7 @@ class SetUpTestTables < ActiveRecord::Migration
 
     create_table :vanillas, :force => true do |t|
       t.string     :name
-      t.references :draft
+      t.references :draft, :foreign_key => true
       t.datetime   :published_at
       t.timestamps
     end
@@ -28,7 +28,7 @@ class SetUpTestTables < ActiveRecord::Migration
     create_table :trashables, :force => true do |t|
       t.string     :name
       t.string     :title, :null => true
-      t.references :draft
+      t.references :draft, :foreign_key => true
       t.datetime   :published_at
       t.datetime   :trashed_at
       t.timestamps
@@ -44,14 +44,14 @@ class SetUpTestTables < ActiveRecord::Migration
     create_table :whitelisters, :force => true do |t|
       t.string     :name
       t.string     :ignored
-      t.references :draft
+      t.references :draft, :foreign_key => true
       t.datetime   :published_at
       t.timestamps
     end
 
     create_table :parents, :force => true do |t|
       t.string     :name
-      t.references :draft
+      t.references :draft, :foreign_key => true
       t.datetime   :trashed_at
       t.datetime   :published_at
       t.timestamps
@@ -60,7 +60,7 @@ class SetUpTestTables < ActiveRecord::Migration
     create_table :children, :force => true do |t|
       t.string     :name
       t.references :parent
-      t.references :draft
+      t.references :draft, :foreign_key => true
       t.datetime   :trashed_at
       t.datetime   :published_at
       t.timestamps
@@ -75,7 +75,7 @@ class SetUpTestTables < ActiveRecord::Migration
     create_table :skippers, :force => true do |t|
       t.string     :name
       t.string     :skip_me
-      t.references :draft
+      t.references :draft, :foreign_key => true
       t.datetime   :trashed_at
       t.datetime   :published_at
       t.timestamps
