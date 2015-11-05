@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## 0.3.7 - November 4, 2015
+
+- [@bdunham](https://github.com/bdunham)
+  [Fixed](https://github.com/liveeditor/draftsman/commit/3610087a319fd203684146bb1d37bf0e41276743) -
+  Prevented double require of model definition
+- [@chrisdpeters](https://github.com/chrisdpeters)
+  [Fixed](https://github.com/liveeditor/draftsman/commit/ec2edf45700a3bea8cfac6f9facbc8ef6c7f9f54)
+  [#36](https://github.com/liveeditor/draftsman/issues/36) -
+  Fails miserably with foreign keys
+- [@dpaluy](https://github.com/dpaluy)
+  [Fixed](https://github.com/dpaluy/draftsman/blob/afce35b3985c79760176f31710c11a77b1201f0e/config/initializers/draftsman.rb)
+  [#33](https://github.com/liveeditor/draftsman/issues/33) -
+  SerializedAttributes is deprecated in Rails 4.2.x, and will be removed in Rails 5
+- [@chrisdpeters](https://github.com/chrisdpeters)
+  [Fixed](https://github.com/liveeditor/draftsman/commit/adc2843105e8fcf34d714557e82cf3f24942dbcb) -
+  Fix `serve_static_assets` deprecation warning
+
 ## 0.3.6 - August 16, 2015
 
 - [@chrisdpeters](https://github.com/chrisdpeters)
