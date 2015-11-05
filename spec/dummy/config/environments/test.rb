@@ -13,7 +13,13 @@ Dummy::Application.configure do
   config.eager_load = false
 
   # Configure static asset server for tests with Cache-Control for performance
-  config.serve_static_assets  = true
+  if ::ActiveRecord::VERSION::STRING < '4.2'
+    config.serve_static_assets  = true
+  # Rails 4.2 deprecates this in favor of `serve_static_files`.
+  else
+    config.serve_static_files  = true
+  end
+
   config.static_cache_control = "public, max-age=3600"
 
   # Show full error reports and disable caching
