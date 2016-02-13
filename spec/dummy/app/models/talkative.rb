@@ -16,7 +16,7 @@ class Talkative < ActiveRecord::Base
   around_draft_destroy :do_this_around_draft_destroy
   after_draft_destroy :do_this_after_draft_destroy
 
-
+private
 
   def do_this_before_draft_creation
     self.before_comment = "I changed before creation"
