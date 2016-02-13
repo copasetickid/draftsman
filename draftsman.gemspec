@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'activerecord', ['>= 3.0', '< 5.0']
 
-  s.add_development_dependency 'rake'
+  s.add_development_dependency 'rake', '~> 10.5'
   s.add_development_dependency 'railties', ['>= 3.0', '< 5.0']
   s.add_development_dependency 'sinatra', '~> 1.0'
   s.add_development_dependency 'rspec-rails', '3.2.1'
