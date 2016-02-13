@@ -35,7 +35,8 @@ source: it's a nice clean example of a gem that hooks into Rails and Sinatra.
    for separate models.
 -  Supports custom draft classes so different models' drafts can have different behavior.
 -  Supports custom name for `draft` association.
--  Supports `before`, `after`, and `around` callbacks on each draft persistence method, such as `before_draft_creation` or `around_draft_update`
+-  Supports `before`, `after`, and `around` callbacks on each draft persistence method, such as `before_draft_creation`
+   or `around_draft_update`.
 -  Threadsafe.
 
 ## Compatibility
@@ -295,9 +296,11 @@ draft.draft_reversion_dependencies
 
 ### Callbacks
 
-Draftsman supports callbacks for draft creation, update, and destroy.  These callbacks can be defined in any model that `has_drafts`.
+Draftsman supports callbacks for draft creation, update, and destroy. These callbacks can be defined in any model
+that `has_drafts`.
 
-Draft callbacks work similarly to ActiveRecord callbacks; pass any functions you would like called before/around/after a draft persistence method.
+Draft callbacks work similarly to ActiveRecord callbacks; pass any functions that you would like called
+before/around/after a draft persistence method.
 
 Available callbacks:
 ```ruby
@@ -482,7 +485,7 @@ end
 
 ```
 
-If you would like your Widget to have callbacks, it might look something like this:
+If you would like your `Widget` to have callbacks, it might look something like this:
 
 ```ruby
 class Widget < ActiveRecord::Base
@@ -491,8 +494,7 @@ class Widget < ActiveRecord::Base
   before_draft_creation :say_hi
   around_draft_update :surround_update
 
-
-  private
+private
 
   def say_hi
     self.some_attr = 'Hi!'
@@ -567,7 +569,7 @@ work on features or find bugs!
 
 ## License
 
-Copyright 2013-2014 Minimal Orange, LLC.
+Copyright 2013-2016 Minimal Orange, LLC.
 
 Draftsman is released under the [MIT License][9].
 
