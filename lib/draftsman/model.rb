@@ -47,7 +47,7 @@ module Draftsman
 
         # Define before/around/after callbacks on each drafted model
         send :extend, ActiveModel::Callbacks
-        define_model_callbacks :draft_creation, :draft_update, :draft_destroy
+        define_model_callbacks :draft_creation, :draft_update, :draft_destruction, :draft_destroy
 
         class_attribute :draftsman_options
         self.draftsman_options = options.dup
@@ -225,56 +225,19 @@ module Draftsman
         return true
       end
 
-      # Trashes object and records a draft for a `destroy` event.
+      # DEPRECATED: Use `draft_destruction` instead.
       def draft_destroy
+        ActiveSupport::Deprecation.warn('`draft_destroy` is deprecated and will be removed from Draftsman 1.0. Use `draft_destruction` instead.')
+
         run_callbacks :draft_destroy do
-          transaction do
-            data = {
-              :item      => self,
-              :event     => 'destroy',
-              :whodunnit => Draftsman.whodunnit,
-              :object    => object_attrs_for_draft_record
-            }
+          _draft_destruction
+        end
+      end
 
-            # Stash previous draft in case it needs to be reverted later
-            if self.draft?
-              attrs = send(self.class.draft_association_name).attributes
-
-              data[:previous_draft] = if self.class.draft_class.previous_draft_col_is_json?
-                attrs
-              else
-                Draftsman.serializer.dump(attrs)
-              end
-            end
-
-            data = merge_metadata_for_draft(data)
-
-            if send(self.class.draft_association_name).present?
-              send(self.class.draft_association_name).update_attributes! data
-            else
-              send("build_#{self.class.draft_association_name}", data)
-              send(self.class.draft_association_name).save!
-              send "#{self.class.draft_association_name}_id=", send(self.class.draft_association_name).id
-              self.update_column "#{self.class.draft_association_name}_id", send(self.class.draft_association_name).id
-            end
-
-            trash!
-
-            # Mock `dependent: :destroy` behavior for all trashable associations
-            dependent_associations = self.class.reflect_on_all_associations(:has_one) + self.class.reflect_on_all_associations(:has_many)
-
-            dependent_associations.each do |association|
-
-              if association.klass.draftable? && association.options.has_key?(:dependent) && association.options[:dependent] == :destroy
-                dependents = self.send(association.name)
-                dependents = [dependents] if (dependents && association.macro == :has_one)
-
-                dependents.each do |dependent|
-                  dependent.draft_destroy unless dependent.draft? && dependent.send(dependent.class.draft_association_name).destroy?
-                end if dependents
-              end
-            end
-          end
+      # Trashes object and records a draft for a `destroy` event.
+      def draft_destruction
+        run_callbacks :draft_destruction do
+          _draft_destruction
         end
       end
 
@@ -379,6 +342,59 @@ module Draftsman
       end
 
     private
+
+      # This is only abstracted away at this moment because of the
+      # `draft_destroy` deprecation. Move all of this logic back into
+      # `draft_destruction` after `draft_destroy is removed.`
+      def _draft_destruction
+        transaction do
+          data = {
+            :item      => self,
+            :event     => 'destroy',
+            :whodunnit => Draftsman.whodunnit,
+            :object    => object_attrs_for_draft_record
+          }
+
+          # Stash previous draft in case it needs to be reverted later
+          if self.draft?
+            attrs = send(self.class.draft_association_name).attributes
+
+            data[:previous_draft] = if self.class.draft_class.previous_draft_col_is_json?
+              attrs
+            else
+              Draftsman.serializer.dump(attrs)
+            end
+          end
+
+          data = merge_metadata_for_draft(data)
+
+          if send(self.class.draft_association_name).present?
+            send(self.class.draft_association_name).update_attributes! data
+          else
+            send("build_#{self.class.draft_association_name}", data)
+            send(self.class.draft_association_name).save!
+            send "#{self.class.draft_association_name}_id=", send(self.class.draft_association_name).id
+            self.update_column "#{self.class.draft_association_name}_id", send(self.class.draft_association_name).id
+          end
+
+          trash!
+
+          # Mock `dependent: :destroy` behavior for all trashable associations
+          dependent_associations = self.class.reflect_on_all_associations(:has_one) + self.class.reflect_on_all_associations(:has_many)
+
+          dependent_associations.each do |association|
+
+            if association.klass.draftable? && association.options.has_key?(:dependent) && association.options[:dependent] == :destroy
+              dependents = self.send(association.name)
+              dependents = [dependents] if (dependents && association.macro == :has_one)
+
+              dependents.each do |dependent|
+                dependent.draft_destruction unless dependent.draft? && dependent.send(dependent.class.draft_association_name).destroy?
+              end if dependents
+            end
+          end
+        end
+      end
 
       # Returns changes on this object, excluding attributes defined in the options for `:ignore` and `:skip`.
       def changed_and_not_ignored_for_draft(options = {})

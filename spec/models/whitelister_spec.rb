@@ -432,7 +432,7 @@ describe Whitelister do
   end
 
   # Not affected by this customization
-  describe 'draft_destroy' do
+  describe 'draft_destruction' do
   end
 
   # Not affected by this customization

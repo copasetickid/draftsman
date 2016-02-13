@@ -8,9 +8,9 @@ require 'spec_helper'
 # -  `before_draft_update`
 # -  `around_draft_update`
 # -  `after_draft_update`
-# -  `before_draft_destroy`
-# -  `around_draft_destroy`
-# -  `after_draft_destroy`
+# -  `before_draft_destruction`
+# -  `around_draft_destruction`
+# -  `after_draft_destruction`
 RSpec.describe Talkative do
   let(:talkative) { subject }
 
@@ -140,13 +140,13 @@ RSpec.describe Talkative do
     end
   end
 
-  describe '#draft_destroy' do
+  describe '#draft_destruction' do
     before do
       talkative.draft_creation
-      talkative.draft_destroy
+      talkative.draft_destruction
     end
 
-    describe '`before_draft_destroy` callback' do
+    describe '`before_draft_destruction` callback' do
       it 'changes `before_comment` attribute' do
         expect(talkative.before_comment).to eql "I changed before destroy"
       end
@@ -162,7 +162,7 @@ RSpec.describe Talkative do
       end
     end
 
-    describe '`around_draft_destroy` callback' do
+    describe '`around_draft_destruction` callback' do
       it 'changes `around_early_comment` attribute (before yield)' do
         expect(talkative.around_early_comment).to eql "I changed around destroy (before yield)"
       end
@@ -191,7 +191,7 @@ RSpec.describe Talkative do
       end
     end
 
-    describe '`after_draft_destroy` callback' do
+    describe '`after_draft_destruction` callback' do
       it 'changes `before_comment` attribute' do
         expect(talkative.before_comment).to eql "I changed before destroy"
       end

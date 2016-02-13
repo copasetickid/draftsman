@@ -11,10 +11,10 @@ class Talkative < ActiveRecord::Base
   around_draft_update :do_this_around_draft_update
   after_draft_update :do_this_after_draft_update
 
-  # # draft_destroy callbacks
-  before_draft_destroy :do_this_before_draft_destroy
-  around_draft_destroy :do_this_around_draft_destroy
-  after_draft_destroy :do_this_after_draft_destroy
+  # # draft_destruction callbacks
+  before_draft_destruction :do_this_before_draft_destruction
+  around_draft_destruction :do_this_around_draft_destruction
+  after_draft_destruction :do_this_after_draft_destruction
 
 private
 
@@ -50,17 +50,17 @@ private
 
 
 
-  def do_this_before_draft_destroy
+  def do_this_before_draft_destruction
     self.before_comment = "I changed before destroy"
   end
 
-  def do_this_around_draft_destroy
+  def do_this_around_draft_destruction
     self.around_early_comment = "I changed around destroy (before yield)"
     yield
     self.around_late_comment = "I changed around destroy (after yield)"
   end
 
-  def do_this_after_draft_destroy
+  def do_this_after_draft_destruction
     self.after_comment = "I changed after destroy"
   end
 end

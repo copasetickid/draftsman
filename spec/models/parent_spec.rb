@@ -45,8 +45,8 @@ describe Parent do
     context 'parent `destroy` draft with child `destroy` draft' do
       before do
         child.save!
-        child.draft_destroy
-        parent.draft_destroy
+        child.draft_destruction
+        parent.draft_destruction
       end
 
       subject { parent.draft.publish! }
@@ -90,8 +90,8 @@ describe Parent do
     context 'parent `destroy` draft with child `destroy` draft' do
       before do
         child.save!
-        child.draft_destroy
-        parent.draft_destroy
+        child.draft_destruction
+        parent.draft_destruction
       end
 
       subject do
@@ -169,7 +169,7 @@ describe Parent do
     context 'parent `destroy` draft with child `destroy` draft' do
       before do
         child.save!
-        parent.draft_destroy
+        parent.draft_destruction
         child.reload
       end
 
@@ -206,7 +206,7 @@ describe Parent do
     context 'parent `destroy` draft with child `destroy` draft' do
       before do
         child.save!
-        parent.draft_destroy
+        parent.draft_destruction
         child.reload
       end
 

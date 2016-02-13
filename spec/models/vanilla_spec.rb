@@ -260,7 +260,7 @@ describe Vanilla do
   end
 
   # Not applicable to this customization
-  describe 'draft_destroy' do
+  describe 'draft_destruction' do
   end
 
   describe 'scopes' do

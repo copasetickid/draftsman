@@ -30,7 +30,7 @@ source: it's a nice clean example of a gem that hooks into Rails and Sinatra.
 -  Allows you to store arbitrary model-level metadata with each draft (useful for filtering).
 -  Allows you to store arbitrary controller-level information with each draft (e.g., remote IP, current account ID).
 -  Only saves drafts when you explicitly tell it to via instance methods like `draft_creation`, `draft_update`, and
-   `draft_destroy`.
+   `draft_destruction`.
 -  Stores everything in a single database table by default (generates migration for you), or you can use separate tables
    for separate models.
 -  Supports custom draft classes so different models' drafts can have different behavior.
@@ -204,7 +204,7 @@ widget.draft_update
 
 # Trashes object and records a draft for a `destroy` event. (The `trashed_at` attribute must be set up on your model for
 # this to work.)
-widget.draft_destroy
+widget.draft_destruction
 
 # Returns whether or not this item has been published at any point in its lifecycle.
 widget.published?
@@ -212,7 +212,7 @@ widget.published?
 # Sets `:published_at` attribute to now and saves to the database immediately.
 widget.publish!
 
-# Returns whether or not this item has been trashed via `draft_destroy`
+# Returns whether or not this item has been trashed via `draft_destruction`.
 widget.trashed?
 ```
 
@@ -304,17 +304,17 @@ before/around/after a draft persistence method.
 
 Available callbacks:
 ```ruby
-before_draft_creation   # called before draft is created
-around_draft_creation   # called function must yield to `draft_creation`
-after_draft_creation    # called after draft is created
+before_draft_creation     # called before draft is created
+around_draft_creation     # called function must yield to `draft_creation`
+after_draft_creation      # called after draft is created
 
-before_draft_update     # called before draft is updated
-around_draft_update     # called function must yield to `draft_update`
-after_draft_update      # called after draft is updated
+before_draft_update       # called before draft is updated
+around_draft_update       # called function must yield to `draft_update`
+after_draft_update        # called after draft is updated
 
-before_draft_destroy    # called before draft is destroyed
-around_draft_destroy    # called function must yield to `draft_destroy`
-after_draft_destroy     # called after draft is destroyed
+before_draft_destruction  # called before draft is destroyed
+around_draft_destruction  # called function must yield to `draft_destruction`
+after_draft_destruction   # called after draft is destroyed
 ```
 
 Note that callbacks must be defined after your call to `has_drafts`.
@@ -376,8 +376,8 @@ class Admin::WidgetsController < Admin::BaseController
   end
 
   def destroy
-    # Instead of calling `destroy`, you call `draft_destroy` to "trash" it as a draft
-    @widget.draft_destroy
+    # Instead of calling `destroy`, you call `draft_destruction` to "trash" it as a draft
+    @widget.draft_destruction
     flash[:success] = 'The widget was moved to the trash.'
     redirect_to admin_widgets_path
   end
@@ -516,8 +516,8 @@ If you are familiar with the PaperTrail gem, some parts of the Draftsman gem wil
 However, there are some differences:
 
 *  PaperTrail hooks into ActiveRecord callbacks so that versions can be saved automatically with your normal CRUD
-   operations (`save`, `create`, `update_attributes`, `destroy`, etc.). Draftsman requires that you explicitly call its
-   own CRUD methods in order to save a draft (`draft_creation`, `draft_update`, and `draft_destroy`).
+   operations (`save`, `create`, `update`, `destroy`, etc.). Draftsman requires that you explicitly call its own
+   CRUD methods in order to save a draft (`draft_creation`, `draft_update`, and `draft_destruction`).
 
 *  PaperTrail's `Version#object` column looks "backwards" and records the object's state _before_ the changes occurred.
    Because drafts record changes as they will look in the future, they must work differently. Draftsman's `Draft#object`

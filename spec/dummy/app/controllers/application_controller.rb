@@ -14,7 +14,7 @@ class ApplicationController < ActionController::Base
   end
 
   def destroy
-    Trashable.last.draft_destroy
+    Trashable.last.draft_destruction
     render nothing: true
   end
 end

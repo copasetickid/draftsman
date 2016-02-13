@@ -229,7 +229,7 @@ describe Draftsman::Draft do
         context 'without previous draft' do
           before do
             trashable.save!
-            trashable.draft_destroy
+            trashable.draft_destruction
           end
 
           it 'does not identify as a `create` event' do
@@ -268,7 +268,7 @@ describe Draftsman::Draft do
         context 'with previous `create` draft' do
           before do
             trashable.draft_creation
-            trashable.draft_destroy
+            trashable.draft_destruction
           end
 
           it 'does not identify as a `create` event' do
@@ -422,7 +422,7 @@ describe Draftsman::Draft do
         context 'without previous draft' do
           before do
             trashable.save!
-            trashable.draft_destroy
+            trashable.draft_destruction
           end
 
           subject { trashable.draft.publish! }
@@ -439,7 +439,7 @@ describe Draftsman::Draft do
         context 'with previous `create` draft' do
           before do
             trashable.draft_creation
-            trashable.draft_destroy
+            trashable.draft_destruction
           end
 
           subject { trashable.draft.publish! }
@@ -515,7 +515,7 @@ describe Draftsman::Draft do
         context 'without previous draft' do
           before do
             trashable.save!
-            trashable.draft_destroy
+            trashable.draft_destruction
           end
 
           subject { trashable.draft.revert!; return trashable.reload }
@@ -556,7 +556,7 @@ describe Draftsman::Draft do
         context 'with previous `create` draft' do
           before do
             trashable.draft_creation
-            trashable.draft_destroy
+            trashable.draft_destruction
           end
 
           subject { trashable.draft.revert!; return trashable.reload }
@@ -666,7 +666,7 @@ describe Draftsman::Draft do
         context 'without previous draft' do
           before do
             trashable.save!
-            trashable.draft_destroy
+            trashable.draft_destruction
           end
 
           it 'records the `name`' do
@@ -681,7 +681,7 @@ describe Draftsman::Draft do
         context 'with previous `create` draft' do
           before do
             trashable.draft_creation
-            trashable.draft_destroy
+            trashable.draft_destruction
           end
 
           it 'records the `name`' do
@@ -700,7 +700,7 @@ describe Draftsman::Draft do
             trashable.title = 'My Title'
             trashable.draft_update
             # Typically, 2 draft operations won't happen in the same request, so reload before draft-destroying.
-            trashable.reload.draft_destroy
+            trashable.reload.draft_destruction
           end
 
           it 'records the updated `name`' do
