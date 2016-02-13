@@ -4,8 +4,8 @@ require 'draftsman/version'
 Gem::Specification.new do |s|
   s.name          = 'draftsman'
   s.version       = Draftsman::VERSION
-  s.summary       = "Create draft versions of your ActiveRecord models' data. Works with Ruby on Rails and Sinatra."
-  s.description   = s.summary
+  s.summary       = 'Create draft versions of your database records.'
+  s.description   = "Stores draft versions of your ActiveRecord models' data in a single table or split up into separate tables. Works with Ruby on Rails and Sinatra."
   s.homepage      = 'https://github.com/liveeditor/draftsman'
   s.authors       = ['Chris Peters']
   s.email         = 'chris@minimalorange.com'
