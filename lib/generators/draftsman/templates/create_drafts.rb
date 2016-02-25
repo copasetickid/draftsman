@@ -7,7 +7,7 @@ class CreateDrafts < ActiveRecord::Migration
       t.string  :whodunnit#  :null => false
       t.text    :object
       t.text    :previous_draft
-      t.timestamps
+      t.timestamps,         :null => false
     end
 
     change_table :drafts do |t|
