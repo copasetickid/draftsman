@@ -7,7 +7,7 @@ class CreateDrafts < ActiveRecord::Migration
       t.string  :whodunnit#  :null => false
       t.json    :object
       t.json    :previous_draft
-      t.timestamps,         :null => false
+      t.timestamps          :null => false
     end
 
     change_table :drafts do |t|
