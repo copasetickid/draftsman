@@ -209,9 +209,6 @@ widget.draft_destruction
 # Returns whether or not this item has been published at any point in its lifecycle.
 widget.published?
 
-# Sets `:published_at` attribute to now and saves to the database immediately.
-widget.publish!
-
 # Returns whether or not this item has been trashed via `draft_destruction`.
 widget.trashed?
 ```
