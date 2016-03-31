@@ -1,5 +1,6 @@
 require 'draftsman/config'
 require 'draftsman/model'
+require 'draftsman/version'
 
 # Require all frameworks and serializers
 Dir[File.join(File.dirname(__FILE__), 'draftsman', 'frameworks', '*.rb')].each { |file| require file }
