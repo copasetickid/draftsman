@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## 0.4.0 - April 5, 2016
+
+- [@npafundi](https://github.com/npafundi)
+  [Implemented](https://github.com/liveeditor/draftsman/pull/20)
+  [#20](https://github.com/liveeditor/draftsman/pull/20) -
+  Adding callbacks for draft creation, update, and destroy
+- [@chrisdpeters](https://github.com/chrisdpeters)
+  [Implemented](https://github.com/liveeditor/draftsman/commit/b3cecfa17f5cf296e7451cca56aeee41eac75f11)
+  [#16](https://github.com/liveeditor/draftsman/issues/16) -
+  Rename `draft_destroy` to `draft_destruction`
+- [@defbyte](https://github.com/defbyte)
+  [Fixed](https://github.com/liveeditor/draftsman/pull/38)
+  [#39](https://github.com/liveeditor/draftsman/issues/39) -
+  Uh oh, ActiveSupport::DeprecationException error when running generated migrations
+- [@chrisdpeters](https://github.com/chrisdpeters)
+  [Fixed](https://github.com/liveeditor/draftsman/commit/b0e328276e1e90ab877a6003f1d3165c7032267d)
+  [#40](https://github.com/liveeditor/draftsman/issues/40) -
+  Docs say publish! is available on the model instance, but it is not
+- [@chrisdpeters](https://github.com/chrisdpeters)
+  [Fixed](https://github.com/liveeditor/draftsman/commit/bae427d2d38715da5b892888ff86d23bf5e39cb0)
+  [#17](https://github.com/liveeditor/draftsman/issues/17) -
+  Fix "open-ended dependency on rake" warning on gem build
+
 ## 0.3.7 - November 4, 2015
 
 - [@bdunham](https://github.com/bdunham)
