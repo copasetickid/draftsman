@@ -1,3 +1,5 @@
+require 'draftsman/attributes_serialization'
+
 module Draftsman
   module Model
 
@@ -44,6 +46,7 @@ module Draftsman
         # Lazily include the instance methods so we don't clutter up
         # any more ActiveRecord models than we need to.
         send :include, InstanceMethods
+        send :extend, AttributesSerialization
 
         # Define before/around/after callbacks on each drafted model
         send :extend, ActiveModel::Callbacks
@@ -124,63 +127,9 @@ module Draftsman
         method_defined?(:draftsman_options)
       end
 
-      # Serializes attribute changes for `Draft#object_changes` attribute.
-      def serialize_draft_attribute_changes(changes)
-        # Don't serialize values before inserting into columns of type `JSON` on PostgreSQL databases.
-        return changes if self.draft_class.object_changes_col_is_json?
-
-        serialized_attributes.each do |key, coder|
-          if changes.key?(key)
-            coder = Draftsman::Serializers::Yaml unless coder.respond_to?(:dump) # Fall back to YAML if `coder` has no `dump` method
-            old_value, new_value = changes[key]
-            changes[key] = [coder.dump(old_value), coder.dump(new_value)]
-          end
-        end
-      end
-
-      # Used for `Draft#object` attribute
-      def serialize_attributes_for_draftsman(attributes)
-        # Don't serialize values before inserting into columns of type `JSON` on PostgreSQL databases.
-        return attributes if self.draft_class.object_col_is_json?
-
-        serialized_attributes.each do |key, coder|
-          if attributes.key?(key)
-            coder = Draftsman::Serializers::Yaml unless coder.respond_to?(:dump) # Fall back to YAML if `coder` has no `dump` method
-            attributes[key] = coder.dump(attributes[key])
-          end
-        end
-      end
-
       # Returns whether or not a `trashed_at` timestamp is set up on this model.
       def trashable?
         draftable? && method_defined?(self.trashed_at_attribute_name)
-      end
-
-      # Unserializes attribute changes for `Draft#object_changes` attribute.
-      def unserialize_draft_attribute_changes(changes)
-        # Don't serialize values before inserting into columns of type `JSON` on PostgreSQL databases.
-        return changes if self.draft_class.object_changes_col_is_json?
-
-        serialized_attributes.each do |key, coder|
-          if changes.key?(key)
-            coder = Draftsman::Serializers::Yaml unless coder.respond_to?(:dump)
-            old_value, new_value = changes[key]
-            changes[key] = [coder.load(old_value), coder.load(new_value)]
-          end
-        end
-      end
-
-      # Used for `Draft#object` attribute
-      def unserialize_attributes_for_draftsman(attributes)
-        # Don't serialize values before inserting into columns of type `JSON` on PostgreSQL databases.
-        return attributes if self.draft_class.object_col_is_json?
-
-        serialized_attributes.each do |key, coder|
-          if attributes.key?(key)
-            coder = Draftsman::Serializers::Yaml unless coder.respond_to?(:dump)
-            attributes[key] = coder.load(attributes[key])
-          end
-        end
       end
 
       # Returns whether or not the included ActiveRecord can do `where.not(...)` style queries.
