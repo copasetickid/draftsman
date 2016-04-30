@@ -3,7 +3,7 @@ module Draftsman
     module Controller
 
       def self.included(base)
-        base.before_filter :set_draftsman_whodunnit, :set_draftsman_controller_info
+        base.before_action :set_draftsman_whodunnit, :set_draftsman_controller_info
       end
 
     protected
