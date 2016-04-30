@@ -46,13 +46,7 @@ class Draftsman::Draft < ActiveRecord::Base
   def changeset
     return nil unless self.class.column_names.include? 'object_changes'
 
-    _changes = self.class.object_changes_col_is_json? ? self.object_changes : Draftsman.serializer.load(self.object_changes)
-
-    @changeset ||= HashWithIndifferentAccess.new(_changes).tap do |changes|
-      item_type.constantize.unserialize_draft_attribute_changes(changes)
-    end
-  rescue
-    {}
+    @changeset ||= load_changeset
   end
 
   # Returns whether or not this is a `create` event.
@@ -301,6 +295,22 @@ private
       ActiveRecord::IdentityMap.without &block
     else
       block.call
+    end
+  end
+
+  def load_changeset
+    changes = HashWithIndifferentAccess.new(object_changes_deserialized)
+    item_type.constantize.unserialize_draft_attribute_changes(changes)
+    changes
+  rescue
+    {}
+  end
+
+  def object_changes_deserialized
+    if self.class.object_changes_col_is_json?
+      object_changes
+    else
+      Draftsman.serializer.load(object_changes)
     end
   end
 end
