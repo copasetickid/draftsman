@@ -7,6 +7,37 @@ Dir[File.join(File.dirname(__FILE__), 'draftsman', 'serializers', '*.rb')].each 
 
 # Draftsman's module methods can be called in both models and controllers.
 module Draftsman
+  # Switches Draftsman on or off.
+  def self.enabled=(value)
+    Draftsman.config.enabled = value
+  end
+
+  # Returns `true` if Draftsman is on, `false` otherwise.
+  # Draftsman is enabled by default.
+  def self.enabled?
+    !!Draftsman.config.enabled
+  end
+
+  def self.serialized_attributes?
+    ActiveSupport::Deprecation.warn(
+      "Draftsman.serialized_attributes? is deprecated without replacement " +
+        "and always returns false."
+    )
+    false
+  end
+
+  # Sets whether Draftsman is enabled or disabled for the current request.
+  def self.enabled_for_controller=(value)
+    draftsman_store[:request_enabled_for_controller] = value
+  end
+
+  # Returns `true` if Draftsman is enabled for the request, `false` otherwise.
+  #
+  # See `Draftsman::Rails::Controller#draftsman_enabled_for_controller`.
+  def self.enabled_for_controller?
+    !!draftsman_store[:request_enabled_for_controller]
+  end
+
   # Returns whether or not ActiveRecord is configured to require mass assignment whitelisting via `attr_accessible`.
   def self.active_record_protected_attributes?
     @active_record_protected_attributes ||= ActiveRecord::VERSION::STRING.to_f < 4.0 || defined?(ProtectedAttributes)
