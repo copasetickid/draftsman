@@ -18,14 +18,6 @@ module Draftsman
     !!Draftsman.config.enabled
   end
 
-  def self.serialized_attributes?
-    ActiveSupport::Deprecation.warn(
-      "Draftsman.serialized_attributes? is deprecated without replacement " +
-        "and always returns false."
-    )
-    false
-  end
-
   # Sets whether Draftsman is enabled or disabled for the current request.
   def self.enabled_for_controller=(value)
     draftsman_store[:request_enabled_for_controller] = value

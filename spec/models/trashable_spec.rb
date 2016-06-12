@@ -3,7 +3,7 @@ require 'spec_helper'
 # A Trashable has a simple call to `has_drafts` without any options specified. The model also contains a `deleted_at`
 # attribute, which allows deletes to be drafts too.
 describe Trashable do
-  let(:trashable) { Trashable.new :name => 'Bob' }
+  let(:trashable) { Trashable.new name: 'Bob' }
 
   describe '.draftable?' do
     it 'is draftable' do

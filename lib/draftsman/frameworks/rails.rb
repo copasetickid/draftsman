@@ -81,7 +81,7 @@ module Draftsman
       # Tells Draftsman any information from the controller you want to store
       # alongside any changes that occur.
       def set_draftsman_controller_info
-        ::Draftsman.controller_info = info_for_draftsman if ::Draftsman.enabled_for_controller?
+        ::Draftsman.controller_info = info_for_draftsman
       end
 
       def warn_about_not_setting_whodunnit
