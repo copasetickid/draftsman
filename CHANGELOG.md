@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.5.1 - August 20, 2016
+
+- [@chrisdpeters](https://github.com/chrisdpeters)
+  [Fixed](https://github.com/liveeditor/draftsman/commit/b19efe6abf73b2e62a420df2aef39dc9eabf20dc)
+  Make Draftsman enabled in Rails by default
+
 ## 0.5.0 - August 20, 2016
 
 - [@npezza93](https://github.com/npezza93)
