@@ -13,7 +13,7 @@ module Draftsman
 
     class SerializedAttribute
       def initialize(coder)
-        @coder = coder.respond_to?(:dump) ? coder : PaperTrail.serializer
+        @coder = coder.respond_to?(:dump) ? coder : Draftsman.serializer
       end
 
       def type_cast_for_database(value)
