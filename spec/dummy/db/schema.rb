@@ -59,6 +59,15 @@ ActiveRecord::Schema.define(version: 20160328184419) do
     t.datetime "published_at"
   end
 
+  create_table "moneybags", force: :cascade do |t|
+    t.integer  "price_cents",    default: 0,     null: false
+    t.string   "price_currency", default: "USD", null: false
+    t.integer  "draft_id"
+    t.datetime "published_at"
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+  end
+
   create_table "only_children", force: :cascade do |t|
     t.string   "name"
     t.integer  "parent_id"
