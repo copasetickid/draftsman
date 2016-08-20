@@ -8,7 +8,8 @@ module Draftsman
     def initialize
       @timestamp_field = :created_at
       @mutex = Mutex.new
-      @serializer      = Draftsman::Serializers::Yaml
+      @serializer = Draftsman::Serializers::Yaml
+      @enabled = true
     end
 
     # Indicates whether Draftsman is on or off. Default: true.
