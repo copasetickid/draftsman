@@ -66,8 +66,7 @@ module Draftsman
 
     private
 
-      # Tells Draftsman whether versions should be saved in the current
-      # request.
+      # Tells Draftsman whether drafts should be saved in the current request.
       def set_draftsman_enabled_for_controller
         ::Draftsman.enabled_for_controller = draftsman_enabled_for_controller
       end

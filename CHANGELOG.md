@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.5.0 - August 20, 2016
+
+- [@npezza93](https://github.com/npezza93)
+  [Implemented](https://github.com/liveeditor/draftsman/pull/45)
+  [#44](https://github.com/liveeditor/draftsman/issues/44)
+  Rails 5 compatibility
+
 ## 0.4.0 - April 5, 2016
 
 - [@npafundi](https://github.com/npafundi)
