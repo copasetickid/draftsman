@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe UsersController, :type => :controller do
-  let(:trashable) { Trashable.create!(:name => 'Bob') }
+describe UsersController, type: :controller do
+  let(:trashable) { Trashable.create!(name: 'Bob') }
 
   describe 'create' do
     before { post :create }
@@ -13,7 +13,7 @@ describe UsersController, :type => :controller do
   end
 
   describe 'update' do
-    before { put :update, :id => trashable.id }
+    before { put :update, id: trashable.id }
     subject { return Draftsman::Draft.last }
 
     it 'records user name via `user_for_draftsman`' do
@@ -22,7 +22,7 @@ describe UsersController, :type => :controller do
   end
 
   describe 'destroy' do
-    before { delete :destroy, :id => trashable.id }
+    before { delete :destroy, id: trashable.id }
     subject { return Draftsman::Draft.last }
 
     it 'records user name via `user_for_draftsman`' do

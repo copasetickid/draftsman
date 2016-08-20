@@ -32,6 +32,6 @@ module Dummy
     config.active_record.whitelist_attributes = false if ::Draftsman.active_record_protected_attributes?
 
     # Do not access the DB or load models when precompiling assets
-    config.assets.initialize_on_precompile = false
+    config.assets.enabled = false if config.respond_to?(:assets)
   end
 end

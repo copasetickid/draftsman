@@ -1,8 +1,8 @@
 require 'spec_helper'
 
 # Tests controller `info_for_draftsman` method
-describe InformantsController, :type => :controller do
-  let(:trashable) { Trashable.create!(:name => 'Bob') }
+describe InformantsController, type: :controller do
+  let(:trashable) { Trashable.create!(name: 'Bob') }
 
   describe 'create' do
     before { post :create }
@@ -18,7 +18,7 @@ describe InformantsController, :type => :controller do
   end
 
   describe 'update' do
-    before { put :update, :id => trashable.id }
+    before { put :update, id: trashable.id }
     subject { Draftsman::Draft.last }
 
     it 'records `ip` from custom `info_for_draftsman`' do
@@ -31,7 +31,7 @@ describe InformantsController, :type => :controller do
   end
 
   describe 'destroy' do
-    before { delete :destroy, :id => trashable.id }
+    before { delete :destroy, id: trashable.id }
     subject { Draftsman::Draft.last }
 
     it 'records `ip` from custom `info_for_draftsman`' do

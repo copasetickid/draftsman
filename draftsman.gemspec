@@ -16,12 +16,12 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ['lib']
 
-  s.add_dependency 'activerecord', ['>= 3.0', '< 5.0']
+  s.add_dependency 'activerecord', ['>= 3.0', '<= 5.0.0']
 
-  s.add_development_dependency 'rake', '~> 10.5'
+  s.add_development_dependency 'rake'
   s.add_development_dependency 'railties', ['>= 3.0', '< 5.0']
   s.add_development_dependency 'sinatra', '~> 1.0'
-  s.add_development_dependency 'rspec-rails', '3.2.1'
+  s.add_development_dependency 'rspec-rails', '3.5.0.beta4'
 
   # JRuby support for the test ENV
   if defined?(JRUBY_VERSION)

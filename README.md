@@ -323,8 +323,8 @@ this. It also presents all data in its drafted form, if a draft exists.
 
 ```ruby
 class Admin::WidgetsController < Admin::BaseController
-  before_filter :find_widget,  :only => [:show, :edit, :update, :destroy]
-  before_filter :reify_widget, :only => [:show, :edit]
+  before_action :find_widget,  :only => [:show, :edit, :update, :destroy]
+  before_action :reify_widget, :only => [:show, :edit]
 
   def index
     # The `live` scope gives us widgets that aren't in the trash.
@@ -423,7 +423,7 @@ other workflow action that you would like for your application to provide for dr
 
 ```ruby
 class Admin::DraftsController < Admin::BaseController
-  before_filter :find_draft, :only => [:show, :update, :destroy]
+  before_action :find_draft, :only => [:show, :update, :destroy]
 
   def index
     @drafts = Draftsman::Draft.includes(:item).order('updated_at DESC')

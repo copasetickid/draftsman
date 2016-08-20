@@ -287,7 +287,7 @@ describe Vanilla do
       subject { Vanilla.live }
 
       it 'raises an exception' do
-        expect { subject.load }.to raise_exception
+        expect { subject.load }.to raise_exception(ActiveRecord::StatementInvalid)
       end
     end
 
@@ -311,7 +311,7 @@ describe Vanilla do
       subject { Vanilla.trashed }
 
       it 'raises an exception' do
-        expect { subject.load }.to raise_exception
+        expect { subject.load }.to raise_exception(ActiveRecord::StatementInvalid)
       end
     end
   end
