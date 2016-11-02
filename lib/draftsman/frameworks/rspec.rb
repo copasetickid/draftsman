@@ -1,4 +1,4 @@
-if defined? RSpec
+if defined? RSpec::Core
   require 'rspec/core'
   require 'rspec/matchers'
 
