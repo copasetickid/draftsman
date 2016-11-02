@@ -183,7 +183,7 @@ class Draftsman::Draft < ActiveRecord::Base
           self.item.send("#{key}=", value)
         end
         self.item.save(:validate => false)
-        
+
         self.item.reload
 
         # Destroy draft
@@ -198,7 +198,7 @@ class Draftsman::Draft < ActiveRecord::Base
   #
   # Example usage:
   #
-  #     `@category = @category.reify if @category.draft?`
+  #     `@category = @category.draft.reify if @category.draft?`
   def reify
     without_identity_map do
       if !self.previous_draft.nil?
@@ -258,7 +258,7 @@ class Draftsman::Draft < ActiveRecord::Base
           self.item.class.where(:id => self.item).update_all "#{self.item.class.draft_association_name}_id".to_sym => nil,
                                                              self.item.class.trashed_at_attribute_name => nil
         end
-        
+
         self.destroy
       end
     end
