@@ -1,6 +1,6 @@
 # Draftsman v0.5.1 (beta)
 
-[![Build Status](https://secure.travis-ci.org/liveeditor/net_http_ssl_fix.svg?branch=master)](http://travis-ci.org/liveeditor/net_http_ssl_fix)
+[![Build Status](https://secure.travis-ci.org/liveeditor/draftsman.svg?branch=master)](http://travis-ci.org/liveeditor/draftsman)
 
 Draftsman is a Ruby gem that lets you create draft versions of your database records. If you're developing a system in
 need of simple drafts or a publishing approval queue, then Draftsman just might be what you need.
