@@ -9,5 +9,7 @@ rvm:
   - 2.2.5
 
 script:
-  - ./spec/dummy/bundle exec rake db:schema:load
+  - cd ./spec/dummy
+  - bundle exec rake db:schema:load
+  - cd ../../
   - bundle exec rake
