@@ -3,14 +3,14 @@ class ApplicationController < ActionController::Base
   before_action :set_draftsman_whodunnit
 
   def create
-    Trashable.new(name: 'Bob').draft_creation
+    Trashable.new(name: 'Bob').save_draft
     head :no_content
   end
 
   def update
     trashable = Trashable.last
     trashable.name = 'Sam'
-    trashable.draft_update
+    trashable.save_draft
     head :no_content
   end
 

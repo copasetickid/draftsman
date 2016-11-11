@@ -23,7 +23,7 @@ describe Draftsman::Draft do
 
     describe 'event, create?, update?, destroy?, object, changeset' do
       context 'with `create` draft' do
-        before { trashable.draft_creation }
+        before { trashable.save_draft }
 
         it 'is a `create` event' do
           expect(subject.event).to eql 'create'
@@ -72,7 +72,7 @@ describe Draftsman::Draft do
         context 'updated create' do
           before do
             trashable.name = 'Sam'
-            trashable.draft_update
+            trashable.save_draft
           end
 
           it 'identifies as a `create` event' do
@@ -126,7 +126,7 @@ describe Draftsman::Draft do
           trashable.save!
           trashable.name = 'Sam'
           trashable.title = 'My Title'
-          trashable.draft_update
+          trashable.save_draft
         end
 
         it 'does not identify as a `create` event' do
@@ -176,7 +176,7 @@ describe Draftsman::Draft do
         context 'updating the update' do
           before do
             trashable.title = nil
-            trashable.draft_update
+            trashable.save_draft
           end
 
           it 'does not identify as a `create` event' do
@@ -267,7 +267,7 @@ describe Draftsman::Draft do
 
         context 'with previous `create` draft' do
           before do
-            trashable.draft_creation
+            trashable.save_draft
             trashable.draft_destruction
           end
 
@@ -324,7 +324,7 @@ describe Draftsman::Draft do
 
     describe 'publish!' do
       context 'with `create` draft' do
-        before { trashable.draft_creation }
+        before { trashable.save_draft }
         subject { trashable.draft.publish!; return trashable.reload }
 
         it 'does not raise an exception' do
@@ -368,7 +368,7 @@ describe Draftsman::Draft do
         before do
           trashable.save!
           trashable.name = 'Sam'
-          trashable.draft_update
+          trashable.save_draft
         end
 
         subject { trashable.draft.publish!; return trashable.reload }
@@ -438,7 +438,7 @@ describe Draftsman::Draft do
 
         context 'with previous `create` draft' do
           before do
-            trashable.draft_creation
+            trashable.save_draft
             trashable.draft_destruction
           end
 
@@ -457,7 +457,7 @@ describe Draftsman::Draft do
 
     describe 'revert!' do
       context 'with `create` draft' do
-        before { trashable.draft_creation }
+        before { trashable.save_draft }
         subject { trashable.draft.revert! }
 
         it 'does not raise an exception' do
@@ -477,7 +477,7 @@ describe Draftsman::Draft do
         before do
           trashable.save!
           trashable.name = 'Sam'
-          trashable.draft_update
+          trashable.save_draft
         end
 
         subject { trashable.draft.revert!; return trashable.reload }
@@ -555,7 +555,7 @@ describe Draftsman::Draft do
 
         context 'with previous `create` draft' do
           before do
-            trashable.draft_creation
+            trashable.save_draft
             trashable.draft_destruction
           end
 
@@ -608,7 +608,7 @@ describe Draftsman::Draft do
       subject { trashable.draft.reify }
 
       context 'with `create` draft' do
-        before { trashable.draft_creation }
+        before { trashable.save_draft }
 
         it "has a `title` that matches the item's" do
           expect(subject.title).to eql trashable.title
@@ -617,7 +617,7 @@ describe Draftsman::Draft do
         context 'updated create' do
           before do
             trashable.name = 'Sam'
-            trashable.draft_update
+            trashable.save_draft
           end
 
           it 'has an updated `name`' do
@@ -635,7 +635,7 @@ describe Draftsman::Draft do
           trashable.save!
           trashable.name = 'Sam'
           trashable.title = 'My Title'
-          trashable.draft_update
+          trashable.save_draft
         end
 
         it 'has the updated `name`' do
@@ -649,7 +649,7 @@ describe Draftsman::Draft do
         context 'updating the update' do
           before do
             trashable.title = nil
-            trashable.draft_update
+            trashable.save_draft
           end
 
           it 'has the same `name`' do
@@ -680,7 +680,7 @@ describe Draftsman::Draft do
 
         context 'with previous `create` draft' do
           before do
-            trashable.draft_creation
+            trashable.save_draft
             trashable.draft_destruction
           end
 
@@ -698,7 +698,7 @@ describe Draftsman::Draft do
             trashable.save!
             trashable.name = 'Sam'
             trashable.title = 'My Title'
-            trashable.draft_update
+            trashable.save_draft
             # Typically, 2 draft operations won't happen in the same request, so reload before draft-destroying.
             trashable.reload.draft_destruction
           end

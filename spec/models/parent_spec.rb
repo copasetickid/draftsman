@@ -7,8 +7,8 @@ describe Parent do
   describe 'publish!' do
     context 'parent `create` draft with child `create` draft' do
       before do
-        parent.draft_creation
-        child.draft_creation
+        parent.save_draft
+        child.save_draft
       end
 
       subject { parent.draft.publish! }
@@ -68,8 +68,8 @@ describe Parent do
   describe 'revert!' do
     context 'parent `create` draft with child `create` draft' do
       before do
-        parent.draft_creation
-        child.draft_creation
+        parent.save_draft
+        child.save_draft
       end
 
       subject { parent.draft.revert! }
@@ -140,8 +140,8 @@ describe Parent do
   describe 'draft_publication_dependencies' do
     context 'parent `create` draft with child `create` draft' do
       before do
-        parent.draft_creation
-        child.draft_creation
+        parent.save_draft
+        child.save_draft
       end
 
       subject { parent.draft }
@@ -155,8 +155,8 @@ describe Parent do
       before do
         parent.save!
         parent.name = 'Selma'
-        parent.draft_update
-        child.draft_creation
+        parent.save_draft
+        child.save_draft
       end
 
       subject { parent.draft }
@@ -188,8 +188,8 @@ describe Parent do
   describe 'draft_reversion_dependencies' do
     context 'parent `create` draft with child `create` draft' do
       before do
-        parent.draft_creation
-        child.draft_creation
+        parent.save_draft
+        child.save_draft
       end
 
       subject { parent.draft }
