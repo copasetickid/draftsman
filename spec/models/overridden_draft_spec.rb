@@ -16,7 +16,7 @@ RSpec.describe OverriddenDraft, type: :model do
 
     describe '#draft.class.name' do
       it 'has an `OverriddenDraft` record as its draft' do
-        vanilla.draft_creation
+        vanilla.save_draft
         expect(vanilla.draft.class.name).to eql 'OverriddenDraft'
       end
     end
@@ -33,7 +33,7 @@ RSpec.describe OverriddenDraft, type: :model do
 
     describe '#draft.class.name' do
       it 'has the default `Draftsman::Draft` record as its draft' do
-        vanilla.draft_creation
+        vanilla.save_draft
         expect(vanilla.reload.draft.class.name).to eql 'Draftsman::Draft'
       end
     end

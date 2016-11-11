@@ -11,7 +11,7 @@ require 'spec_helper'
 # -  `before_draft_destruction`
 # -  `around_draft_destruction`
 # -  `after_draft_destruction`
-RSpec.describe Talkative do
+RSpec.describe Talkative, type: :model do
   let(:talkative) { subject }
 
   describe '.draftable?' do
@@ -20,129 +20,131 @@ RSpec.describe Talkative do
     end
   end
 
-  describe '#draft_creation' do
-    before { talkative.draft_creation }
+  describe '#save_draft' do
+    context 'on create' do
+      before { talkative.save_draft }
 
-    describe '`before_draft_creation` callback' do
-      it 'changes `before_comment` attribute' do
-        expect(talkative.before_comment).to eql "I changed before creation"
+      describe '`before_draft_creation` callback' do
+        it 'changes `before_comment` attribute' do
+          expect(talkative.before_comment).to eql "I changed before creation"
+        end
+
+        it 'persists updated `before_comment` attribute to draft' do
+          talkative.reload
+          expect(talkative.draft.reify.before_comment).to eql "I changed before creation"
+        end
       end
 
-      it 'persists updated `before_comment` attribute to draft' do
-        talkative.reload
-        expect(talkative.draft.reify.before_comment).to eql "I changed before creation"
-      end
-    end
+      describe 'around_draft_creation callback' do
+        it 'changes `around_early_comment` attribute (before yield)' do
+          expect(talkative.around_early_comment).to eql "I changed around creation (before yield)"
+        end
 
-    describe 'around_draft_creation callback' do
-      it 'changes `around_early_comment` attribute (before yield)' do
-        expect(talkative.around_early_comment).to eql "I changed around creation (before yield)"
-      end
+        it 'persists updated `around_early_comment` attribute to draft' do
+          talkative.reload
+          expect(talkative.draft.reify.around_late_comment).to be_nil
+        end
 
-      it 'persists updated `around_early_comment` attribute to draft' do
-        talkative.reload
-        expect(talkative.draft.reify.around_late_comment).to be_nil
-      end
+        it 'changes `around_late_comment` attribute (after yield)' do
+          expect(talkative.around_late_comment).to eql "I changed around creation (after yield)"
+        end
 
-      it 'changes `around_late_comment` attribute (after yield)' do
-        expect(talkative.around_late_comment).to eql "I changed around creation (after yield)"
-      end
+        it 'does not persist updated `around_late_comment` attribute' do
+          talkative.reload
+          expect(talkative.around_late_comment).to be_nil
+        end
 
-      it 'does not persist updated `around_late_comment` attribute' do
-        talkative.reload
-        expect(talkative.around_late_comment).to be_nil
-      end
-
-      it 'does not persist updated `around_late_comment` attribute to draft' do
-        talkative.reload
-        expect(talkative.draft.reify.around_late_comment).to be_nil
-      end
-    end
-
-    describe '`after_draft_creation` callback' do
-      it 'changes `after_comment` attribute' do
-        expect(talkative.after_comment).to eql "I changed after creation"
+        it 'does not persist updated `around_late_comment` attribute to draft' do
+          talkative.reload
+          expect(talkative.draft.reify.around_late_comment).to be_nil
+        end
       end
 
-      it 'does not persist updated `after_comment` attribute' do
-        talkative.reload
-        expect(talkative.after_comment).to be_nil
-      end
+      describe '`after_draft_creation` callback' do
+        it 'changes `after_comment` attribute' do
+          expect(talkative.after_comment).to eql "I changed after creation"
+        end
 
-      it 'does not persist updated `after_comment` attribute to draft' do
-        talkative.reload
-        expect(talkative.draft.reify.after_comment).to be_nil
-      end
-    end
-  end
+        it 'does not persist updated `after_comment` attribute' do
+          talkative.reload
+          expect(talkative.after_comment).to be_nil
+        end
 
-  describe '#draft_update' do
-    before do
-      talkative.draft_creation
-      talkative.draft_update
-    end
-
-    describe '`before_draft_update` callback' do
-      it 'changes `before_comment` attribute' do
-        expect(talkative.before_comment).to eql "I changed before update"
-      end
-
-      it 'persists updated `before_comment` attribute to draft' do
-        talkative.reload
-        expect(talkative.draft.reify.before_comment).to eql "I changed before update"
+        it 'does not persist updated `after_comment` attribute to draft' do
+          talkative.reload
+          expect(talkative.draft.reify.after_comment).to be_nil
+        end
       end
     end
 
-    describe '`around_draft_update` callback' do
-      it 'changes `around_early_comment` attribute (before yield)' do
-        expect(talkative.around_early_comment).to eql "I changed around update (before yield)"
+    context 'on update' do
+      before do
+        talkative.save_draft
+        talkative.save_draft
       end
 
-      it 'persists updated `around_early_comment` attribute' do
-        talkative.reload
-        expect(talkative.around_early_comment).to eql "I changed around update (before yield)"
+      describe '`before_draft_update` callback' do
+        it 'changes `before_comment` attribute' do
+          expect(talkative.before_comment).to eql "I changed before update"
+        end
+
+        it 'persists updated `before_comment` attribute to draft' do
+          talkative.reload
+          expect(talkative.draft.reify.before_comment).to eql "I changed before update"
+        end
       end
 
-      it 'persists updated `around_early_comment` attribute to draft' do
-        talkative.reload
-        expect(talkative.draft.reify.around_early_comment).to eql "I changed around update (before yield)"
+      describe '`around_draft_update` callback' do
+        it 'changes `around_early_comment` attribute (before yield)' do
+          expect(talkative.around_early_comment).to eql "I changed around update (before yield)"
+        end
+
+        it 'persists updated `around_early_comment` attribute' do
+          talkative.reload
+          expect(talkative.around_early_comment).to eql "I changed around update (before yield)"
+        end
+
+        it 'persists updated `around_early_comment` attribute to draft' do
+          talkative.reload
+          expect(talkative.draft.reify.around_early_comment).to eql "I changed around update (before yield)"
+        end
+
+        it 'changes `around_late_comment` attribute (after yield)' do
+          expect(talkative.around_late_comment).to eql "I changed around update (after yield)"
+        end
+
+        it 'does not persist updated `around_late_comment` attribute' do
+          talkative.reload
+          expect(talkative.around_late_comment).to eql 'I changed around creation (after yield)'
+        end
+
+        it 'does not persist updated `around_late_comment` attribute to draft' do
+          talkative.reload
+          expect(talkative.draft.reify.around_late_comment).to eql 'I changed around creation (after yield)'
+        end
       end
 
-      it 'changes `around_late_comment` attribute (after yield)' do
-        expect(talkative.around_late_comment).to eql "I changed around update (after yield)"
-      end
+      describe 'after callback' do
+        it 'changes `after_comment` attribute' do
+          expect(talkative.after_comment).to eql "I changed after update"
+        end
 
-      it 'does not persist updated `around_late_comment` attribute' do
-        talkative.reload
-        expect(talkative.around_late_comment).to eql 'I changed around creation (after yield)'
-      end
+        it 'does not persist updated `after_comment` attribute' do
+          talkative.reload
+          expect(talkative.after_comment).to eql 'I changed after creation'
+        end
 
-      it 'does not persist updated `around_late_comment` attribute to draft' do
-        talkative.reload
-        expect(talkative.draft.reify.around_late_comment).to eql 'I changed around creation (after yield)'
-      end
-    end
-
-    describe 'after callback' do
-      it 'changes `after_comment` attribute' do
-        expect(talkative.after_comment).to eql "I changed after update"
-      end
-
-      it 'does not persist updated `after_comment` attribute' do
-        talkative.reload
-        expect(talkative.after_comment).to eql 'I changed after creation'
-      end
-
-      it 'does not persist updated `after_comment` attribute to draft' do
-        talkative.reload
-        expect(talkative.draft.reify.after_comment).to eql 'I changed after creation'
+        it 'does not persist updated `after_comment` attribute to draft' do
+          talkative.reload
+          expect(talkative.draft.reify.after_comment).to eql 'I changed after creation'
+        end
       end
     end
   end
 
   describe '#draft_destruction' do
     before do
-      talkative.draft_creation
+      talkative.save_draft
       talkative.draft_destruction
     end
 

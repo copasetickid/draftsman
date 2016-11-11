@@ -12,16 +12,12 @@ describe Trashable do
   end
 
   # Not affected by this customization
-  describe '#draft_creation' do
-  end
-
-  # Not affected by this customization
-  describe '#draft_update' do
+  describe '#save_draft' do
   end
 
   describe '#draft_destruction' do
     context 'with `:create` draft' do
-      before { trashable.draft_creation }
+      before { trashable.save_draft }
       subject { trashable.draft_destruction; return trashable }
 
       it 'is persisted' do
@@ -83,7 +79,7 @@ describe Trashable do
         trashable.published_at = Time.now
         trashable.save!
         trashable.name = 'Sam'
-        trashable.draft_update
+        trashable.save_draft
       end
 
       subject { trashable.draft_destruction; return trashable.reload }
@@ -200,9 +196,9 @@ describe Trashable do
   end
 
   describe 'scopes' do
-    let!(:drafted_trashable)   { trashable.draft_creation; return trashable }
-    let!(:published_trashable) { Trashable.create :name => 'Jane', :published_at => Time.now }
-    let!(:trashed_trashable)   { Trashable.create :name => 'Ralph' }
+    let!(:drafted_trashable)   { trashable.save_draft; return trashable }
+    let!(:published_trashable) { Trashable.create(name: 'Jane', published_at: Time.now) }
+    let!(:trashed_trashable)   { Trashable.create(name: 'Ralph') }
 
     # Not affected by this customization
     describe '.drafted' do
