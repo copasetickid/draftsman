@@ -9,4 +9,4 @@ rvm:
   - 2.2.5
 
 before_script:
-  - cp spec/dummy/config/database.travis.yml spec/dummy/config/database.yml
+  - bundle exec rake -f spec/dummy/Rakefile db:schema:load
