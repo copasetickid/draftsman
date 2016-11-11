@@ -201,29 +201,32 @@ class Draftsman::Draft < ActiveRecord::Base
   #     `@category = @category.draft.reify if @category.draft?`
   def reify
     without_identity_map do
-      if !self.previous_draft.nil?
+      if self.create?
+        item
+      elsif self.previous_draft.present?
         reify_previous_draft.reify
       elsif !self.object.nil?
-        # This appears to be necessary if for some reason the draft's model hasn't been loaded (such as when done in the console).
+        # This appears to be necessary if for some reason the draft's model
+        # hasn't been loaded (such as when done in the console).
         unless defined? self.item_type
           require self.item_type.underscore
         end
 
-        model = item.reload
+        model = item
 
         attrs = self.class.object_col_is_json? ? self.object : Draftsman.serializer.load(object)
-        model.class.unserialize_attributes_for_draftsman attrs
+        model.class.unserialize_attributes_for_draftsman(attrs)
 
         attrs.each do |key, value|
           # Skip counter_cache columns
           if model.respond_to?("#{key}=") && !key.end_with?('_count')
-            model.send "#{key}=", value
+            model.send("#{key}=", value)
           elsif !key.end_with?('_count')
-            logger.warn "Attribute #{key} does not exist on #{item_type} (Draft ID: #{id})."
+            logger.warn("Attribute #{key} does not exist on #{item_type} (Draft ID: #{id}).")
           end
         end
 
-        model.send "#{model.class.draft_association_name}=", self
+        model.send("#{model.class.draft_association_name}=", self)
         model
       end
     end
