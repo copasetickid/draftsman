@@ -50,7 +50,7 @@ module Draftsman
 
         # Define before/around/after callbacks on each drafted model
         send :extend, ActiveModel::Callbacks
-        define_model_callbacks :draft_creation, :draft_update, :draft_destruction, :draft_destroy
+        define_model_callbacks :save_draft, :draft_creation, :draft_update, :draft_destruction, :draft_destroy
 
         class_attribute :draftsman_options
         self.draftsman_options = options.dup
@@ -204,10 +204,12 @@ module Draftsman
       # Returns `true` or `false` depending on if the object passed validation
       # and the save was successful.
       def save_draft
-        if self.new_record?
-          _draft_creation
-        else
-          _draft_update
+        run_callbacks :save_draft do
+          if self.new_record?
+            _draft_creation
+          else
+            _draft_update
+          end
         end
       end
 
@@ -222,6 +224,7 @@ module Draftsman
       # `true` or `false` depending on whether or not the objects passed
       # validation and the save was successful.
       def _draft_creation
+        # TODO: Remove callback wrapper in v1.0.
         run_callbacks :draft_creation do
           transaction do
             # We want to save the draft after create
@@ -310,6 +313,7 @@ module Draftsman
       # Returns `true` or `false` depending on if the object passed validation
       # and the save was successful.
       def _draft_update
+        # TODO: Remove callback wrapper in v1.0.
         run_callbacks :draft_update do
           transaction do
             save_only_columns_for_draft
