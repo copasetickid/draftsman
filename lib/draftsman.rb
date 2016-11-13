@@ -83,10 +83,19 @@ module Draftsman
     draftsman_store[:whodunnit]
   end
 
-  # Sets who is responsible for any changes that occur.
-  # You would normally use this in a migration or on the console,
-  # when working with models directly.  In a controller, it is set
-  # automatically to the `current_user`.
+  # Returns the field which records whodunnit data.
+  def self.whodunnit_field
+    Draftsman.config.whodunnit_field
+  end
+
+  # Sets global attribute name for `whodunnit` data.
+  def self.whodunnit_field=(field_name)
+    Draftsman.config.whodunnit_field = field_name
+  end
+
+  # Sets who is responsible for any changes that occur. You would normally use
+  # this in a migration or on the console when working with models directly. In
+  # a controller, it is set automatically to the `current_user`.
   def self.whodunnit=(value)
     draftsman_store[:whodunnit] = value
   end
@@ -95,7 +104,7 @@ private
 
   # Thread-safe hash to hold Draftman's data. Initializing with needed default values.
   def self.draftsman_store
-    Thread.current[:draft] ||= { :draft_class_name => 'Draftsman::Draft' }
+    Thread.current[:draft] ||= { draft_class_name: 'Draftsman::Draft' }
   end
 
   # Returns Draftman's configuration object.

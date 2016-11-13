@@ -43,6 +43,7 @@ ActiveRecord::Schema.define(version: 20160328184419) do
     t.integer  "item_id"
     t.string   "event",          null: false
     t.string   "whodunnit"
+    t.integer  "user_id"
     t.text     "object"
     t.text     "object_changes"
     t.text     "previous_draft"

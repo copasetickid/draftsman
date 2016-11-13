@@ -1,33 +1,30 @@
 class Draftsman::Draft < ActiveRecord::Base
-  # Mass assignment (for <= ActiveRecord 3.x)
-  if Draftsman.active_record_protected_attributes?
-    attr_accessible :item_type, :item_id, :item, :event, :whodunnit, :object, :object_changes, :previous_draft
-  end
-
   # Associations
-  belongs_to :item, :polymorphic => true
+  belongs_to :item, polymorphic: true
 
   # Validations
   validates_presence_of :event
 
   def self.with_item_keys(item_type, item_id)
-    scoped :conditions => { :item_type => item_type, :item_id => item_id }
+    scoped conditions: { item_type: item_type, item_id: item_id }
   end
 
   def self.creates
-    where :event => 'create'
+    where(event: :create)
   end
 
   def self.destroys
-    where :event => 'destroy'
+    where(event: :destroy)
   end
 
-  # Returns whether the `object` column is using the `json` type supported by PostgreSQL.
+  # Returns whether the `object` column is using the `json` type supported by
+  # PostgreSQL.
   def self.object_col_is_json?
     @object_col_is_json ||= columns_hash['object'].type == :json
   end
 
-  # Returns whether the `object_changes` column is using the `json` type supported by PostgreSQL.
+  # Returns whether the `object_changes` column is using the `json` type
+  # supported by PostgreSQL.
   def self.object_changes_col_is_json?
     @object_changes_col_is_json ||= columns_hash['object_changes'].type == :json
   end
@@ -38,14 +35,13 @@ class Draftsman::Draft < ActiveRecord::Base
   end
 
   def self.updates
-    where :event => 'update'
+    where(event: :update)
   end
 
   # Returns what changed in this draft. Similar to `ActiveModel::Dirty#changes`.
   # Returns `nil` if your `drafts` table does not have an `object_changes` text column.
   def changeset
-    return nil unless self.class.column_names.include? 'object_changes'
-
+    return nil unless self.class.column_names.include?('object_changes')
     @changeset ||= load_changeset
   end
 

@@ -8,40 +8,50 @@ module Draftsman
     end
 
     module ClassMethods
-      # Declare this in your model to enable the Draftsman API for it. A draft of the model is available in the `draft`
-      # association (if one exists).
+      # Declare this in your model to enable the Draftsman API for it. A draft
+      # of the model is available in the `draft` association (if one exists).
       #
       # Options:
       #
       # :class_name
-      # The name of a custom `Draft` class. This class should inherit from `Draftsman::Draft`. A global default can be
-      # set for this using `Draftsman.draft_class_name=` if the default of `Draftsman::Draft` needs to be overridden.
+      # The name of a custom `Draft` class. This class should inherit from
+      # `Draftsman::Draft`. A global default can be set for this using
+      # `Draftsman.draft_class_name=` if the default of `Draftsman::Draft` needs
+      # to be overridden.
       #
       # :ignore
-      # An array of attributes for which an update to a `Draft` will not be stored if they are the only ones changed.
+      # An array of attributes for which an update to a `Draft` will not be
+      # stored if they are the only ones changed.
       #
       # :only
-      # Inverse of `ignore` - a new `Draft` will be created only for these attributes if supplied. It's recommended that
-      # you only specify optional attributes for this (that can be empty).
+      # Inverse of `ignore` - a new `Draft` will be created only for these
+      # attributes if supplied. It's recommended that you only specify optional
+      # attributes for this (that can be empty).
       #
       # :skip
-      # Fields to ignore completely.  As with `ignore`, updates to these fields will not create a new `Draft`. In
-      # addition, these fields will not be included in the serialized versions of the object whenever a new `Draft` is
-      # created.
+      # Fields to ignore completely.  As with `ignore`, updates to these fields
+      # will not create a new `Draft`. In addition, these fields will not be
+      # included in the serialized versions of the object whenever a new `Draft`
+      # is created.
       #
       # :meta
-      # A hash of extra data to store.  You must add a column to the `drafts` table for each key. Values are objects or
-      # `procs` (which are called with `self`, i.e. the model with the `has_drafts`). See
-      # `Draftsman::Controller.info_for_draftsman` for an example of how to store data from the controller.
+      # A hash of extra data to store. You must add a column to the `drafts`
+      # table for each key. Values are objects or `procs` (which are called with
+      # `self`, i.e. the model with the `has_drafts`). See
+      # `Draftsman::Controller.info_for_draftsman` for an example of how to
+      # store data from the controller.
       #
       # :draft
-      # The name to use for the `draft` association shortcut method. Default is `:draft`.
+      # The name to use for the `draft` association shortcut method. Default is
+      # `:draft`.
       #
       # :published_at
-      # The name to use for the method which returns the published timestamp. Default is `published_at`.
+      # The name to use for the method which returns the published timestamp.
+      # Default is `published_at`.
       #
       # :trashed_at
-      # The name to use for the method which returns the soft delete timestamp. Default is `trashed_at`.
+      # The name to use for the method which returns the soft delete timestamp.
+      # Default is `trashed_at`.
       def has_drafts(options = {})
         # Lazily include the instance methods so we don't clutter up
         # any more ActiveRecord models than we need to.
@@ -50,6 +60,8 @@ module Draftsman
 
         # Define before/around/after callbacks on each drafted model
         send :extend, ActiveModel::Callbacks
+        # TODO: Remove `draft_creation`, `draft_update`, and `draft_destroy` in
+        # v1.0.
         define_model_callbacks :save_draft, :draft_creation, :draft_update, :draft_destruction, :draft_destroy
 
         class_attribute :draftsman_options
@@ -78,7 +90,7 @@ module Draftsman
         self.trashed_at_attribute_name = options[:trashed_at] || :trashed_at
 
         # `belongs_to :draft` association
-        belongs_to self.draft_association_name, :class_name => self.draft_class_name, :dependent => :destroy
+        belongs_to(self.draft_association_name, class_name: self.draft_class_name, dependent: :destroy)
 
         # Scopes
         scope :drafted, (lambda do |referenced_table_name = nil|
@@ -231,11 +243,11 @@ module Draftsman
             return false unless self.save
 
             data = {
-              item:      self,
-              event:     :create,
-              whodunnit: Draftsman.whodunnit,
-              object:    object_attrs_for_draft_record
+              item:   self,
+              event:  :create,
+              object: object_attrs_for_draft_record
             }
+            data[Draftsman.whodunnit_field] = Draftsman.whodunnit
             data[:object_changes] = changes_for_draftsman(previous_changes: true) if track_object_changes_for_draft?
             data = merge_metadata_for_draft(data)
 
@@ -261,11 +273,11 @@ module Draftsman
       def _draft_destruction
         transaction do
           data = {
-            :item      => self,
-            :event     => 'destroy',
-            :whodunnit => Draftsman.whodunnit,
-            :object    => object_attrs_for_draft_record
+            item:   self,
+            event:  :destroy,
+            object: object_attrs_for_draft_record
           }
+          data[Draftsman.whodunnit_field] = Draftsman.whodunnit
 
           # Stash previous draft in case it needs to be reverted later
           if self.draft?
@@ -324,14 +336,15 @@ module Draftsman
             # If updating a creation draft, also update this item
             if self.draft? && send(self.class.draft_association_name).create?
               data = {
-                item:      self,
-                whodunnit: Draftsman.whodunnit,
-                object:    object_attrs_for_draft_record
+                item:   self,
+                object: object_attrs_for_draft_record
               }
+              data[Draftsman.whodunnit_field] = Draftsman.whodunnit
 
               if track_object_changes_for_draft?
                 data[:object_changes] = changes_for_draftsman(changed_from: self.send(self.class.draft_association_name).changeset)
               end
+
               data = merge_metadata_for_draft(data)
               send(self.class.draft_association_name).update_attributes(data)
               self.save
@@ -486,8 +499,8 @@ module Draftsman
 
       # Sets `trashed_at` attribute to now and saves to the database immediately.
       def trash!
-        write_attribute self.class.trashed_at_attribute_name, Time.now
-        self.update_column self.class.trashed_at_attribute_name, send(self.class.trashed_at_attribute_name)
+        write_attribute(self.class.trashed_at_attribute_name, Time.now)
+        self.update_column(self.class.trashed_at_attribute_name, send(self.class.trashed_at_attribute_name))
       end
 
       # Updates skipped attributes' values on this model.
