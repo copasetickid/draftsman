@@ -143,9 +143,9 @@ Add `has_drafts` to the models you want to have drafts on.
 Draftsman provides a helper extension that acts similarly to the controller
 mixin it provides for Rails applications.
 
-It will set `Draftsman.whodunnit` to whatever is returned by a method named
-`user_for_paper_trail`, which you can define inside your Sinatra Application.
-(By default, it attempts to invoke a method named `current_user`.)
+It will set `Draftsman::Draft#whodunnit` to whatever is returned by a method
+named `user_for_paper_trail`, which you can define inside your Sinatra
+application. (By default, it attempts to invoke a method named `current_user`.)
 
 If you're using the modular [`Sinatra::Base`][8] style of application, you will
 need to register the extension:

@@ -13,3 +13,6 @@
 
 # Field which records when a draft was created.
 # Draftsman.timestamp_field = :created_at
+
+# Field which records who last recorded the draft.
+# Draftsman.whodunnit_field = :whodunnit
