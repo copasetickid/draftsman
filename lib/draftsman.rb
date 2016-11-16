@@ -78,9 +78,28 @@ module Draftsman
     Draftsman.config.serializer = value
   end
 
+  # Sets whether or not `#save_draft` should stash drafted changes into the
+  # associated draft record or persist them to the main item.
+  def self.stash_drafted_changes=(value)
+    Draftsman.config.stash_drafted_changes = value
+  end
+
+  # Returns setting for whether or not `#save_draft` should stash drafted
+  # changes into the associated draft record.
+  def self.stash_drafted_changes?
+    Draftsman.config.stash_drafted_changes?
+  end
+
   # Returns who is reponsible for any changes that occur.
   def self.whodunnit
     draftsman_store[:whodunnit]
+  end
+
+  # Sets who is responsible for any changes that occur. You would normally use
+  # this in a migration or on the console when working with models directly. In
+  # a controller, it is set automatically to the `current_user`.
+  def self.whodunnit=(value)
+    draftsman_store[:whodunnit] = value
   end
 
   # Returns the field which records whodunnit data.
@@ -91,13 +110,6 @@ module Draftsman
   # Sets global attribute name for `whodunnit` data.
   def self.whodunnit_field=(field_name)
     Draftsman.config.whodunnit_field = field_name
-  end
-
-  # Sets who is responsible for any changes that occur. You would normally use
-  # this in a migration or on the console when working with models directly. In
-  # a controller, it is set automatically to the `current_user`.
-  def self.whodunnit=(value)
-    draftsman_store[:whodunnit] = value
   end
 
 private

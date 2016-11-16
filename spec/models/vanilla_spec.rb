@@ -7,262 +7,601 @@ describe Vanilla do
 
   describe '#save_draft' do
     context 'on create' do
-      subject do
-        vanilla.save_draft
-        vanilla.reload
-      end
-
       it 'is persisted' do
-        expect(subject).to be_persisted
+        vanilla.save_draft
+        expect(vanilla).to be_persisted
       end
 
       it 'is a draft' do
-        expect(subject.draft?).to eql true
+        vanilla.save_draft
+        expect(vanilla.draft?).to eql true
       end
 
       it 'has a `draft_id`' do
-        expect(subject.draft_id).to be_present
+        vanilla.save_draft
+        expect(vanilla.draft_id).to be_present
       end
 
       it 'has a `draft`' do
-        expect(subject.draft).to be_present
+        vanilla.save_draft
+        expect(vanilla.draft).to be_present
       end
 
       it 'has a `create` draft' do
-        expect(subject.draft.create?).to eql true
+        vanilla.save_draft
+        expect(vanilla.draft.create?).to eql true
       end
 
       it 'saves the `name`' do
-        expect(subject.name).to eql 'Bob'
+        vanilla.save_draft
+        expect(vanilla.name).to eql 'Bob'
       end
     end
 
     context 'on update' do
-      subject do
-        vanilla.save_draft
-        vanilla.reload
-      end
-
-      context 'without existing draft' do
-        before do
-          vanilla.save!
-          vanilla.name = 'Sam'
-        end
-
-        it 'is persisted' do
-          expect(subject).to be_persisted
-        end
-
-        it 'is a draft' do
-          expect(subject.draft?).to eql true
-        end
-
-        it 'has a `draft_id`' do
-          expect(subject.draft_id).to be_present
-        end
-
-        it 'has a `draft`' do
-          expect(subject.draft).to be_present
-        end
-
-        it 'has an `update` draft' do
-          expect(subject.draft.update?).to eql true
-        end
-
-        it 'has the original `name`' do
-          expect(subject.name).to eql 'Bob'
-        end
-
-        it 'creates a new draft' do
-          expect { subject }.to change(Draftsman::Draft, :count).by(1)
-        end
-      end
-
-      describe 'changing back to initial state' do
-        before do
-          vanilla.published_at = Time.now
-          vanilla.save!
-          vanilla.name = 'Sam'
-          vanilla.save_draft
-          vanilla.reload
-          vanilla.name = 'Bob'
-        end
-
-        it 'is no longer a draft' do
-          expect(subject.draft?).to eql false
-        end
-
-        it 'has the original `name`' do
-          expect(subject.name).to eql 'Bob'
-        end
-
-        it 'does not have a `draft_id`' do
-          expect(subject.draft_id).to be_nil
-        end
-
-        it 'has no `draft`' do
-          expect(subject.draft).to be_nil
-        end
-
-        it 'destroys the draft' do
-          expect { subject }.to change(Draftsman::Draft.where(:id => vanilla.draft_id), :count).by(-1)
-        end
-      end
-
-      context 'with existing `create` draft' do
-        before { vanilla.save_draft }
-
-        context 'with changes' do
-          before { vanilla.name = 'Sam' }
+      context 'with stashed drafted changes' do
+        context 'without existing draft' do
+          before do
+            vanilla.save!
+            vanilla.name = 'Sam'
+          end
 
           it 'is persisted' do
-            expect(subject).to be_persisted
+            vanilla.save_draft
+            expect(vanilla).to be_persisted
           end
 
           it 'is a draft' do
-            expect(subject.draft?).to eql true
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.draft?).to eql true
           end
 
           it 'has a `draft_id`' do
-            expect(subject.draft_id).to be_present
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.draft_id).to be_present
           end
 
           it 'has a `draft`' do
-            expect(subject.draft).to be_present
-          end
-
-          it 'records the new `name`' do
-            expect(subject.name).to eql 'Sam'
-          end
-
-          it 'updates the existing draft' do
-            expect { subject }.to_not change(Draftsman::Draft.where(:id => vanilla.draft_id), :count)
-          end
-
-          it "updates the draft's `name`" do
-            expect(subject.draft.reify.name).to eql 'Sam'
-          end
-
-          it 'has a `create` draft' do
-            expect(subject.draft.create?).to eql true
-          end
-        end
-
-        context 'with no changes' do
-          it 'is persisted' do
-            expect(subject).to be_persisted
-          end
-
-          it 'is a draft' do
-            expect(subject.draft?).to eql true
-          end
-
-          it 'has a `draft_id`' do
-            expect(subject.draft_id).to be_present
-          end
-
-          it 'has a `draft`' do
-            expect(subject.draft).to be_present
-          end
-
-          it 'has a `create` draft' do
-            expect(subject.draft.create?).to eql true
-          end
-
-          it 'has the same `name`' do
-            expect(subject.name).to eql 'Bob'
-          end
-
-          it "doesn't change the number of drafts" do
-            expect { subject }.to_not change(Draftsman::Draft.where(:id => vanilla.draft_id), :count)
-          end
-        end
-      end
-
-      context 'with existing `update` draft' do
-        before do
-          vanilla.save!
-          vanilla.name = 'Sam'
-          vanilla.save_draft
-          vanilla.reload
-          vanilla.attributes = vanilla.draft.reify.attributes
-        end
-
-        context 'with changes' do
-          before { vanilla.name = 'Steve' }
-
-          it 'is persisted' do
-            expect(subject).to be_persisted
-          end
-
-          it 'is a draft' do
-            expect(subject.draft?).to eql true
-          end
-
-          it 'has a `draft_id`' do
-            expect(subject.draft_id).to be_present
-          end
-
-          it 'has a `draft`' do
-            expect(subject.draft).to be_present
-          end
-
-          it 'has the original `name`' do
-            expect(subject.name).to eql 'Bob'
-          end
-
-          it 'updates the existing draft' do
-            expect { subject }.to_not change(Draftsman::Draft.where(:id => vanilla.draft_id), :count)
-          end
-
-          it "updates the draft's `name`" do
-            expect(subject.draft.reify.name).to eql 'Steve'
-          end
-
-          it 'has a `create` draft' do
-            expect(subject.draft.update?).to eql true
-          end
-        end
-
-        context 'with no changes' do
-          it 'is persisted' do
-            expect(subject).to be_persisted
-          end
-
-          it 'is a draft' do
-            expect(subject.draft?).to eql true
-          end
-
-          it 'has a `draft_id`' do
-            expect(subject.draft_id).to be_present
-          end
-
-          it 'has a `draft`' do
-            expect(subject.draft).to be_present
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.draft).to be_present
           end
 
           it 'has an `update` draft' do
-            expect(subject.draft.update?).to eql true
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.draft.update?).to eql true
           end
 
           it 'has the original `name`' do
-            expect(subject.name).to eql 'Bob'
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.reload.name).to eql 'Bob'
           end
 
-          it "doesn't change the number of drafts" do
-            expect { subject }.to_not change(Draftsman::Draft.where(:id => vanilla.draft_id), :count)
-          end
-
-          it "does not update the draft's `name`" do
-            expect(subject.draft.reify.name).to eql 'Sam'
+          it 'creates a new draft' do
+            expect { vanilla.save_draft }.to change(Draftsman::Draft, :count).by(1)
           end
         end
-      end
-    end
+
+        describe 'changing back to initial state' do
+          before do
+            vanilla.published_at = Time.now
+            vanilla.save!
+            vanilla.name = 'Sam'
+            vanilla.save_draft
+            vanilla.reload
+            vanilla.name = 'Bob'
+          end
+
+          it 'is no longer a draft' do
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.draft?).to eql false
+          end
+
+          it 'has the original `name`' do
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.reload.name).to eql 'Bob'
+          end
+
+          it 'does not have a `draft_id`' do
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.draft_id).to be_nil
+          end
+
+          it 'has no `draft`' do
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.draft).to be_nil
+          end
+
+          it 'destroys the draft' do
+            expect { vanilla.save_draft }.to change(Draftsman::Draft.where(id: vanilla.draft_id), :count).by(-1)
+          end
+        end
+
+        context 'with existing `create` draft' do
+          before { vanilla.save_draft }
+
+          context 'with changes' do
+            before { vanilla.name = 'Sam' }
+
+            it 'is persisted' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla).to be_persisted
+            end
+
+            it 'is a draft' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft?).to eql true
+            end
+
+            it 'has a `draft_id`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft_id).to be_present
+            end
+
+            it 'has a `draft`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft).to be_present
+            end
+
+            it 'records the new `name`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.reload.name).to eql 'Sam'
+            end
+
+            it 'updates the existing draft' do
+              expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+            end
+
+            it "updates the draft's `name`" do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft.reify.name).to eql 'Sam'
+            end
+
+            it 'has a `create` draft' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft.create?).to eql true
+            end
+          end # with changes
+
+          context 'with no changes' do
+            it 'is persisted' do
+              vanilla.save_draft
+              expect(vanilla).to be_persisted
+            end
+
+            it 'is a draft' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft?).to eql true
+            end
+
+            it 'has a `draft_id`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft_id).to be_present
+            end
+
+            it 'has a `draft`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft).to be_present
+            end
+
+            it 'has a `create` draft' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft.create?).to eql true
+            end
+
+            it 'has the same `name`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.reload.name).to eql 'Bob'
+            end
+
+            it "doesn't change the number of drafts" do
+              expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+            end
+          end
+        end # with no changes
+
+        context 'with existing `update` draft' do
+          before do
+            vanilla.save!
+            vanilla.name = 'Sam'
+            vanilla.save_draft
+            vanilla.reload
+            vanilla.attributes = vanilla.draft.reify.attributes
+          end
+
+          context 'with changes' do
+            before { vanilla.name = 'Steve' }
+
+            it 'is persisted' do
+              vanilla.save_draft
+              expect(vanilla).to be_persisted
+            end
+
+            it 'is a draft' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft?).to eql true
+            end
+
+            it 'has a `draft_id`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft_id).to be_present
+            end
+
+            it 'has a `draft`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft).to be_present
+            end
+
+            it 'has the original `name`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.reload.name).to eql 'Bob'
+            end
+
+            it 'updates the existing draft' do
+              expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+            end
+
+            it "updates the draft's `name`" do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft.reify.name).to eql 'Steve'
+            end
+
+            it 'has an `update` draft' do
+              vanilla.save_draft
+              expect(vanilla.draft.update?).to eql true
+            end
+          end # with changes
+
+          context 'with no changes' do
+            it 'is persisted' do
+              vanilla.save_draft
+              expect(vanilla).to be_persisted
+            end
+
+            it 'is a draft' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft?).to eql true
+            end
+
+            it 'has a `draft_id`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft_id).to be_present
+            end
+
+            it 'has a `draft`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft).to be_present
+            end
+
+            it 'has an `update` draft' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft.update?).to eql true
+            end
+
+            it 'has the original `name`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.reload.name).to eql 'Bob'
+            end
+
+            it "doesn't change the number of drafts" do
+              expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+            end
+
+            it "does not update the draft's `name`" do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft.reify.name).to eql 'Sam'
+            end
+          end # with no changes
+        end # with existing `update` draft
+      end # with stashed drafted changes
+
+      context 'without stashed drafted changes' do
+        before { Draftsman.stash_drafted_changes = false }
+        after { Draftsman.stash_drafted_changes = true }
+
+        context 'without existing draft' do
+          before do
+            vanilla.save!
+            vanilla.name = 'Sam'
+          end
+
+          it 'is persisted' do
+            vanilla.save_draft
+            expect(vanilla).to be_persisted
+          end
+
+          it 'is a draft' do
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.draft?).to eql true
+          end
+
+          it 'has a `draft_id`' do
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.draft_id).to be_present
+          end
+
+          it 'has a `draft`' do
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.draft).to be_present
+          end
+
+          it 'has an `update` draft' do
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.draft.update?).to eql true
+          end
+
+          it 'has the new `name`' do
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.reload.name).to eql 'Sam'
+          end
+
+          it 'creates a new draft' do
+            expect { vanilla.save_draft }.to change(Draftsman::Draft, :count).by(1)
+          end
+        end
+
+        describe 'changing back to initial state' do
+          before do
+            vanilla.published_at = Time.now
+            vanilla.save!
+            vanilla.name = 'Sam'
+            vanilla.save_draft
+            vanilla.reload
+            vanilla.name = 'Bob'
+          end
+
+          it 'is no longer a draft' do
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.draft?).to eql false
+          end
+
+          it 'has the original `name`' do
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.reload.name).to eql 'Bob'
+          end
+
+          it 'does not have a `draft_id`' do
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.draft_id).to be_nil
+          end
+
+          it 'has no `draft`' do
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.draft).to be_nil
+          end
+
+          it 'destroys the draft' do
+            expect { vanilla.save_draft }.to change(Draftsman::Draft.where(id: vanilla.draft_id), :count).by(-1)
+          end
+        end
+
+        context 'with existing `create` draft' do
+          before { vanilla.save_draft }
+
+          context 'with changes' do
+            before { vanilla.name = 'Sam' }
+
+            it 'is persisted' do
+              vanilla.save_draft
+              expect(vanilla).to be_persisted
+            end
+
+            it 'is a draft' do
+              vanilla.save_draft
+              expect(vanilla.draft?).to eql true
+            end
+
+            it 'has a `draft_id`' do
+              vanilla.save_draft
+              expect(vanilla.draft_id).to be_present
+            end
+
+            it 'has a `draft`' do
+              vanilla.save_draft
+              expect(vanilla.draft).to be_present
+            end
+
+            it 'records the new `name`' do
+              vanilla.save_draft
+              expect(vanilla.reload.name).to eql 'Sam'
+            end
+
+            it 'updates the existing draft' do
+              expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+            end
+
+            it "updates the draft's `name`" do
+              vanilla.save_draft
+              expect(vanilla.draft.reify.name).to eql 'Sam'
+            end
+
+            it 'has a `create` draft' do
+              vanilla.save_draft
+              expect(vanilla.draft.create?).to eql true
+            end
+          end
+
+          context 'with no changes' do
+            it 'is persisted' do
+              vanilla.save_draft
+              expect(vanilla).to be_persisted
+            end
+
+            it 'is a draft' do
+              vanilla.save_draft
+              expect(vanilla.draft?).to eql true
+            end
+
+            it 'has a `draft_id`' do
+              expect(vanilla.draft_id).to be_present
+            end
+
+            it 'has a `draft`' do
+              vanilla.save_draft
+              expect(vanilla.draft).to be_present
+            end
+
+            it 'has a `create` draft' do
+              vanilla.save_draft
+              expect(vanilla.draft.create?).to eql true
+            end
+
+            it 'has the same `name`' do
+              vanilla.save_draft
+              expect(vanilla.reload.name).to eql 'Bob'
+            end
+
+            it "doesn't change the number of drafts" do
+              expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+            end
+          end
+        end
+
+        context 'with existing `update` draft' do
+          before do
+            vanilla.save!
+            vanilla.name = 'Sam'
+            vanilla.save_draft
+            vanilla.reload
+          end
+
+          context 'with changes' do
+            before { vanilla.name = 'Steve' }
+
+            it 'is persisted' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla).to be_persisted
+            end
+
+            it 'is a draft' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft?).to eql true
+            end
+
+            it 'has a `draft_id`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft_id).to be_present
+            end
+
+            it 'has a `draft`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft).to be_present
+            end
+
+            it 'has the new `name`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.reload.name).to eql 'Steve'
+            end
+
+            it 'updates the existing draft' do
+              expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+            end
+
+            it "updates the draft's `name`" do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft.reify.name).to eql 'Steve'
+            end
+
+            it 'has an `update` draft' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.draft.update?).to eql true
+            end
+          end # with changes
+
+          context 'with no changes' do
+            it 'is persisted' do
+              vanilla.save_draft
+              expect(vanilla).to be_persisted
+            end
+
+            it 'is a draft' do
+              vanilla.save_draft
+              expect(vanilla.draft?).to eql true
+            end
+
+            it 'has a `draft_id`' do
+              vanilla.save_draft
+              expect(vanilla.draft_id).to be_present
+            end
+
+            it 'has a `draft`' do
+              vanilla.save_draft
+              expect(vanilla.draft).to be_present
+            end
+
+            it 'has an `update` draft' do
+              vanilla.save_draft
+              expect(vanilla.draft.update?).to eql true
+            end
+
+            it 'has the original `name`' do
+              vanilla.save_draft
+              expect(vanilla.reload.name).to eql 'Sam'
+            end
+
+            it "doesn't change the number of drafts" do
+              expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+            end
+
+            it "does not update the draft's `name`" do
+              vanilla.save_draft
+              expect(vanilla.draft.reify.name).to eql 'Sam'
+            end
+          end # with no changes
+        end # with existing `update` draft
+      end # without stashed drafted changes
+    end # on update
   end
 
   # Not applicable to this customization
-  describe 'draft_destruction' do
+  describe '#draft_destruction' do
   end
 
   describe 'scopes' do

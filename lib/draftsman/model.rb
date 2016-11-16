@@ -164,7 +164,7 @@ module Draftsman
 
       # DEPRECATED: Use `#draft_destruction` instead.
       def draft_destroy
-        ActiveSupport::Deprecation.warn('`draft_destroy` is deprecated and will be removed from Draftsman 1.0. Use `draft_destruction` instead.')
+        ActiveSupport::Deprecation.warn('`#draft_destroy` is deprecated and will be removed from Draftsman 1.0. Use `draft_destruction` instead.')
 
         run_callbacks :draft_destroy do
           _draft_destruction
@@ -188,11 +188,15 @@ module Draftsman
       def object_attrs_for_draft_record(object = nil)
         object ||= self
 
-        _attrs = object.attributes.except(*self.class.draftsman_options[:skip]).tap do |attributes|
+        attrs = object.attributes.except(*self.class.draftsman_options[:skip]).tap do |attributes|
           self.class.serialize_attributes_for_draftsman attributes
         end
 
-        self.class.draft_class.object_col_is_json? ? _attrs : Draftsman.serializer.dump(_attrs)
+        if self.class.draft_class.object_col_is_json?
+          attrs
+        else
+          Draftsman.serializer.dump(attrs)
+        end
       end
 
       # Returns whether or not this item has been published at any point in its lifecycle.
@@ -236,27 +240,26 @@ module Draftsman
       # `true` or `false` depending on whether or not the objects passed
       # validation and the save was successful.
       def _draft_creation
-        # TODO: Remove callback wrapper in v1.0.
-        run_callbacks :draft_creation do
-          transaction do
+        transaction do
+          # TODO: Remove callback wrapper in v1.0.
+          run_callbacks :draft_creation do
             # We want to save the draft after create
             return false unless self.save
 
+            # Build data to store in draft record.
             data = {
-              item:   self,
-              event:  :create,
-              object: object_attrs_for_draft_record
+              item: self,
+              event: :create,
             }
+            data[:object] = object_attrs_for_draft_record if Draftsman.stash_drafted_changes?
             data[Draftsman.whodunnit_field] = Draftsman.whodunnit
-            data[:object_changes] = changes_for_draftsman(previous_changes: true) if track_object_changes_for_draft?
+            data[:object_changes] = serialized_draft_changeset(changes_for_draftsman(:create)) if track_object_changes_for_draft?
             data = merge_metadata_for_draft(data)
-
             send("build_#{self.class.draft_association_name}", data)
 
             if send(self.class.draft_association_name).save
               fk = "#{self.class.draft_association_name}_id"
               id = send(self.class.draft_association_name).id
-              write_attribute(fk, id)
               self.update_column(fk, id)
             else
               raise ActiveRecord::Rollback and return false
@@ -273,32 +276,33 @@ module Draftsman
       def _draft_destruction
         transaction do
           data = {
-            item:   self,
-            event:  :destroy,
-            object: object_attrs_for_draft_record
+            item: self,
+            event: :destroy
           }
+          data[:object] = object_attrs_for_draft_record if Draftsman.stash_drafted_changes?
           data[Draftsman.whodunnit_field] = Draftsman.whodunnit
 
           # Stash previous draft in case it needs to be reverted later
           if self.draft?
             attrs = send(self.class.draft_association_name).attributes
 
-            data[:previous_draft] = if self.class.draft_class.previous_draft_col_is_json?
-              attrs
-            else
-              Draftsman.serializer.dump(attrs)
-            end
+            data[:previous_draft] =
+              if self.class.draft_class.previous_draft_col_is_json?
+                attrs
+              else
+                Draftsman.serializer.dump(attrs)
+              end
           end
 
           data = merge_metadata_for_draft(data)
 
           if send(self.class.draft_association_name).present?
-            send(self.class.draft_association_name).update_attributes! data
+            send(self.class.draft_association_name).update!(data)
           else
             send("build_#{self.class.draft_association_name}", data)
             send(self.class.draft_association_name).save!
-            send "#{self.class.draft_association_name}_id=", send(self.class.draft_association_name).id
-            self.update_column "#{self.class.draft_association_name}_id", send(self.class.draft_association_name).id
+            send("#{self.class.draft_association_name}_id=", send(self.class.draft_association_name).id)
+            self.update_column("#{self.class.draft_association_name}_id", send(self.class.draft_association_name).id)
           end
 
           trash!
@@ -307,14 +311,15 @@ module Draftsman
           dependent_associations = self.class.reflect_on_all_associations(:has_one) + self.class.reflect_on_all_associations(:has_many)
 
           dependent_associations.each do |association|
-
             if association.klass.draftable? && association.options.has_key?(:dependent) && association.options[:dependent] == :destroy
               dependents = self.send(association.name)
               dependents = [dependents] if (dependents && association.macro == :has_one)
 
-              dependents.each do |dependent|
-                dependent.draft_destruction unless dependent.draft? && dependent.send(dependent.class.draft_association_name).destroy?
-              end if dependents
+              if dependents
+                dependents.each do |dependent|
+                  dependent.draft_destruction unless dependent.draft? && dependent.send(dependent.class.draft_association_name).destroy?
+                end
+              end
             end
           end
         end
@@ -326,75 +331,70 @@ module Draftsman
       # and the save was successful.
       def _draft_update
         # TODO: Remove callback wrapper in v1.0.
-        run_callbacks :draft_update do
-          transaction do
-            save_only_columns_for_draft
-
-            # We want to save the draft before update
+        transaction do
+          run_callbacks :draft_update do
+            # Run validations.
             return false unless self.valid?
 
-            # If updating a creation draft, also update this item
+            # If updating a create draft, also update this item.
             if self.draft? && send(self.class.draft_association_name).create?
-              data = {
-                item:   self,
-                object: object_attrs_for_draft_record
-              }
+              the_changes = changes_for_draftsman(:create)
+              data = { item: self }
               data[Draftsman.whodunnit_field] = Draftsman.whodunnit
-
-              if track_object_changes_for_draft?
-                data[:object_changes] = changes_for_draftsman(changed_from: self.send(self.class.draft_association_name).changeset)
-              end
+              data[:object] = object_attrs_for_draft_record if Draftsman.stash_drafted_changes?
+              data[:object_changes] = serialized_draft_changeset(the_changes) if track_object_changes_for_draft?
 
               data = merge_metadata_for_draft(data)
-              send(self.class.draft_association_name).update_attributes(data)
+              send(self.class.draft_association_name).update(data)
               self.save
-            # Destroy the draft if this record has changed back to the original record
-            elsif changed_to_original_for_draft?
-              nilified_draft = send(self.class.draft_association_name)
-              send("#{self.class.draft_association_name}_id=", nil)
-              self.save
-              nilified_draft.destroy
-            # Save a draft if record is changed notably
-            elsif changed_notably_for_draft?
-              data = {
-                item:      self,
-                whodunnit: Draftsman.whodunnit,
-                object:    object_attrs_for_draft_record
-              }
-              data = merge_metadata_for_draft(data)
-
-              # If there's already a draft, update it.
-              if send(self.class.draft_association_name).present?
-                data[:object_changes] = changes_for_draftsman if track_object_changes_for_draft?
-                send(self.class.draft_association_name).update_attributes(data)
-                update_skipped_attributes
-              # If there's not draft, create an update draft.
-              else
-                data[:event]          = 'update'
-                data[:object_changes] = changes_for_draftsman if track_object_changes_for_draft?
-                send("build_#{self.class.draft_association_name}", data)
-
-                if send(self.class.draft_association_name).save
-                  update_column("#{self.class.draft_association_name}_id", send(self.class.draft_association_name).id)
-                  update_skipped_attributes
-                else
-                  raise ActiveRecord::Rollback and return false
-                end
-              end
-            # If record is a draft and not changed notably, then update the draft.
-            elsif self.draft?
-              data = {
-                item:      self,
-                whodunnit: Draftsman.whodunnit,
-                object:    object_attrs_for_draft_record
-              }
-              data[:object_changes] = changes_for_draftsman(changed_from: @object.draft.changeset) if track_object_changes_for_draft?
-              data = merge_metadata_for_draft(data)
-              send(self.class.draft_association_name).update_attributes data
-              update_skipped_attributes
-            # Otherwise, just save the record
             else
-              self.save
+              the_changes = changes_for_draftsman(:update)
+              save_only_columns_for_draft if Draftsman.stash_drafted_changes?
+
+              # Destroy the draft if this record has changed back to the original
+              # record.
+              if self.draft? && the_changes.empty?
+                nilified_draft = send(self.class.draft_association_name)
+                send("#{self.class.draft_association_name}_id=", nil)
+                self.save
+                nilified_draft.destroy
+              # Save an update draft if record is changed notably.
+              elsif !the_changes.empty?
+                data = { item: self, event: :update }
+                data[Draftsman.whodunnit_field] = Draftsman.whodunnit
+                data[:object] = object_attrs_for_draft_record if Draftsman.stash_drafted_changes?
+                data[:object_changes] = serialized_draft_changeset(the_changes) if track_object_changes_for_draft?
+                data = merge_metadata_for_draft(data)
+
+                # If there's already a draft, update it.
+                if self.draft?
+                  send(self.class.draft_association_name).update(data)
+
+                  if Draftsman.stash_drafted_changes?
+                    update_skipped_attributes
+                  else
+                    self.save
+                  end
+                # If there's not an existing draft, create an update draft.
+                else
+                  send("build_#{self.class.draft_association_name}", data)
+
+                  if send(self.class.draft_association_name).save
+                    update_column("#{self.class.draft_association_name}_id", send(self.class.draft_association_name).id)
+
+                    if Draftsman.stash_drafted_changes?
+                      update_skipped_attributes
+                    else
+                      self.save
+                    end
+                  else
+                    raise ActiveRecord::Rollback and return false
+                  end
+                end
+              # Otherwise, just save the record.
+              else
+                self.save
+              end
             end
           end
         end
@@ -402,49 +402,35 @@ module Draftsman
         false
       end
 
-      # Returns changes on this object, excluding attributes defined in the options for `:ignore` and `:skip`.
-      def changed_and_not_ignored_for_draft(options = {})
-        options[:previous_changes] ||= false
-
-        my_changed = options[:previous_changes] ? previous_changes.keys : self.changed
-
+      # Returns hash of attributes that have changed for the object, similar to
+      # how ActiveRecord's `changes` works.
+      def changes_for_draftsman(event)
+        the_changes = {}
         ignore = self.class.draftsman_options[:ignore]
         skip   = self.class.draftsman_options[:skip]
-        my_changed - ignore - skip
-      end
+        only   = self.class.draftsman_options[:only]
+        draftable_attrs = self.attributes.keys - ignore - skip
+        draftable_attrs = draftable_attrs & only if only.present?
 
-      # Returns whether or not this instance has changes that should trigger a new draft.
-      def changed_notably_for_draft?
-        notably_changed_attributes_for_draft.any?
-      end
-
-      # Returns whether or not the updates change this draft back to the original state
-      def changed_to_original_for_draft?
-        send(self.draft_association_name).present? && send(self.class.draft_association_name).update? && !changed_notably_for_draft?
-      end
-
-      # Returns array of attributes that have changed for the object.
-      def changes_for_draftsman(options = {})
-        options[:changed_from]     ||= {}
-        options[:previous_changes] ||= false
-
-        my_changes = options[:previous_changes] ? self.previous_changes : self.changes
-
-        new_changes = my_changes.delete_if do |key, value|
-          !notably_changed_attributes_for_draft(previous_changes: options[:previous_changes]).include?(key)
-        end.tap do |changes|
-          self.class.serialize_draft_attribute_changes(changes) # Use serialized value for attributes when necessary
+        # If there's already an update draft, get its changes and reconcile them
+        # manually.
+        if event == :update
+          # Collect all attributes' previous and new values.
+          draftable_attrs.each do |attr|
+            if self.draft? && self.draft.changeset.key?(attr)
+              the_changes[attr] = [self.draft.changeset[attr].first, send(attr)]
+            else
+              the_changes[attr] = [self.send("#{attr}_was"), send(attr)]
+            end
+          end
+        # If there is no draft or it's for a create, then all draftable
+        # attributes are the changes.
+        else
+          draftable_attrs.each { |attr| the_changes[attr] = [nil, send(attr)] }
         end
 
-        new_changes.each do |attribute, value|
-          new_changes[attribute][0] = options[:changed_from][attribute][0] if options[:changed_from].has_key?(attribute)
-        end
-
-        # We need to merge any previous changes so they are not lost on further updates before committing or
-        # reverting
-        my_changes = options[:changed_from].merge new_changes
-
-        self.class.draft_class.object_changes_col_is_json? ? my_changes : Draftsman.serializer.dump(my_changes)
+        # Purge attributes that haven't changed.
+        the_changes.delete_if { |key, value| value.first == value.last }
       end
 
       # Merges model-level metadata from `meta` and `controller_info` into draft object.
@@ -470,52 +456,47 @@ module Draftsman
         data.merge(Draftsman.controller_info || {})
       end
 
-      # Returns array of attributes that were changed to trigger a draft.
-      def notably_changed_attributes_for_draft(options = {})
-        options[:previous_changes] ||= false
-
-        only = self.class.draftsman_options[:only]
-        only.empty? ? changed_and_not_ignored_for_draft(previous_changes: options[:previous_changes]) : (changed_and_not_ignored_for_draft(previous_changes: options[:previous_changes]) & only)
-      end
-
       # Save columns outside of the `only` option directly to master table
       def save_only_columns_for_draft
         if self.class.draftsman_options[:only].any?
           only_changes = {}
-          only_changed_attributes = self.changed - self.class.draftsman_options[:only]
+          only_changed_attributes = self.attributes.keys - self.class.draftsman_options[:only]
 
-          only_changed_attributes.each do |attribute|
-            only_changes[attribute] = self.changes[attribute].last
+          only_changed_attributes.each do |key|
+            only_changes[key] = send(key)
           end
 
-          self.update_columns only_changes if only_changes.any?
+          self.update_columns(only_changes) if only_changes.any?
         end
+      end
+
+      # Returns changeset data in format appropriate for `object_changes`
+      # column.
+      def serialized_draft_changeset(my_changes)
+        self.class.draft_class.object_changes_col_is_json? ? my_changes : Draftsman.serializer.dump(my_changes)
       end
 
       # Returns whether or not the draft class includes an `object_changes` attribute.
       def track_object_changes_for_draft?
-        self.class.draft_class.column_names.include? 'object_changes'
+        self.class.draft_class.column_names.include?('object_changes')
       end
 
       # Sets `trashed_at` attribute to now and saves to the database immediately.
       def trash!
-        write_attribute(self.class.trashed_at_attribute_name, Time.now)
-        self.update_column(self.class.trashed_at_attribute_name, send(self.class.trashed_at_attribute_name))
+        self.update_column(self.class.trashed_at_attribute_name, Time.now)
       end
 
       # Updates skipped attributes' values on this model.
       def update_skipped_attributes
-        if draftsman_options[:skip].present?
-          changed_and_skipped_keys = self.changed.select { |key| draftsman_options[:skip].include?(key) }
-          changed_and_skipped_attrs = {}
-          changed_and_skipped_keys.each { |key| changed_and_skipped_attrs[key] = self.changes[key].last }
+        # Skip over this if nothing's being skipped.
+        return true unless draftsman_options[:skip].present?
 
-          self.reload
-          self.attributes = changed_and_skipped_attrs
-          self.save
-        else
-          true
-        end
+        keys = self.attributes.keys.select { |key| draftsman_options[:skip].include?(key) }
+        attrs = {}
+        keys.each { |key| attrs[key] = self.send(key) }
+
+        self.reload
+        self.update(attrs)
       end
     end
   end

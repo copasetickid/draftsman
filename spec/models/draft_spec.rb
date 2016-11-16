@@ -21,7 +21,7 @@ describe Draftsman::Draft do
     end
   end
 
-  describe '#event, #create?, #update?, #destroy?, #object, #changeset' do
+  describe '#event, #create?, #update?, #destroy?, #changeset' do
     context 'with `create` draft' do
       before { trashable.save_draft }
 
@@ -39,10 +39,6 @@ describe Draftsman::Draft do
 
       it 'does not identify as a `destroy` event' do
         expect(trashable.draft.destroy?).to eql false
-      end
-
-      it 'has an object' do
-        expect(trashable.draft.object).to be_present
       end
 
       it 'has an `id` in the `changeset`' do
@@ -89,10 +85,6 @@ describe Draftsman::Draft do
 
         it 'is a `create` event' do
           expect(trashable.draft.event).to eql 'create'
-        end
-
-        it 'has an `object`' do
-          expect(trashable.draft.object).to be_present
         end
 
         it 'has an `id` in the `changeset`' do
@@ -145,10 +137,6 @@ describe Draftsman::Draft do
         expect(trashable.draft.event).to eql 'update'
       end
 
-      it 'has an `object`' do
-        expect(trashable.draft.object).to be_present
-      end
-
       it 'does not have an `id` in the `changeset`' do
         expect(trashable.draft.changeset).to_not include :id
       end
@@ -177,6 +165,7 @@ describe Draftsman::Draft do
         before do
           trashable.title = nil
           trashable.save_draft
+          trashable.reload
         end
 
         it 'does not identify as a `create` event' do
@@ -193,10 +182,6 @@ describe Draftsman::Draft do
 
         it 'has an `update` event' do
           expect(trashable.draft.event).to eql 'update'
-        end
-
-        it 'has an `object`' do
-          expect(trashable.draft.object).to be_present
         end
 
         it 'does not have an `id` in the `changeset`' do
@@ -252,10 +237,6 @@ describe Draftsman::Draft do
           expect(trashable.draft.event).to eql 'destroy'
         end
 
-        it 'has an `object`' do
-          expect(trashable.draft.object).to be_present
-        end
-
         it 'has an empty `changeset`' do
           expect(trashable.draft.changeset).to eql Hash.new
         end
@@ -291,10 +272,6 @@ describe Draftsman::Draft do
           expect(trashable.draft.event).to eql 'destroy'
         end
 
-        it 'has an `object`' do
-          expect(trashable.draft.object).to be_present
-        end
-
         it 'has an `id` in the `changeset`' do
           expect(trashable.draft.changeset).to include :id
         end
@@ -320,7 +297,152 @@ describe Draftsman::Draft do
         end
       end
     end
-  end # #event, #create?, #update?, #destroy?, #object, #changeset
+  end # #event, #create?, #update?, #destroy?, #changeset
+
+  describe '#object' do
+    context 'with stashed drafted changes' do
+      context 'with `create` draft' do
+        before { trashable.save_draft }
+
+        it 'has an object' do
+          expect(trashable.draft.object).to be_present
+        end
+
+        context 'updated create' do
+          before do
+            trashable.name = 'Sam'
+            trashable.save_draft
+          end
+
+          it 'has an `object`' do
+            expect(trashable.draft.object).to be_present
+          end
+        end
+      end
+
+      context 'with `update` draft' do
+        before do
+          trashable.save!
+          trashable.name = 'Sam'
+          trashable.title = 'My Title'
+          trashable.save_draft
+        end
+
+        it 'has an `object`' do
+          expect(trashable.draft.object).to be_present
+        end
+
+        context 'updating the update' do
+          before do
+            trashable.title = nil
+            trashable.save_draft
+          end
+
+          it 'has an `object`' do
+            expect(trashable.draft.object).to be_present
+          end
+        end
+      end
+
+      context 'with `destroy` draft' do
+        context 'without previous draft' do
+          before do
+            trashable.save!
+            trashable.draft_destruction
+          end
+
+          it 'has an `object`' do
+            expect(trashable.draft.object).to be_present
+          end
+        end
+
+        context 'with previous `create` draft' do
+          before do
+            trashable.save_draft
+            trashable.draft_destruction
+          end
+
+          it 'has an `object`' do
+            expect(trashable.draft.object).to be_present
+          end
+        end
+      end
+    end # with stashed drafted changes
+
+    context 'without stashed drafted changes' do
+      before { Draftsman.stash_drafted_changes = false }
+      after { Draftsman.stash_drafted_changes = true }
+
+      context 'with `create` draft' do
+        before { trashable.save_draft }
+
+        it 'has no object' do
+          expect(trashable.draft.object).to be_nil
+        end
+
+        context 'updated create' do
+          before do
+            trashable.name = 'Sam'
+            trashable.save_draft
+            trashable.reload
+          end
+
+          it 'has no `object`' do
+            expect(trashable.draft.object).to be_nil
+          end
+        end
+      end
+
+      context 'with `update` draft' do
+        before do
+          trashable.save!
+          trashable.name = 'Sam'
+          trashable.title = 'My Title'
+          trashable.save_draft
+          trashable.reload
+        end
+
+        it 'has no `object`' do
+          expect(trashable.draft.object).to be_nil
+        end
+
+        context 'updating the update' do
+          before do
+            trashable.title = nil
+            trashable.save_draft
+          end
+
+          it 'has no `object`' do
+            expect(trashable.draft.object).to be_nil
+          end
+        end
+      end
+
+      context 'with `destroy` draft' do
+        context 'without previous draft' do
+          before do
+            trashable.save!
+            trashable.draft_destruction
+          end
+
+          it 'has no `object`' do
+            expect(trashable.draft.object).to be_nil
+          end
+        end
+
+        context 'with previous `create` draft' do
+          before do
+            trashable.save_draft
+            trashable.draft_destruction
+          end
+
+          it 'has no `object`' do
+            expect(trashable.draft.object).to be_nil
+          end
+        end
+      end
+    end # without stashed drafted changes
+  end # #object
 
   describe '#whodunnit' do
     context 'with default `whodunnit` field name' do
@@ -349,225 +471,332 @@ describe Draftsman::Draft do
         ::Draftsman.whodunnit_field = :whodunnit
       end
     end
-  end # #whodunnit
-
-  describe '#publish!' do
-    context 'with `create` draft' do
-      before { trashable.save_draft }
-
-      it 'does not raise an exception' do
-        expect { trashable.draft.publish! }.to_not raise_exception
-      end
-
-      it 'publishes the item' do
-        trashable.draft.publish!
-        expect(trashable.reload.published?).to eql true
-      end
-
-      it 'is not trashed' do
-        trashable.draft.publish!
-        expect(trashable.reload.trashed?).to eql false
-      end
-
-      it 'is no longer a draft' do
-        trashable.draft.publish!
-        expect(trashable.reload.draft?).to eql false
-      end
-
-      it 'should have a `published_at` timestamp' do
-        trashable.draft.publish!
-        expect(trashable.reload.published_at).to be_present
-      end
-
-      it 'does not have a `draft_id`' do
-        trashable.draft.publish!
-        expect(trashable.reload.draft_id).to be_nil
-      end
-
-      it 'does not have a draft' do
-        trashable.draft.publish!
-        expect(trashable.reload.draft).to be_nil
-      end
-
-      it 'does not have a `trashed_at` timestamp' do
-        trashable.draft.publish!
-        expect(trashable.reload.trashed_at).to be_nil
-      end
-
-      it 'deletes the draft record' do
-        expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
-      end
-    end
-
-    context 'with `update` draft' do
-      before do
-        trashable.save!
-        trashable.name = 'Sam'
-        trashable.save_draft
-      end
-
-      it 'does not raise an exception' do
-        expect { trashable.draft.publish! }.to_not raise_exception
-      end
-
-      it 'publishes the item' do
-        trashable.draft.publish!
-        expect(trashable.reload.published?).to eql true
-      end
-
-      it 'is no longer a draft' do
-        trashable.draft.publish!
-        expect(trashable.reload.draft?).to eql false
-      end
-
-      it 'is not trashed' do
-        trashable.draft.publish!
-        expect(trashable.reload.trashed?).to eql false
-      end
-
-      it 'has an updated `name`' do
-        trashable.draft.publish!
-        expect(trashable.reload.name).to eql 'Sam'
-      end
-
-      it 'has a `published_at` timestamp' do
-        trashable.draft.publish!
-        expect(trashable.reload.published_at).to be_present
-      end
-
-      it 'does not have a `draft_id`' do
-        trashable.draft.publish!
-        expect(trashable.reload.draft_id).to be_nil
-      end
-
-      it 'does not have a `draft`' do
-        trashable.draft.publish!
-        expect(trashable.reload.draft).to be_nil
-      end
-
-      it 'does not have a `trashed_at` timestamp' do
-        trashable.draft.publish!
-        expect(trashable.reload.trashed_at).to be_nil
-      end
-
-      it 'destroys the draft' do
-        expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
-      end
-
-      it 'does not delete the associated item' do
-        expect { trashable.draft.publish! }.to_not change(Trashable, :count)
-      end
-    end
-
-    context 'with `destroy` draft' do
-      context 'without previous draft' do
-        before do
-          trashable.save!
-          trashable.draft_destruction
-        end
-
-        it 'destroys the draft' do
-          expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
-        end
-
-        it 'deletes the associated item' do
-          expect { trashable.draft.publish! }.to change(Trashable, :count).by(-1)
-        end
-      end
-
-      context 'with previous `create` draft' do
-        before do
-          trashable.save_draft
-          trashable.draft_destruction
-        end
-
-        it 'destroys the draft' do
-          expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
-        end
-
-        it 'deletes the associated item' do
-          expect { trashable.draft.publish! }.to change(Trashable, :count).by(-1)
-        end
-      end
-    end
   end
 
-  describe '#revert!' do
-    context 'with `create` draft' do
-      before { trashable.save_draft }
+  describe '#publish!' do
+    context 'with stashed drafted changes' do
+      context 'with `create` draft' do
+        before { trashable.save_draft }
 
-      it 'does not raise an exception' do
-        expect { trashable.draft.revert! }.to_not raise_exception
-      end
+        it 'does not raise an exception' do
+          expect { trashable.draft.publish! }.to_not raise_exception
+        end
 
-      it 'destroys the draft' do
-        expect { trashable.draft.revert! }.to change(Draftsman::Draft, :count).by(-1)
-      end
+        it 'publishes the item' do
+          trashable.draft.publish!
+          expect(trashable.reload.published?).to eql true
+        end
 
-      it 'destroys associated item' do
-        expect { trashable.draft.revert! }.to change(Trashable, :count).by(-1)
-      end
-    end
+        it 'is not trashed' do
+          trashable.draft.publish!
+          expect(trashable.reload.trashed?).to eql false
+        end
 
-    context 'with `update` draft' do
-      before do
-        trashable.save!
-        trashable.name = 'Sam'
-        trashable.save_draft
-      end
+        it 'is no longer a draft' do
+          trashable.draft.publish!
+          expect(trashable.reload.draft?).to eql false
+        end
 
-      it 'does not raise an exception' do
-        expect { trashable.draft.revert! }.to_not raise_exception
-      end
+        it 'should have a `published_at` timestamp' do
+          trashable.draft.publish!
+          expect(trashable.reload.published_at).to be_present
+        end
 
-      it 'is no longer a draft' do
-        trashable.draft.revert!
-        expect(trashable.reload.draft?).to eql false
-      end
+        it 'does not have a `draft_id`' do
+          trashable.draft.publish!
+          expect(trashable.reload.draft_id).to be_nil
+        end
 
-      it 'reverts its `name`' do
-        trashable.draft.revert!
-        expect(trashable.reload.name).to eql 'Bob'
-      end
+        it 'does not have a draft' do
+          trashable.draft.publish!
+          expect(trashable.reload.draft).to be_nil
+        end
 
-      it 'does not have a `draft_id`' do
-        trashable.draft.revert!
-        expect(trashable.reload.draft_id).to be_nil
-      end
+        it 'does not have a `trashed_at` timestamp' do
+          trashable.draft.publish!
+          expect(trashable.reload.trashed_at).to be_nil
+        end
 
-      it 'does not have a `draft`' do
-        trashable.draft.revert!
-        expect(trashable.reload.draft).to be_nil
-      end
+        it 'deletes the draft record' do
+          expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
+        end
+      end # with `create` draft
 
-      it 'destroys the draft record' do
-        expect { trashable.draft.revert! }.to change(Draftsman::Draft, :count).by(-1)
-      end
-
-      it 'does not destroy the associated item' do
-        expect { trashable.draft.revert! }.to_not change(Trashable, :count)
-      end
-    end
-
-    context 'with `destroy` draft' do
-      context 'without previous draft' do
+      context 'with `update` draft' do
         before do
           trashable.save!
-          trashable.draft_destruction
+          trashable.name = 'Sam'
+          trashable.save_draft
+        end
+
+        it 'does not raise an exception' do
+          expect { trashable.draft.publish! }.to_not raise_exception
+        end
+
+        it 'publishes the item' do
+          trashable.draft.publish!
+          expect(trashable.reload.published?).to eql true
+        end
+
+        it 'is no longer a draft' do
+          trashable.draft.publish!
+          expect(trashable.reload.draft?).to eql false
+        end
+
+        it 'is not trashed' do
+          trashable.draft.publish!
+          expect(trashable.reload.trashed?).to eql false
+        end
+
+        it 'has an updated `name`' do
+          trashable.draft.publish!
+          expect(trashable.reload.name).to eql 'Sam'
+        end
+
+        it 'has a `published_at` timestamp' do
+          trashable.draft.publish!
+          expect(trashable.reload.published_at).to be_present
+        end
+
+        it 'does not have a `draft_id`' do
+          trashable.draft.publish!
+          expect(trashable.reload.draft_id).to be_nil
+        end
+
+        it 'does not have a `draft`' do
+          trashable.draft.publish!
+          expect(trashable.reload.draft).to be_nil
+        end
+
+        it 'does not have a `trashed_at` timestamp' do
+          trashable.draft.publish!
+          expect(trashable.reload.trashed_at).to be_nil
+        end
+
+        it 'destroys the draft' do
+          expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
+        end
+
+        it 'does not delete the associated item' do
+          expect { trashable.draft.publish! }.to_not change(Trashable, :count)
+        end
+      end # with `update` draft
+
+      context 'with `destroy` draft' do
+        context 'without previous draft' do
+          before do
+            trashable.save!
+            trashable.draft_destruction
+          end
+
+          it 'destroys the draft' do
+            expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
+          end
+
+          it 'deletes the associated item' do
+            expect { trashable.draft.publish! }.to change(Trashable, :count).by(-1)
+          end
+        end
+
+        context 'with previous `create` draft' do
+          before do
+            trashable.save_draft
+            trashable.draft_destruction
+          end
+
+          it 'destroys the draft' do
+            expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
+          end
+
+          it 'deletes the associated item' do
+            expect { trashable.draft.publish! }.to change(Trashable, :count).by(-1)
+          end
+        end
+      end
+    end # with stashed drafted changes
+
+    context 'without stashed drafted changes' do
+      before { Draftsman.stash_drafted_changes = false }
+      after { Draftsman.stash_drafted_changes = true }
+
+      context 'with `create` draft' do
+        before { trashable.save_draft }
+
+        it 'does not raise an exception' do
+          expect { trashable.draft.publish! }.to_not raise_exception
+        end
+
+        it 'publishes the item' do
+          trashable.draft.publish!
+          expect(trashable.reload.published?).to eql true
+        end
+
+        it 'is not trashed' do
+          trashable.draft.publish!
+          expect(trashable.reload.trashed?).to eql false
+        end
+
+        it 'is no longer a draft' do
+          trashable.draft.publish!
+          expect(trashable.reload.draft?).to eql false
+        end
+
+        it 'should have a `published_at` timestamp' do
+          trashable.draft.publish!
+          expect(trashable.reload.published_at).to be_present
+        end
+
+        it 'does not have a `draft_id`' do
+          trashable.draft.publish!
+          expect(trashable.reload.draft_id).to be_nil
+        end
+
+        it 'does not have a draft' do
+          trashable.draft.publish!
+          expect(trashable.reload.draft).to be_nil
+        end
+
+        it 'does not have a `trashed_at` timestamp' do
+          trashable.draft.publish!
+          expect(trashable.reload.trashed_at).to be_nil
+        end
+
+        it 'deletes the draft record' do
+          expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
+        end
+      end
+
+      context 'with `update` draft' do
+        before do
+          trashable.save!
+          trashable.name = 'Sam'
+          trashable.save_draft
+        end
+
+        it 'does not raise an exception' do
+          expect { trashable.draft.publish! }.to_not raise_exception
+        end
+
+        it 'publishes the item' do
+          trashable.draft.publish!
+          expect(trashable.reload.published?).to eql true
+        end
+
+        it 'is no longer a draft' do
+          trashable.draft.publish!
+          expect(trashable.reload.draft?).to eql false
+        end
+
+        it 'is not trashed' do
+          trashable.draft.publish!
+          expect(trashable.reload.trashed?).to eql false
+        end
+
+        it 'has an updated `name`' do
+          trashable.draft.publish!
+          expect(trashable.reload.name).to eql 'Sam'
+        end
+
+        it 'has a `published_at` timestamp' do
+          trashable.draft.publish!
+          expect(trashable.reload.published_at).to be_present
+        end
+
+        it 'does not have a `draft_id`' do
+          trashable.draft.publish!
+          expect(trashable.reload.draft_id).to be_nil
+        end
+
+        it 'does not have a `draft`' do
+          trashable.draft.publish!
+          expect(trashable.reload.draft).to be_nil
+        end
+
+        it 'does not have a `trashed_at` timestamp' do
+          trashable.draft.publish!
+          expect(trashable.reload.trashed_at).to be_nil
+        end
+
+        it 'destroys the draft' do
+          expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
+        end
+
+        it 'does not delete the associated item' do
+          expect { trashable.draft.publish! }.to_not change(Trashable, :count)
+        end
+      end
+
+      context 'with `destroy` draft' do
+        context 'without previous draft' do
+          before do
+            trashable.save!
+            trashable.draft_destruction
+          end
+
+          it 'destroys the draft' do
+            expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
+          end
+
+          it 'deletes the associated item' do
+            expect { trashable.draft.publish! }.to change(Trashable, :count).by(-1)
+          end
+        end
+
+        context 'with previous `create` draft' do
+          before do
+            trashable.save_draft
+            trashable.draft_destruction
+          end
+
+          it 'destroys the draft' do
+            expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
+          end
+
+          it 'deletes the associated item' do
+            expect { trashable.draft.publish! }.to change(Trashable, :count).by(-1)
+          end
+        end
+      end
+    end # without stashed draft changes
+  end # #publish!
+
+  describe '#revert!' do
+    context 'with stashed draft changes' do
+      context 'with `create` draft' do
+        before { trashable.save_draft }
+
+        it 'does not raise an exception' do
+          expect { trashable.draft.revert! }.to_not raise_exception
+        end
+
+        it 'destroys the draft' do
+          expect { trashable.draft.revert! }.to change(Draftsman::Draft, :count).by(-1)
+        end
+
+        it 'destroys associated item' do
+          expect { trashable.draft.revert! }.to change(Trashable, :count).by(-1)
+        end
+      end
+
+      context 'with `update` draft' do
+        before do
+          trashable.save!
+          trashable.name = 'Sam'
+          trashable.save_draft
         end
 
         it 'does not raise an exception' do
           expect { trashable.draft.revert! }.to_not raise_exception
         end
 
-        it 'is not trashed' do
-          trashable.draft.revert!
-          expect(trashable.reload.trashed?).to eql false
-        end
-
         it 'is no longer a draft' do
           trashable.draft.revert!
           expect(trashable.reload.draft?).to eql false
+        end
+
+        it 'reverts its `name`' do
+          trashable.draft.revert!
+          expect(trashable.reload.name).to eql 'Bob'
         end
 
         it 'does not have a `draft_id`' do
@@ -580,9 +809,164 @@ describe Draftsman::Draft do
           expect(trashable.reload.draft).to be_nil
         end
 
-        it 'does not have a `trashed_at` timestamp' do
+        it 'destroys the draft record' do
+          expect { trashable.draft.revert! }.to change(Draftsman::Draft, :count).by(-1)
+        end
+
+        it 'does not destroy the associated item' do
+          expect { trashable.draft.revert! }.to_not change(Trashable, :count)
+        end
+      end # with `update` draft
+
+      context 'with `destroy` draft' do
+        context 'without previous draft' do
+          before do
+            trashable.save!
+            trashable.draft_destruction
+          end
+
+          it 'does not raise an exception' do
+            expect { trashable.draft.revert! }.to_not raise_exception
+          end
+
+          it 'is not trashed' do
+            trashable.draft.revert!
+            expect(trashable.reload.trashed?).to eql false
+          end
+
+          it 'is no longer a draft' do
+            trashable.draft.revert!
+            expect(trashable.reload.draft?).to eql false
+          end
+
+          it 'does not have a `draft_id`' do
+            trashable.draft.revert!
+            expect(trashable.reload.draft_id).to be_nil
+          end
+
+          it 'does not have a `draft`' do
+            trashable.draft.revert!
+            expect(trashable.reload.draft).to be_nil
+          end
+
+          it 'does not have a `trashed_at` timestamp' do
+            trashable.draft.revert!
+            expect(trashable.reload.trashed_at).to be_nil
+          end
+
+          it 'destroys the draft record' do
+            expect { trashable.draft.revert! }.to change(Draftsman::Draft, :count).by(-1)
+          end
+
+          it 'does not destroy the associated item' do
+            expect { trashable.draft.revert! }.to_not change(Trashable, :count)
+          end
+        end # without previous draft
+
+        context 'with previous `create` draft' do
+          before do
+            trashable.save_draft
+            trashable.draft_destruction
+          end
+
+          it 'does not raise an exception' do
+            expect { trashable.draft.revert! }.to_not raise_exception
+          end
+
+          it 'is not trashed' do
+            trashable.draft.revert!
+            expect(trashable.reload.trashed?).to eql false
+          end
+
+          it 'is a draft' do
+            trashable.draft.revert!
+            expect(trashable.reload.draft?).to eql true
+          end
+
+          it 'has a `draft_id`' do
+            trashable.draft.revert!
+            expect(trashable.reload.draft_id).to be_present
+          end
+
+          it 'has a `draft`' do
+            trashable.draft.revert!
+            expect(trashable.reload.draft).to be_present
+          end
+
+          it 'does not have a `trashed_at` timestamp' do
+            trashable.draft.revert!
+            expect(trashable.reload.trashed_at).to be_nil
+          end
+
+          it 'destroys the `destroy` draft record' do
+            expect { trashable.draft.revert! }.to change(Draftsman::Draft.where(event: :destroy), :count).by(-1)
+          end
+
+          it 'reifies the previous `create` draft record' do
+            expect { trashable.draft.revert! }.to change(Draftsman::Draft.where(event: :create), :count).by(1)
+          end
+
+          it 'does not destroy the associated item' do
+            expect { trashable.draft.revert! }.to_not change(Trashable, :count)
+          end
+
+          it "no longer has a `previous_draft`" do
+            trashable.draft.revert!
+            expect(trashable.reload.draft.previous_draft).to be_nil
+          end
+        end # with previous `create` draft
+      end # with `destroy` draft
+    end # with stashed draft changes
+
+    context 'without stashed draft changes' do
+      before { Draftsman.stash_drafted_changes = false }
+      after { Draftsman.stash_drafted_changes = true }
+
+      context 'with `create` draft' do
+        before { trashable.save_draft }
+
+        it 'does not raise an exception' do
+          expect { trashable.draft.revert! }.to_not raise_exception
+        end
+
+        it 'destroys the draft' do
+          expect { trashable.draft.revert! }.to change(Draftsman::Draft, :count).by(-1)
+        end
+
+        it 'destroys associated item' do
+          expect { trashable.draft.revert! }.to change(Trashable, :count).by(-1)
+        end
+      end
+
+      context 'with `update` draft' do
+        before do
+          trashable.save!
+          trashable.name = 'Sam'
+          trashable.save_draft
+        end
+
+        it 'does not raise an exception' do
+          expect { trashable.draft.revert! }.to_not raise_exception
+        end
+
+        it 'is no longer a draft' do
           trashable.draft.revert!
-          expect(trashable.reload.trashed_at).to be_nil
+          expect(trashable.reload.draft?).to eql false
+        end
+
+        it 'reverts its `name`' do
+          trashable.draft.revert!
+          expect(trashable.reload.name).to eql 'Bob'
+        end
+
+        it 'does not have a `draft_id`' do
+          trashable.draft.revert!
+          expect(trashable.reload.draft_id).to be_nil
+        end
+
+        it 'does not have a `draft`' do
+          trashable.draft.revert!
+          expect(trashable.reload.draft).to be_nil
         end
 
         it 'destroys the draft record' do
@@ -592,62 +976,108 @@ describe Draftsman::Draft do
         it 'does not destroy the associated item' do
           expect { trashable.draft.revert! }.to_not change(Trashable, :count)
         end
-      end
+      end # with `update` draft
 
-      context 'with previous `create` draft' do
-        before do
-          trashable.save_draft
-          trashable.draft_destruction
-        end
+      context 'with `destroy` draft' do
+        context 'without previous draft' do
+          before do
+            trashable.save!
+            trashable.draft_destruction
+          end
 
-        it 'does not raise an exception' do
-          expect { trashable.draft.revert! }.to_not raise_exception
-        end
+          it 'does not raise an exception' do
+            expect { trashable.draft.revert! }.to_not raise_exception
+          end
 
-        it 'is not trashed' do
-          trashable.draft.revert!
-          expect(trashable.reload.trashed?).to eql false
-        end
+          it 'is not trashed' do
+            trashable.draft.revert!
+            expect(trashable.reload.trashed?).to eql false
+          end
 
-        it 'is a draft' do
-          trashable.draft.revert!
-          expect(trashable.reload.draft?).to eql true
-        end
+          it 'is no longer a draft' do
+            trashable.draft.revert!
+            expect(trashable.reload.draft?).to eql false
+          end
 
-        it 'has a `draft_id`' do
-          trashable.draft.revert!
-          expect(trashable.reload.draft_id).to be_present
-        end
+          it 'does not have a `draft_id`' do
+            trashable.draft.revert!
+            expect(trashable.reload.draft_id).to be_nil
+          end
 
-        it 'has a `draft`' do
-          trashable.draft.revert!
-          expect(trashable.reload.draft).to be_present
-        end
+          it 'does not have a `draft`' do
+            trashable.draft.revert!
+            expect(trashable.reload.draft).to be_nil
+          end
 
-        it 'does not have a `trashed_at` timestamp' do
-          trashable.draft.revert!
-          expect(trashable.reload.trashed_at).to be_nil
-        end
+          it 'does not have a `trashed_at` timestamp' do
+            trashable.draft.revert!
+            expect(trashable.reload.trashed_at).to be_nil
+          end
 
-        it 'destroys the `destroy` draft record' do
-          expect { trashable.draft.revert! }.to change(Draftsman::Draft.where(event: :destroy), :count).by(-1)
-        end
+          it 'destroys the draft record' do
+            expect { trashable.draft.revert! }.to change(Draftsman::Draft, :count).by(-1)
+          end
 
-        it 'reifies the previous `create` draft record' do
-          expect { trashable.draft.revert! }.to change(Draftsman::Draft.where(event: :create), :count).by(1)
-        end
+          it 'does not destroy the associated item' do
+            expect { trashable.draft.revert! }.to_not change(Trashable, :count)
+          end
+        end # without previous draft
 
-        it 'does not destroy the associated item' do
-          expect { trashable.draft.revert! }.to_not change(Trashable, :count)
-        end
+        context 'with previous `create` draft' do
+          before do
+            trashable.save_draft
+            trashable.draft_destruction
+          end
 
-        it "no longer has a `previous_draft`" do
-          trashable.draft.revert!
-          expect(trashable.reload.draft.previous_draft).to be_nil
-        end
-      end
-    end
-  end
+          it 'does not raise an exception' do
+            expect { trashable.draft.revert! }.to_not raise_exception
+          end
+
+          it 'is not trashed' do
+            trashable.draft.revert!
+            expect(trashable.reload.trashed?).to eql false
+          end
+
+          it 'is a draft' do
+            trashable.draft.revert!
+            expect(trashable.reload.draft?).to eql true
+          end
+
+          it 'has a `draft_id`' do
+            trashable.draft.revert!
+            expect(trashable.reload.draft_id).to be_present
+          end
+
+          it 'has a `draft`' do
+            trashable.draft.revert!
+            expect(trashable.reload.draft).to be_present
+          end
+
+          it 'does not have a `trashed_at` timestamp' do
+            trashable.draft.revert!
+            expect(trashable.reload.trashed_at).to be_nil
+          end
+
+          it 'destroys the `destroy` draft record' do
+            expect { trashable.draft.revert! }.to change(Draftsman::Draft.where(event: :destroy), :count).by(-1)
+          end
+
+          it 'reifies the previous `create` draft record' do
+            expect { trashable.draft.revert! }.to change(Draftsman::Draft.where(event: :create), :count).by(1)
+          end
+
+          it 'does not destroy the associated item' do
+            expect { trashable.draft.revert! }.to_not change(Trashable, :count)
+          end
+
+          it "no longer has a `previous_draft`" do
+            trashable.draft.revert!
+            expect(trashable.reload.draft.previous_draft).to be_nil
+          end
+        end # with previous `create` draft
+      end # with `destroy` draft
+    end # without stashed draft changes
+  end # #revert!
 
   describe '#reify' do
     context 'with `create` draft' do
@@ -693,6 +1123,7 @@ describe Draftsman::Draft do
         before do
           trashable.title = nil
           trashable.save_draft
+          trashable.reload
         end
 
         it 'has the same `name`' do
@@ -756,5 +1187,119 @@ describe Draftsman::Draft do
         end
       end
     end
-  end
+  end # #reify
+
+  describe '#draft_publication_dependencies' do
+    context 'with stashed draft changes' do
+      context 'with publication dependency' do
+        let(:parent) { Parent.new(name: 'Marge') }
+        let(:child)  { Child.new(name: 'Lisa', parent: parent) }
+
+        before do
+          parent.save_draft
+          child.save_draft
+        end
+
+        it 'returns the parent' do
+          expect(child.draft.draft_publication_dependencies.to_a).to eql [parent.draft]
+        end
+      end
+
+      context 'without publication dependency' do
+        let(:parent) { Parent.new(name: 'Marge') }
+        let(:child)  { Child.new(name: 'Lisa', parent: parent) }
+
+        before do
+          parent.save_draft
+          child.save_draft
+        end
+
+        it 'returns the parent' do
+          expect(parent.draft.draft_publication_dependencies.to_a).to eql []
+        end
+      end
+    end
+
+    context 'without stashed drafted changes' do
+      before { Draftsman.stash_drafted_changes = false }
+      after { Draftsman.stash_drafted_changes = true }
+
+      context 'with publication dependency' do
+        let(:parent) { Parent.new(name: 'Marge') }
+        let(:child)  { Child.new(name: 'Lisa', parent: parent) }
+
+        before do
+          parent.save_draft
+          child.save_draft
+        end
+
+        it 'returns the parent' do
+          expect(child.draft.draft_publication_dependencies.to_a).to eql [parent.draft]
+        end
+      end
+
+      context 'without publication dependency' do
+        let(:parent) { Parent.new(name: 'Marge') }
+        let(:child)  { Child.new(name: 'Lisa', parent: parent) }
+
+        before do
+          parent.save_draft
+          child.save_draft
+        end
+
+        it 'returns the parent' do
+          expect(parent.draft.draft_publication_dependencies.to_a).to eql []
+        end
+      end
+    end
+  end # #draft_publication_dependencies
+
+  describe '#draft_reversion_dependencies' do
+    context 'with stashed draft changes' do
+      let(:parent) { Parent.new(name: 'Marge') }
+      let(:child)  { Child.new(name: 'Lisa', parent: parent) }
+
+      before do
+        parent.save_draft
+        child.save_draft
+      end
+
+      context 'with reversion dependency' do
+        it 'returns the parent' do
+          expect(parent.draft.draft_reversion_dependencies).to eql [child.draft]
+        end
+      end
+
+      context 'without reversion dependency' do
+        it 'returns the parent' do
+          expect(child.draft.draft_reversion_dependencies).to eql []
+        end
+      end
+    end
+
+    context 'without stashed drafted changes' do
+      let(:parent) { Parent.new(name: 'Marge') }
+      let(:child)  { Child.new(name: 'Lisa', parent: parent) }
+
+      before do
+        Draftsman.stash_drafted_changes = false
+        parent.save_draft
+        child.save_draft
+      end
+
+      after { Draftsman.stash_drafted_changes = true }
+
+      context 'with publication dependency' do
+        it 'returns the parent' do
+          expect(parent.draft.draft_reversion_dependencies).to eql [child.draft]
+        end
+      end
+
+      context 'without publication dependency' do
+        it 'returns the parent' do
+          expect(child.draft.draft_reversion_dependencies).to eql []
+        end
+      end
+    end
+  end # #draft_reversion_dependencies
 end
