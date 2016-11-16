@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## 0.6.0 - Release TBD
+
+- [@chrisdpeters](https://github.com/chrisdpeters)
+  [implemented](https://github.com/liveeditor/draftsman/commit/39e74ef34f34de83262761a383e94a7e7731d47f)
+  [#53](https://github.com/liveeditor/draftsman/issues/53) -
+  Add option to not stash drafted data separately
+- [@chrisdpeters](https://github.com/chrisdpeters)
+  [implemented](https://github.com/liveeditor/draftsman/commit/340e632b9590ae3a07f5b567df3ca2b6d9a5b804)
+  [#31](https://github.com/liveeditor/draftsman/issues/51) -
+  Allow `whodunnit` column name to be configurable
+- [@chrisdpeters](https://github.com/chrisdpeters)
+  [implemented](https://github.com/liveeditor/draftsman/commit/340e632b9590ae3a07f5b567df3ca2b6d9a5b804)
+  [#51](https://github.com/liveeditor/draftsman/issues/51) -
+  Performance: skip reification logic on create drafts
+- [@chrisdpeters](https://github.com/chrisdpeters)
+  [implemented](https://github.com/liveeditor/draftsman/commit/eae59a6991d9aef18a9f9a811ccc7a8668cd351f)
+  [#47](https://github.com/liveeditor/draftsman/issues/47) -
+  Add ``#save_draft` method to classes initialized with ``#has_drafts`
+- [@chrisdpeters](https://github.com/chrisdpeters)
+  [fixed](https://github.com/liveeditor/draftsman/commit/696caf78baff938ebdf98c2867f6c4d2610b4611)
+  [#49](https://github.com/liveeditor/draftsman/issues/49) -
+  irb: warn: can't alias context from irb_context
+
 ## 0.5.1 - August 20, 2016
 
 - [@chrisdpeters](https://github.com/chrisdpeters)
