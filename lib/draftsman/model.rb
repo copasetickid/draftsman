@@ -95,32 +95,17 @@ module Draftsman
         # Scopes
         scope :drafted, (lambda do |referenced_table_name = nil|
           referenced_table_name = referenced_table_name.present? ? referenced_table_name : table_name
-
-          if where_not?
-            where.not(referenced_table_name => { "#{self.draft_association_name}_id" => nil })
-          else
-            where("#{referenced_table_name}.#{self.draft_association_name}_id IS NOT NULL")
-          end
+          where.not(referenced_table_name => { "#{self.draft_association_name}_id" => nil })
         end)
 
         scope :published, (lambda do |referenced_table_name = nil|
           referenced_table_name = referenced_table_name.present? ? referenced_table_name : table_name
-
-          if where_not?
-            where.not(referenced_table_name => { self.published_at_attribute_name => nil })
-          else
-            where("#{self.published_at_attribute_name} IS NOT NULL")
-          end
+          where.not(referenced_table_name => { self.published_at_attribute_name => nil })
         end)
 
         scope :trashed, (lambda do |referenced_table_name = nil|
           referenced_table_name = referenced_table_name.present? ? referenced_table_name : table_name
-
-          if where_not?
-            where.not(referenced_table_name => { self.trashed_at_attribute_name => nil })
-          else
-            where("#{self.trashed_at_attribute_name} IS NOT NULL")
-          end
+          where.not(referenced_table_name => { self.trashed_at_attribute_name => nil })
         end)
 
         scope :live, (lambda do |referenced_table_name = nil|
@@ -142,11 +127,6 @@ module Draftsman
       # Returns whether or not a `trashed_at` timestamp is set up on this model.
       def trashable?
         draftable? && method_defined?(self.trashed_at_attribute_name)
-      end
-
-      # Returns whether or not the included ActiveRecord can do `where.not(...)` style queries.
-      def where_not?
-        ActiveRecord::VERSION::STRING.to_f >= 4.0
       end
     end
 
