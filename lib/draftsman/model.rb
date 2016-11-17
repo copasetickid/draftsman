@@ -93,25 +93,25 @@ module Draftsman
         belongs_to(self.draft_association_name, class_name: self.draft_class_name, dependent: :destroy)
 
         # Scopes
-        scope :drafted, (lambda do |referenced_table_name = nil|
+        scope :drafted, -> (referenced_table_name = nil) {
           referenced_table_name = referenced_table_name.present? ? referenced_table_name : table_name
           where.not(referenced_table_name => { "#{self.draft_association_name}_id" => nil })
-        end)
+        }
 
-        scope :published, (lambda do |referenced_table_name = nil|
+        scope :published, -> (referenced_table_name = nil) {
           referenced_table_name = referenced_table_name.present? ? referenced_table_name : table_name
           where.not(referenced_table_name => { self.published_at_attribute_name => nil })
-        end)
+        }
 
-        scope :trashed, (lambda do |referenced_table_name = nil|
+        scope :trashed, -> (referenced_table_name = nil) {
           referenced_table_name = referenced_table_name.present? ? referenced_table_name : table_name
           where.not(referenced_table_name => { self.trashed_at_attribute_name => nil })
-        end)
+        }
 
-        scope :live, (lambda do |referenced_table_name = nil|
+        scope :live, -> (referenced_table_name = nil) {
           referenced_table_name = referenced_table_name.present? ? referenced_table_name : table_name
           where(referenced_table_name => { self.trashed_at_attribute_name => nil })
-        end)
+        }
       end
 
       # Returns draft class.
