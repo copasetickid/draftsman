@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## 0.6.0 - Release TBD
+## 0.6.0 - November 16, 2015
+
+### Enhancements
 
 - [@chrisdpeters](https://github.com/chrisdpeters)
   [implemented](https://github.com/liveeditor/draftsman/commit/39e74ef34f34de83262761a383e94a7e7731d47f)
@@ -18,10 +20,19 @@
   [implemented](https://github.com/liveeditor/draftsman/commit/eae59a6991d9aef18a9f9a811ccc7a8668cd351f)
   [#47](https://github.com/liveeditor/draftsman/issues/47) -
   Add ``#save_draft` method to classes initialized with ``#has_drafts`
+
+### Bug Fixes
+
 - [@chrisdpeters](https://github.com/chrisdpeters)
   [fixed](https://github.com/liveeditor/draftsman/commit/696caf78baff938ebdf98c2867f6c4d2610b4611)
   [#49](https://github.com/liveeditor/draftsman/issues/49) -
   irb: warn: can't alias context from irb_context
+
+### Deprecations/Breaking Changes
+
+- Now only supports ActiveRecord 4+.
+- `#draft_creation` and `#draft_update` are now deprecated and will be removed
+  in v1.0.0. Use `#save_draft` instead.
 
 ## 0.5.1 - August 20, 2016
 
