@@ -4,6 +4,18 @@ describe Whitelister do
   let(:whitelister) { Whitelister.new(name: 'Bob') }
   it { should be_draftable }
 
+  describe '#object_attrs_for_draft_record' do
+    before { whitelister.ignored = 'Meh.' }
+
+    it 'contains included column name' do
+      expect(whitelister.object_attrs_for_draft_record).to include 'name'
+    end
+
+    it 'does not include non-included column name' do
+      expect(whitelister.object_attrs_for_draft_record).to include 'name'
+    end
+  end
+
   describe '#save_draft' do
     # Not affected by this customization.
     context 'on create' do

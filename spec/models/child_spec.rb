@@ -4,7 +4,7 @@ RSpec.describe Child, type: :model do
   let(:parent) { Parent.new(name: 'Marge') }
   let(:child)  { Child.new(name: 'Lisa', parent: parent) }
 
-  describe 'publish!' do
+  describe '#publish!' do
     context 'parent `create` draft with child `create` draft' do
       before do
         parent.save_draft
@@ -74,7 +74,7 @@ RSpec.describe Child, type: :model do
     end
   end
 
-  describe 'revert!' do
+  describe '#revert!' do
     context 'parent `create` draft with child `create` draft' do
       before do
         parent.save_draft
@@ -150,7 +150,7 @@ RSpec.describe Child, type: :model do
     end
   end
 
-  describe 'draft_publication_dependencies' do
+  describe '#draft_publication_dependencies' do
     context 'parent `create` draft with child `create` draft' do
       before do
         parent.save_draft
@@ -228,7 +228,7 @@ RSpec.describe Child, type: :model do
     end
   end
 
-  describe 'draft_reversion_dependencies' do
+  describe '#draft_reversion_dependencies' do
     context 'parent `create` draft with child `create` draft' do
       before do
         parent.save_draft

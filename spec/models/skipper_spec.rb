@@ -1,10 +1,22 @@
 require 'spec_helper'
 
 RSpec.describe Skipper, type: :model do
-  let(:skipper) { Skipper.new :name => 'Bob', :skip_me => 'Skipped 1' }
+  let(:skipper) { Skipper.new(name: 'Bob', skip_me: 'Skipped 1') }
 
-  it 'is draftable' do
-    expect(subject.class.draftable?).to eql true
+  describe '.draftable?' do
+    it 'is `true`' do
+      expect(subject.class.draftable?).to eql true
+    end
+  end
+
+  describe '#object_attrs_for_draft_record' do
+    it 'contains changed but not skipped column name' do
+      expect(skipper.object_attrs_for_draft_record).to include 'name'
+    end
+
+    it 'does not contain the skipped column name' do
+      expect(skipper.object_attrs_for_draft_record).to_not include 'skip_me'
+    end
   end
 
   describe '#save_draft' do

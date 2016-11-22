@@ -5,6 +5,12 @@ describe Vanilla do
   let(:vanilla) { Vanilla.new(name: 'Bob') }
   it { should be_draftable }
 
+  describe '#object_attrs_for_draft_record' do
+    it 'contains column name' do
+      expect(vanilla.object_attrs_for_draft_record).to include 'name'
+    end
+  end
+
   describe '#save_draft' do
     context 'on create' do
       it 'is persisted' do

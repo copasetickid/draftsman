@@ -169,7 +169,7 @@ module Draftsman
         object ||= self
 
         attrs = object.attributes.except(*self.class.draftsman_options[:skip]).tap do |attributes|
-          self.class.serialize_attributes_for_draftsman attributes
+          self.class.serialize_attributes_for_draftsman(attributes)
         end
 
         if self.class.draft_class.object_col_is_json?
