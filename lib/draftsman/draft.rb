@@ -223,7 +223,7 @@ class Draftsman::Draft < ActiveRecord::Base
       elsif self.previous_draft.present?
         reify_previous_draft.reify
       # Prefer changeset for refication if it's present.
-      elsif !self.changeset.empty?
+      elsif self.changeset.present? && self.changeset.any?
         self.changeset.each do |key, value|
           # Skip counter_cache columns
           if self.item.respond_to?("#{key}=") && !key.end_with?('_count')
