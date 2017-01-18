@@ -443,7 +443,7 @@ module Draftsman
           only_changed_attributes = self.attributes.keys - self.class.draftsman_options[:only]
 
           only_changed_attributes.each do |key|
-            only_changes[key] = send(key)
+            only_changes[key] = send(key) if changed.include?(key)
           end
 
           self.update_columns(only_changes) if only_changes.any?
