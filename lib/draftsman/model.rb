@@ -397,7 +397,7 @@ module Draftsman
         if event == :update
           # Collect all attributes' previous and new values.
           draftable_attrs.each do |attr|
-            if self.draft? && self.draft.changeset.key?(attr)
+            if self.draft? && self.draft.changeset && self.draft.changeset.key?(attr)
               the_changes[attr] = [self.draft.changeset[attr].first, send(attr)]
             else
               the_changes[attr] = [self.send("#{attr}_was"), send(attr)]
