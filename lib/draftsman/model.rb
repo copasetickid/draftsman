@@ -331,12 +331,11 @@ module Draftsman
               the_changes = changes_for_draftsman(:update)
               save_only_columns_for_draft if Draftsman.stash_drafted_changes?
 
-              # Destroy the draft if this record has changed back to the original
-              # record.
+              # Destroy the draft if this record has changed back to the
+              # original values.
               if self.draft? && the_changes.empty?
                 nilified_draft = send(self.class.draft_association_name)
                 send("#{self.class.draft_association_name}_id=", nil)
-                self.save
                 nilified_draft.destroy
               # Save an update draft if record is changed notably.
               elsif !the_changes.empty?
