@@ -274,10 +274,10 @@ class Draftsman::Draft < ActiveRecord::Base
           self.changeset.each do |attr, values|
             self.item.send("#{attr}=", values.first) if self.item.respond_to?(attr)
           end
+          self.item.save!(validate: false)
         end
         # Then clear out the draft ID.
-        self.item.send("#{self.item.class.draft_association_name}_id=", nil)
-        self.item.save!(validate: false)
+        self.item.update_column("#{self.item.class.draft_association_name}_id", nil)
         # Then destroy draft.
         self.destroy
       when :destroy

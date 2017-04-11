@@ -335,7 +335,7 @@ module Draftsman
               # original values.
               if self.draft? && the_changes.empty?
                 nilified_draft = send(self.class.draft_association_name)
-                send("#{self.class.draft_association_name}_id=", nil)
+                self.update_column("#{self.class.draft_association_name}_id", nil)
                 nilified_draft.destroy
               # Save an update draft if record is changed notably.
               elsif !the_changes.empty?
