@@ -612,7 +612,7 @@ included, please do the following:
 2.  Run `bundle install`.
 
 3.  Run `RAILS_ENV=test bundle exec rake -f spec/dummy/
-    Rakefile db:schema:load` to apply test database migrations.
+    Rakefile db:schema:load` to load test database schema.
 
 4.  Add at least one test for your change. Only refactoring and documentation
     changes require no new tests. If you are adding functionality or fixing a
