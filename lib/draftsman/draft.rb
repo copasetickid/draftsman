@@ -180,18 +180,6 @@ class Draftsman::Draft < ActiveRecord::Base
         # Clear out draft
         self.item.send("#{self.item.class.draft_association_name}_id=", nil)
 
-        # Determine which columns should be updated
-        only   = self.item.class.draftsman_options[:only]
-        ignore = self.item.class.draftsman_options[:ignore]
-        skip   = self.item.class.draftsman_options[:skip]
-        attributes_to_change = only.any? ? only : self.item.attribute_names
-        attributes_to_change = attributes_to_change - ignore + ['published_at', "#{self.item.class.draft_association_name}_id"] - skip
-
-        # Save without validations or callbacks
-        self.item.attributes.slice(*attributes_to_change).each do |key, value|
-          self.item.send("#{key}=", value)
-        end
-
         self.item.save(validate: false)
         self.item.reload
 
