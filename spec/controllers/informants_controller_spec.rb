@@ -18,7 +18,7 @@ describe InformantsController, type: :controller do
   end
 
   describe 'update' do
-    before { put :update, id: trashable.id }
+    before { put :update, params: { id: trashable.id } }
     subject { Draftsman::Draft.last }
 
     it 'records `ip` from custom `info_for_draftsman`' do
@@ -31,7 +31,7 @@ describe InformantsController, type: :controller do
   end
 
   describe 'destroy' do
-    before { delete :destroy, id: trashable.id }
+    before { delete :destroy, params: { id: trashable.id } }
     subject { Draftsman::Draft.last }
 
     it 'records `ip` from custom `info_for_draftsman`' do

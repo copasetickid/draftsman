@@ -14,7 +14,7 @@ describe WhodunnitsController, type: :controller do
   end
 
   describe 'update' do
-    before { put :update, id: trashable.id }
+    before { put :update, params: { id: trashable.id } }
     subject { Draftsman::Draft.last }
 
     it 'records `current_user` via `user_for_draftsman' do
@@ -23,7 +23,7 @@ describe WhodunnitsController, type: :controller do
   end
 
   describe 'destroy' do
-    before { delete :destroy, id: trashable.id }
+    before { delete :destroy, params: { id: trashable.id } }
     subject { Draftsman::Draft.last }
 
     it 'records `current_user` via `user_for_draftsman' do
