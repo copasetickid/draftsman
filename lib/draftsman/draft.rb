@@ -175,7 +175,7 @@ class Draftsman::Draft < ActiveRecord::Base
         self.item.attributes = self.reify.attributes if Draftsman.stash_drafted_changes? && self.update?
 
         # Write `published_at` attribute
-        self.item.send("#{self.item.class.published_at_attribute_name}=", Time.now)
+        self.item.send("#{self.item.class.published_at_attribute_name}=", current_time_from_proper_timezone)
 
         # Clear out draft
         self.item.send("#{self.item.class.draft_association_name}_id=", nil)
@@ -274,10 +274,10 @@ class Draftsman::Draft < ActiveRecord::Base
           self.changeset.each do |attr, values|
             self.item.send("#{attr}=", values.first) if self.item.respond_to?(attr)
           end
-          self.item.save!(validate: false)
         end
         # Then clear out the draft ID.
-        self.item.update_column("#{self.item.class.draft_association_name}_id", nil)
+        self.item.send("#{self.item.class.draft_association_name}_id=", nil)
+        self.item.save!(validate: false, touch: false)
         # Then destroy draft.
         self.destroy
       when :destroy
