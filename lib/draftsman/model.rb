@@ -326,7 +326,7 @@ module Draftsman
 
               data = merge_metadata_for_draft(data)
               send(self.class.draft_association_name).update(data)
-              self.save
+              save
             else
               the_changes = changes_for_draftsman(:update)
               save_only_columns_for_draft if Draftsman.stash_drafted_changes?
@@ -336,7 +336,12 @@ module Draftsman
               if self.draft? && the_changes.empty?
                 nilified_draft = send(self.class.draft_association_name)
                 send("#{self.class.draft_association_name}_id=", nil)
-                save(touch: false)
+                touch = false
+                if !Draftsman.stash_drafted_changes? ||
+                   draftsman_options[:skip].present?
+                  touch = true
+                end
+                save(touch: touch)
                 nilified_draft.destroy
               # Save an update draft if record is changed notably.
               elsif !the_changes.empty?
