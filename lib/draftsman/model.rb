@@ -474,7 +474,8 @@ module Draftsman
       # Updates skipped attributes' values on this model.
       def update_skipped_attributes
         # Skip over this if nothing's being skipped.
-        return true unless draftsman_options[:skip].present?
+        skipped_changed = changed_attributes.keys & draftsman_options[:skip]
+        return true unless skipped_changed.present?
 
         keys = self.attributes.keys.select { |key| draftsman_options[:skip].include?(key) }
         attrs = {}
