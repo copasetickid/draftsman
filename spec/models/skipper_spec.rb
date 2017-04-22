@@ -53,6 +53,11 @@ RSpec.describe Skipper, type: :model do
       it 'has a value for `skip_me`' do
         expect(subject.skip_me).to eql 'Skipped 1'
       end
+
+      it 'sets `updated_at`' do
+        time = Time.now
+        expect(subject.updated_at).to be > time
+      end
     end
 
     context 'on update' do
@@ -99,6 +104,11 @@ RSpec.describe Skipper, type: :model do
         it 'creates a new draft' do
           expect { subject }.to change(Draftsman::Draft, :count).by(1)
         end
+
+        it 'has a newer `updated_at`' do
+          time = skipper.updated_at
+          expect(subject.updated_at).to be > time
+        end
       end
 
       describe 'changing back to initial state' do
@@ -134,6 +144,11 @@ RSpec.describe Skipper, type: :model do
 
         it 'destroys the draft' do
           expect { subject }.to change(Draftsman::Draft.where(:id => skipper.draft_id), :count).by(-1)
+        end
+
+        it 'has a newer `updated_at`' do
+          time = skipper.updated_at
+          expect(subject.updated_at).to be > time
         end
       end
 
@@ -181,6 +196,33 @@ RSpec.describe Skipper, type: :model do
           it "updates the draft's `name`" do
             expect(subject.draft.reify.name).to eql 'Sam'
           end
+
+          it 'has a newer `updated_at`' do
+            time = skipper.updated_at
+            expect(subject.updated_at).to be > time
+          end
+        end
+
+        context 'with changes to drafted attribute' do
+          before do
+            skipper.name = 'Sam'
+          end
+
+          it 'has a newer `updated_at`' do
+            time = skipper.updated_at
+            expect(subject.updated_at).to be > time
+          end
+        end
+
+        context 'with changes to skipped attribute' do
+          before do
+            skipper.skip_me = 'Skipped 2'
+          end
+
+          it 'has a newer `updated_at`' do
+            time = skipper.updated_at
+            expect(subject.updated_at).to be > time
+          end
         end
 
         context 'with no changes' do
@@ -214,6 +256,11 @@ RSpec.describe Skipper, type: :model do
 
           it "doesn't change the number of drafts" do
             expect { subject }.to_not change(Draftsman::Draft.where(:id => skipper.draft_id), :count)
+          end
+
+          it 'has the original `updated_at`' do
+            time = skipper.updated_at
+            expect(subject.updated_at).to eq time
           end
         end
       end
@@ -266,14 +313,16 @@ RSpec.describe Skipper, type: :model do
           it "updates the draft's `name`" do
             expect(subject.draft.reify.name).to eql 'Steve'
           end
+
+          it 'has the original `updated_at`' do
+            time = skipper.updated_at
+            expect(subject.updated_at).to eq time
+          end
         end
 
         context 'with changes to skipped attributes' do
           before do
             skipper.skip_me = 'Skip and save'
-            skipper.save_draft
-            skipper.reload
-            skipper.attributes = skipper.draft.reify.attributes
           end
 
           it 'is persisted' do
@@ -315,6 +364,11 @@ RSpec.describe Skipper, type: :model do
           it 'updates skipped attribute on draft' do
             expect(subject.draft.reify.skip_me).to eql 'Skip and save'
           end
+
+          it 'has a newer `updated_at`' do
+            time = skipper.updated_at
+            expect(subject.updated_at).to be > time
+          end
         end
 
         context 'with no changes' do
@@ -352,6 +406,11 @@ RSpec.describe Skipper, type: :model do
 
           it "does not update the draft's `name`" do
             expect(subject.draft.reify.name).to eql 'Sam'
+          end
+
+          it 'has the original `updated_at`' do
+            time = skipper.updated_at
+            expect(subject.updated_at).to eq time
           end
         end
       end
