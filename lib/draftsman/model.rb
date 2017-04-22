@@ -335,12 +335,8 @@ module Draftsman
               # original values.
               if self.draft? && the_changes.empty?
                 nilified_draft = send(self.class.draft_association_name)
+                touch = changed?
                 send("#{self.class.draft_association_name}_id=", nil)
-                touch = false
-                if !Draftsman.stash_drafted_changes? ||
-                   draftsman_options[:skip].present?
-                  touch = true
-                end
                 save(touch: touch)
                 nilified_draft.destroy
               # Save an update draft if record is changed notably.
