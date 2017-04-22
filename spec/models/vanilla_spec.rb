@@ -215,10 +215,11 @@ describe Vanilla do
               expect(vanilla.draft.create?).to eql true
             end
 
-            it 'has the original `updated_at`' do
+            it 'has a new `updated_at`' do
+              time = vanilla.updated_at
               vanilla.save_draft
               vanilla.reload
-              expect(vanilla.updated_at).to eq vanilla.created_at
+              expect(vanilla.updated_at).to be > time
             end
           end # with changes
 
