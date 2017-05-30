@@ -1,6 +1,6 @@
 class Draftsman::Draft < ActiveRecord::Base
   # Associations
-  belongs_to :item, polymorphic: true
+  belongs_to :item, polymorphic: true, counter_cache: true
 
   # Validations
   validates :event, presence: true
@@ -62,12 +62,7 @@ class Draftsman::Draft < ActiveRecord::Base
   def draft_publication_dependencies
     dependencies = []
 
-    my_item =
-      if Draftsman.stash_drafted_changes? && self.item.draft?
-        self.item.draft.reify
-      else
-        self.item
-      end
+    my_item = self.item
 
     case self.event.to_sym
     when :create, :update
@@ -169,16 +164,13 @@ class Draftsman::Draft < ActiveRecord::Base
       case self.event.to_sym
       when :create, :update
         # Parents must be published too
-        self.draft_publication_dependencies.each { |dependency| dependency.publish! }
+        #self.draft_publication_dependencies.each { |dependency| dependency.publish! }
 
         # Update drafts need to copy over data to main record
         self.item.attributes = self.reify.attributes if Draftsman.stash_drafted_changes? && self.update?
 
         # Write `published_at` attribute
         self.item.send("#{self.item.class.published_at_attribute_name}=", Time.now)
-
-        # Clear out draft
-        self.item.send("#{self.item.class.draft_association_name}_id=", nil)
 
         # Determine which columns should be updated
         only   = self.item.class.draftsman_options[:only]
@@ -207,7 +199,7 @@ class Draftsman::Draft < ActiveRecord::Base
   #
   # Example usage:
   #
-  #     `@category = @category.draft.reify if @category.draft?`
+  #     `@category = @category.drafts.last.reify if @category.has_drafts?`
   def reify
     # This appears to be necessary if for some reason the draft's model
     # hasn't been loaded (such as when done in the console).
@@ -233,7 +225,6 @@ class Draftsman::Draft < ActiveRecord::Base
           end
         end
 
-        self.item.send("#{self.item.class.draft_association_name}=", self)
         self.item
       # Reify based on object if it's all that's available.
       elsif self.object.present?
@@ -249,7 +240,7 @@ class Draftsman::Draft < ActiveRecord::Base
           end
         end
 
-        self.item.send("#{self.item.class.draft_association_name}=", self)
+        #self.item.send("#{self.item.class.draft_association_name}=", self)
         self.item
       end
     end
@@ -275,14 +266,12 @@ class Draftsman::Draft < ActiveRecord::Base
             self.item.send("#{attr}=", values.first) if self.item.respond_to?(attr)
           end
         end
-        # Then clear out the draft ID.
-        self.item.send("#{self.item.class.draft_association_name}_id=", nil)
         self.item.save!(validate: false)
         # Then destroy draft.
         self.destroy
       when :destroy
         # Parents must be restored too
-        self.draft_reversion_dependencies.each { |dependency| dependency.revert! }
+        #self.draft_reversion_dependencies.each { |dependency| dependency.revert! }
 
         # Restore previous draft if one was stashed away
         if self.previous_draft.present?
