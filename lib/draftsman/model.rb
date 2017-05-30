@@ -41,9 +41,9 @@ module Draftsman
       # `Draftsman::Controller.info_for_draftsman` for an example of how to
       # store data from the controller.
       #
-      # :draft
+      # :drafts
       # The name to use for the `draft` association shortcut method. Default is
-      # `:draft`.
+      # `:drafts`.
       #
       # :published_at
       # The name to use for the method which returns the published timestamp.
@@ -52,7 +52,7 @@ module Draftsman
       # :trashed_at
       # The name to use for the method which returns the soft delete timestamp.
       # Default is `trashed_at`.
-      def has_drafts(options = {})
+      def has_draftsman(options = {})
         # Lazily include the instance methods so we don't clutter up
         # any more ActiveRecord models than we need to.
         send :include, InstanceMethods
@@ -60,15 +60,14 @@ module Draftsman
 
         # Define before/around/after callbacks on each drafted model
         send :extend, ActiveModel::Callbacks
-        # TODO: Remove `draft_creation`, `draft_update`, and `draft_destroy` in
-        # v1.0.
-        define_model_callbacks :save_draft, :draft_creation, :draft_update, :draft_destruction, :draft_destroy
+
+        define_model_callbacks :save_draft, :draft_destruction
 
         class_attribute :draftsman_options
         self.draftsman_options = options.dup
 
         class_attribute :draft_association_name
-        self.draft_association_name = options[:draft] || :draft
+        self.draft_association_name = options[:drafts] || :drafts
 
         class_attribute :draft_class_name
         self.draft_class_name = options[:class_name] || Draftsman.draft_class_name
@@ -77,7 +76,8 @@ module Draftsman
           draftsman_options[key] = ([draftsman_options[key]].flatten.compact || []).map(&:to_s)
         end
 
-        draftsman_options[:ignore] << "#{self.draft_association_name}_id"
+        # ignore counter_cache column
+        draftsman_options[:ignore] << "#{self.draft_association_name}_count"
 
         draftsman_options[:meta] ||= {}
 
@@ -89,13 +89,13 @@ module Draftsman
         class_attribute :trashed_at_attribute_name
         self.trashed_at_attribute_name = options[:trashed_at] || :trashed_at
 
-        # `belongs_to :draft` association
-        belongs_to(self.draft_association_name, class_name: self.draft_class_name, dependent: :destroy)
+        # `has_many :drafts` association
+        has_many(self.draft_association_name, class_name: self.draft_class_name, dependent: :destroy, as: :item)
 
         # Scopes
         scope :drafted, -> (referenced_table_name = nil) {
           referenced_table_name = referenced_table_name.present? ? referenced_table_name : table_name
-          where.not(referenced_table_name => { "#{self.draft_association_name}_id" => nil })
+          where.not(referenced_table_name => { "#{self.draft_association_name}_count" => [0, nil] })
         }
 
         scope :published, -> (referenced_table_name = nil) {
@@ -132,36 +132,47 @@ module Draftsman
 
     module InstanceMethods
       # Returns whether or not this item has a draft.
-      def draft?
-        send(self.class.draft_association_name).present?
-      end
-
-      # DEPRECATED: Use `#draft_save` instead.
-      def draft_creation
-        ActiveSupport::Deprecation.warn('`#draft_creation` is deprecated and will be removed from Draftsman 1.0. Use `#save_draft` instead.')
-        _draft_creation
-      end
-
-      # DEPRECATED: Use `#draft_destruction` instead.
-      def draft_destroy
-        ActiveSupport::Deprecation.warn('`#draft_destroy` is deprecated and will be removed from Draftsman 1.0. Use `draft_destruction` instead.')
-
-        run_callbacks :draft_destroy do
-          _draft_destruction
-        end
+      def has_drafts?
+        send(self.class.draft_association_name).any?
       end
 
       # Trashes object and records a draft for a `destroy` event.
       def draft_destruction
         run_callbacks :draft_destruction do
-          _draft_destruction
-        end
-      end
 
-      # DEPRECATED: Use `#draft_save` instead.
-      def draft_update
-        ActiveSupport::Deprecation.warn('`#draft_update` is deprecated and will be removed from Draftsman 1.0. Use `#save_draft` instead.')
-        _draft_update
+          transaction do
+
+            data = {
+              item: self,
+              event: :destroy
+            }
+
+            data[:object] = object_attrs_for_draft_record if Draftsman.stash_drafted_changes?
+            data[Draftsman.whodunnit_field] = Draftsman.whodunnit
+            data = merge_metadata_for_draft(data)
+
+            draft = send(self.class.draft_association_name).new(data)
+            draft.save!
+
+            trash!
+
+            # Mock `dependent: :destroy` behavior for all trashable associations
+            dependent_associations = self.class.reflect_on_all_associations(:has_one) + self.class.reflect_on_all_associations(:has_many)
+
+            dependent_associations.each do |association|
+              if association.klass.draftable? && association.options.has_key?(:dependent) && association.options[:dependent] == :destroy
+                dependents = self.send(association.name)
+                dependents = [dependents] if (dependents && association.macro == :has_one)
+
+                if dependents
+                  dependents.each do |dependent|
+                    dependent.draft_destruction unless dependent.has_drafts && dependent.send(dependent.class.draft_association_name).destroy?
+                  end
+                end
+              end
+            end
+          end
+        end
       end
 
       # Returns serialized object representing this drafted item.
@@ -214,168 +225,75 @@ module Draftsman
         send(self.class.trashed_at_attribute_name).present?
       end
 
-    private
+      private
 
       # Creates object and records a draft for the object's creation. Returns
       # `true` or `false` depending on whether or not the objects passed
       # validation and the save was successful.
       def _draft_creation
         transaction do
-          # TODO: Remove callback wrapper in v1.0.
-          run_callbacks :draft_creation do
-            # We want to save the draft after create
-            return false unless self.save
+          # We want to save the draft after create
+          return false unless self.save
+          # Build data to store in draft record.
+          data = {
+            item: self,
+            event: :create,
+          }
 
-            # Build data to store in draft record.
-            data = {
-              item: self,
-              event: :create,
-            }
-            data[:object] = object_attrs_for_draft_record if Draftsman.stash_drafted_changes?
-            data[Draftsman.whodunnit_field] = Draftsman.whodunnit
-            data[:object_changes] = serialized_draft_changeset(changes_for_draftsman(:create)) if track_object_changes_for_draft?
-            data = merge_metadata_for_draft(data)
-            send("build_#{self.class.draft_association_name}", data)
+          data[:object] = object_attrs_for_draft_record if Draftsman.stash_drafted_changes?
+          data[Draftsman.whodunnit_field] = Draftsman.whodunnit
+          data[:object_changes] = serialized_draft_changeset(changes_for_draftsman(:create)) if track_object_changes_for_draft?
+          data = merge_metadata_for_draft(data)
 
-            if send(self.class.draft_association_name).save
-              fk = "#{self.class.draft_association_name}_id"
-              id = send(self.class.draft_association_name).id
-              self.update_column(fk, id)
-            else
-              raise ActiveRecord::Rollback and return false
-            end
+          draft = send(self.class.draft_association_name).new(data)
+
+          if !draft.save
+            raise ActiveRecord::Rollback and return false
           end
         end
 
         return true
       end
 
-      # This is only abstracted away at this moment because of the
-      # `draft_destroy` deprecation. Move all of this logic back into
-      # `draft_destruction` after `draft_destroy is removed.`
-      def _draft_destruction
-        transaction do
-          data = {
-            item: self,
-            event: :destroy
-          }
-          data[:object] = object_attrs_for_draft_record if Draftsman.stash_drafted_changes?
-          data[Draftsman.whodunnit_field] = Draftsman.whodunnit
-
-          # Stash previous draft in case it needs to be reverted later
-          if self.draft?
-            attrs = send(self.class.draft_association_name).attributes
-
-            data[:previous_draft] =
-              if self.class.draft_class.previous_draft_col_is_json?
-                attrs
-              else
-                Draftsman.serializer.dump(attrs)
-              end
-          end
-
-          data = merge_metadata_for_draft(data)
-
-          if send(self.class.draft_association_name).present?
-            send(self.class.draft_association_name).update!(data)
-          else
-            send("build_#{self.class.draft_association_name}", data)
-            send(self.class.draft_association_name).save!
-            send("#{self.class.draft_association_name}_id=", send(self.class.draft_association_name).id)
-            self.update_column("#{self.class.draft_association_name}_id", send(self.class.draft_association_name).id)
-          end
-
-          trash!
-
-          # Mock `dependent: :destroy` behavior for all trashable associations
-          dependent_associations = self.class.reflect_on_all_associations(:has_one) + self.class.reflect_on_all_associations(:has_many)
-
-          dependent_associations.each do |association|
-            if association.klass.draftable? && association.options.has_key?(:dependent) && association.options[:dependent] == :destroy
-              dependents = self.send(association.name)
-              dependents = [dependents] if (dependents && association.macro == :has_one)
-
-              if dependents
-                dependents.each do |dependent|
-                  dependent.draft_destruction unless dependent.draft? && dependent.send(dependent.class.draft_association_name).destroy?
-                end
-              end
-            end
-          end
-        end
-      end
+      # CHANGE: every update is conisdered a new draft,
+      # so no need to update or destroy existing drafts
 
       # Updates object and records a draft for an `update` event. If the draft
       # is being updated to the object's original state, the draft is destroyed.
       # Returns `true` or `false` depending on if the object passed validation
       # and the save was successful.
       def _draft_update
-        # TODO: Remove callback wrapper in v1.0.
         transaction do
-          run_callbacks :draft_update do
-            # Run validations.
-            return false unless self.valid?
 
-            # If updating a create draft, also update this item.
-            if self.draft? && send(self.class.draft_association_name).create?
-              the_changes = changes_for_draftsman(:create)
-              data = { item: self }
-              data[Draftsman.whodunnit_field] = Draftsman.whodunnit
-              data[:object] = object_attrs_for_draft_record if Draftsman.stash_drafted_changes?
-              data[:object_changes] = serialized_draft_changeset(the_changes) if track_object_changes_for_draft?
+          # Run validations.
+          return false unless self.valid?
 
-              data = merge_metadata_for_draft(data)
-              send(self.class.draft_association_name).update(data)
-              self.save
-            else
-              the_changes = changes_for_draftsman(:update)
-              save_only_columns_for_draft if Draftsman.stash_drafted_changes?
+          the_changes = changes_for_draftsman(:update)
+          save_only_columns_for_draft if Draftsman.stash_drafted_changes?
 
-              # Destroy the draft if this record has changed back to the original
-              # record.
-              if self.draft? && the_changes.empty?
-                nilified_draft = send(self.class.draft_association_name)
-                send("#{self.class.draft_association_name}_id=", nil)
-                self.save
-                nilified_draft.destroy
-              # Save an update draft if record is changed notably.
-              elsif !the_changes.empty?
-                data = { item: self, event: :update }
-                data[Draftsman.whodunnit_field] = Draftsman.whodunnit
-                data[:object] = object_attrs_for_draft_record if Draftsman.stash_drafted_changes?
-                data[:object_changes] = serialized_draft_changeset(the_changes) if track_object_changes_for_draft?
-                data = merge_metadata_for_draft(data)
+          # Save an update draft if record is changed notably.
+          if !the_changes.empty?
+            data = { item: self, event: :update }
+            data[Draftsman.whodunnit_field] = Draftsman.whodunnit
+            data[:object] = object_attrs_for_draft_record if Draftsman.stash_drafted_changes?
+            data[:object_changes] = serialized_draft_changeset(the_changes) if track_object_changes_for_draft?
+            data = merge_metadata_for_draft(data)
 
-                # If there's already a draft, update it.
-                if self.draft?
-                  send(self.class.draft_association_name).update(data)
+            # create an update draft.
+            draft = send(self.class.draft_association_name).new(data)
 
-                  if Draftsman.stash_drafted_changes?
-                    update_skipped_attributes
-                  else
-                    self.save
-                  end
-                # If there's not an existing draft, create an update draft.
-                else
-                  send("build_#{self.class.draft_association_name}", data)
-
-                  if send(self.class.draft_association_name).save
-                    update_column("#{self.class.draft_association_name}_id", send(self.class.draft_association_name).id)
-
-                    if Draftsman.stash_drafted_changes?
-                      update_skipped_attributes
-                    else
-                      self.save
-                    end
-                  else
-                    raise ActiveRecord::Rollback and return false
-                  end
-                end
-              # Otherwise, just save the record.
+            if draft.save
+              if Draftsman.stash_drafted_changes?
+                update_skipped_attributes
               else
                 self.save
               end
+            else
+              raise ActiveRecord::Rollback and return false
             end
+            # Otherwise, just save the record.
+          else
+            self.save
           end
         end
       rescue Exception => e
@@ -397,14 +315,10 @@ module Draftsman
         if event == :update
           # Collect all attributes' previous and new values.
           draftable_attrs.each do |attr|
-            if self.draft? && self.draft.changeset && self.draft.changeset.key?(attr)
-              the_changes[attr] = [self.draft.changeset[attr].first, send(attr)]
-            else
-              the_changes[attr] = [self.send("#{attr}_was"), send(attr)]
-            end
+            the_changes[attr] = [self.send("#{attr}_was"), send(attr)]
           end
-        # If there is no draft or it's for a create, then all draftable
-        # attributes are the changes.
+          # If there is no draft or it's for a create, then all draftable
+          # attributes are the changes.
         else
           draftable_attrs.each { |attr| the_changes[attr] = [nil, send(attr)] }
         end
@@ -418,18 +332,18 @@ module Draftsman
         # First, we merge the model-level metadata in `meta`.
         draftsman_options[:meta].each do |attribute, value|
           data[attribute] =
-            if value.respond_to?(:call)
-              value.call(self)
-            elsif value.is_a?(Symbol) && respond_to?(value)
-              # if it is an attribute that is changing, be sure to grab the current version
-              if has_attribute?(value) && send("#{value}_changed?".to_sym)
-                send("#{value}_was".to_sym)
-              else
-                send(value)
-              end
+          if value.respond_to?(:call)
+            value.call(self)
+          elsif value.is_a?(Symbol) && respond_to?(value)
+            # if it is an attribute that is changing, be sure to grab the current version
+            if has_attribute?(value) && send("#{value}_changed?".to_sym)
+              send("#{value}_was".to_sym)
             else
-              value
+              send(value)
             end
+          else
+            value
+          end
         end
 
         # Second, we merge any extra data from the controller (if available).
