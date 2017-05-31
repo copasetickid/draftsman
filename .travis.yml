@@ -4,9 +4,13 @@ cache: bundler
 sudo: false
 
 rvm:
-  - 2.4.0-preview3
+  - 2.4.0
   - 2.3.1
   - 2.2.5
+
+gemfile:
+  - gemfiles/ar_5_1.gemfile
+  - gemfiles/ar_5_0.gemfile
 
 before_script:
   - bundle exec rake -f spec/dummy/Rakefile db:schema:load
