@@ -1,21 +1,29 @@
-FROM ruby:2.4-alpine
+FROM alpine
 
-RUN apk add --no-cache sqlite \
+WORKDIR /srv/app
+
+RUN apk add --no-cache ruby \
+    ruby-dev \
+    ruby-io-console \
+    ruby-bigdecimal \
+    ruby-rdoc \
+    ruby-irb \
+    tzdata \
+    sqlite \
     sqlite-dev \
     git \
     build-base \
     libxml2-dev \
-    && gem install bundle
+    ruby-bundler
 
-WORKDIR /srv/app
-
-COPY ./ ./
+COPY Gemfile .
+COPY Gemfile.lock .
+COPY draftsman.gemspec .
+COPY lib lib/
 
 RUN bundle install
 
-# Not picked by bundle in Docker
-RUN bundle add bigdecimal \
-    && bundle add tzinfo-data
+COPY ./ ./
 
 RUN RAILS_ENV=test bundle exec rake -f spec/dummy/Rakefile db:schema:load
 
