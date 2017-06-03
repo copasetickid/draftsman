@@ -259,8 +259,7 @@ RSpec.describe Skipper, type: :model do
           end
 
           it 'has the original `updated_at`' do
-            time = skipper.updated_at
-            expect(subject.updated_at).to eq time
+            expect(subject.updated_at).to eq skipper.updated_at
           end
         end
       end
