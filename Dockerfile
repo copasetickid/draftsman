@@ -4,17 +4,22 @@ WORKDIR /srv/app
 
 RUN apk add --no-cache ruby \
     ruby-dev \
-    ruby-io-console \
+
+    ruby-bundler \
     ruby-bigdecimal \
-    ruby-rdoc \
+    ruby-io-console \
     ruby-irb \
+    ruby-rdoc \
+
     tzdata \
+
     sqlite \
     sqlite-dev \
+
     git \
+
     build-base \
-    libxml2-dev \
-    ruby-bundler
+    libxml2-dev
 
 COPY Gemfile .
 COPY Gemfile.lock .
