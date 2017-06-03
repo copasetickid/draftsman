@@ -19,7 +19,7 @@ RUN apk add --no-cache ruby \
 COPY Gemfile .
 COPY Gemfile.lock .
 COPY draftsman.gemspec .
-COPY lib lib/
+COPY lib/draftsman/version.rb lib/draftsman/version.rb
 
 RUN bundle install
 
