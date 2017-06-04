@@ -153,7 +153,10 @@ RSpec.describe Skipper, type: :model do
       end
 
       context 'with existing `create` draft' do
-        before { skipper.save_draft }
+        before do
+          skipper.save_draft
+          skipper.reload
+        end
 
         context 'with changes' do
           before do
@@ -259,7 +262,8 @@ RSpec.describe Skipper, type: :model do
           end
 
           it 'has the original `updated_at`' do
-            expect(subject.updated_at).to eq skipper.updated_at
+            time = skipper.updated_at
+            expect(subject.updated_at).to eq time
           end
         end
       end
