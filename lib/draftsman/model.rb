@@ -326,17 +326,18 @@ module Draftsman
 
               data = merge_metadata_for_draft(data)
               send(self.class.draft_association_name).update(data)
-              self.save
+              save
             else
               the_changes = changes_for_draftsman(:update)
               save_only_columns_for_draft if Draftsman.stash_drafted_changes?
 
-              # Destroy the draft if this record has changed back to the original
-              # record.
+              # Destroy the draft if this record has changed back to the
+              # original values.
               if self.draft? && the_changes.empty?
                 nilified_draft = send(self.class.draft_association_name)
+                touch = changed?
                 send("#{self.class.draft_association_name}_id=", nil)
-                self.save
+                save(touch: touch)
                 nilified_draft.destroy
               # Save an update draft if record is changed notably.
               elsif !the_changes.empty?
@@ -469,7 +470,8 @@ module Draftsman
       # Updates skipped attributes' values on this model.
       def update_skipped_attributes
         # Skip over this if nothing's being skipped.
-        return true unless draftsman_options[:skip].present?
+        skipped_changed = changed_attributes.keys & draftsman_options[:skip]
+        return true unless skipped_changed.present?
 
         keys = self.attributes.keys.select { |key| draftsman_options[:skip].include?(key) }
         attrs = {}

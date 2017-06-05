@@ -175,22 +175,10 @@ class Draftsman::Draft < ActiveRecord::Base
         self.item.attributes = self.reify.attributes if Draftsman.stash_drafted_changes? && self.update?
 
         # Write `published_at` attribute
-        self.item.send("#{self.item.class.published_at_attribute_name}=", Time.now)
+        self.item.send("#{self.item.class.published_at_attribute_name}=", current_time_from_proper_timezone)
 
         # Clear out draft
         self.item.send("#{self.item.class.draft_association_name}_id=", nil)
-
-        # Determine which columns should be updated
-        only   = self.item.class.draftsman_options[:only]
-        ignore = self.item.class.draftsman_options[:ignore]
-        skip   = self.item.class.draftsman_options[:skip]
-        attributes_to_change = only.any? ? only : self.item.attribute_names
-        attributes_to_change = attributes_to_change - ignore + ['published_at', "#{self.item.class.draft_association_name}_id"] - skip
-
-        # Save without validations or callbacks
-        self.item.attributes.slice(*attributes_to_change).each do |key, value|
-          self.item.send("#{key}=", value)
-        end
 
         self.item.save(validate: false)
         self.item.reload
@@ -277,7 +265,7 @@ class Draftsman::Draft < ActiveRecord::Base
         end
         # Then clear out the draft ID.
         self.item.send("#{self.item.class.draft_association_name}_id=", nil)
-        self.item.save!(validate: false)
+        self.item.save!(validate: false, touch: false)
         # Then destroy draft.
         self.destroy
       when :destroy
