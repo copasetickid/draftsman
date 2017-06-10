@@ -1,7 +1,7 @@
 # Override global `draft` class. For example, perhaps you want your own class at
 # `app/models/draft.rb` that adds extra attributes, validations, associations,
-# methods, etc. Be sure that this new model class extends `Draftsman::Draft`.
-# Draftsman.draft_class_name = 'Draftsman::Draft'
+# methods, etc. Be sure that this new model class extends `Draftsman::Single::Draft` or `Draftsman::Multiple::Draft`.
+# Draftsman.draft_class_name = 'Draftsman::Single::Draft'
 
 # Serializer for `object`, `object_changes`, and `previous_draft` columns. To
 # use the JSON serializer, change to `Draftsman::Serializers::Json`. You could

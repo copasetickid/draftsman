@@ -116,7 +116,7 @@ private
 
   # Thread-safe hash to hold Draftman's data. Initializing with needed default values.
   def self.draftsman_store
-    Thread.current[:draft] ||= { draft_class_name: 'Draftsman::Draft' }
+    Thread.current[:draft] ||= { draft_class_name: 'Draftsman::Single::Draft' }
   end
 
   # Returns Draftman's configuration object.
@@ -130,7 +130,8 @@ private
 end
 
 # Draft model class.
-require 'draftsman/draft'
+require 'draftsman/single/draft'
+require 'draftsman/multiple/draft'
 
 # Inject `Draftsman::Model` into ActiveRecord classes.
 ActiveSupport.on_load(:active_record) do
