@@ -9,6 +9,14 @@ describe Vanilla do
     it 'contains column name' do
       expect(vanilla.object_attrs_for_draft_record).to include 'name'
     end
+
+    it 'contains column updated_at' do
+      expect(vanilla.object_attrs_for_draft_record).to include 'updated_at'
+    end
+
+    it 'contains column created_at' do
+      expect(vanilla.object_attrs_for_draft_record).to include 'created_at'
+    end
   end
 
   describe '#save_draft' do
@@ -41,6 +49,18 @@ describe Vanilla do
       it 'saves the `name`' do
         vanilla.save_draft
         expect(vanilla.name).to eql 'Bob'
+      end
+
+      it 'sets `updated_at`' do
+        time = Time.now
+        vanilla.save_draft
+        expect(vanilla.updated_at).to be > time
+      end
+
+      it 'sets `created_at`' do
+        time = Time.now
+        vanilla.save_draft
+        expect(vanilla.created_at).to be > time
       end
     end
 
@@ -90,6 +110,12 @@ describe Vanilla do
           it 'creates a new draft' do
             expect { vanilla.save_draft }.to change(Draftsman::Draft, :count).by(1)
           end
+
+          it 'has the original `updated_at`' do
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.updated_at).to eq vanilla.created_at
+          end
         end
 
         describe 'changing back to initial state' do
@@ -128,6 +154,12 @@ describe Vanilla do
 
           it 'destroys the draft' do
             expect { vanilla.save_draft }.to change(Draftsman::Draft.where(id: vanilla.draft_id), :count).by(-1)
+          end
+
+          it 'has the original `updated_at`' do
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.updated_at).to eq vanilla.created_at
           end
         end
 
@@ -182,6 +214,13 @@ describe Vanilla do
               vanilla.reload
               expect(vanilla.draft.create?).to eql true
             end
+
+            it 'has a new `updated_at`' do
+              time = vanilla.updated_at
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.updated_at).to be > time
+            end
           end # with changes
 
           context 'with no changes' do
@@ -222,6 +261,12 @@ describe Vanilla do
 
             it "doesn't change the number of drafts" do
               expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+            end
+
+            it 'has the original `updated_at`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.updated_at).to eq vanilla.created_at
             end
           end
         end # with no changes
@@ -281,6 +326,12 @@ describe Vanilla do
               vanilla.save_draft
               expect(vanilla.draft.update?).to eql true
             end
+
+            it 'has the original `updated_at`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.updated_at).to eq vanilla.created_at
+            end
           end # with changes
 
           context 'with no changes' do
@@ -327,6 +378,12 @@ describe Vanilla do
               vanilla.save_draft
               vanilla.reload
               expect(vanilla.draft.reify.name).to eql 'Sam'
+            end
+
+            it 'has the original `updated_at`' do
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.updated_at).to eq vanilla.created_at
             end
           end # with no changes
         end # with existing `update` draft
@@ -380,6 +437,13 @@ describe Vanilla do
           it 'creates a new draft' do
             expect { vanilla.save_draft }.to change(Draftsman::Draft, :count).by(1)
           end
+
+          it 'has a new `updated_at`' do
+            time = vanilla.updated_at
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.updated_at).to be > time
+          end
         end
 
         describe 'changing back to initial state' do
@@ -418,6 +482,13 @@ describe Vanilla do
 
           it 'destroys the draft' do
             expect { vanilla.save_draft }.to change(Draftsman::Draft.where(id: vanilla.draft_id), :count).by(-1)
+          end
+
+          it 'has a new `updated_at`' do
+            time = vanilla.updated_at
+            vanilla.save_draft
+            vanilla.reload
+            expect(vanilla.updated_at).to be > time
           end
         end
 
@@ -465,6 +536,13 @@ describe Vanilla do
               vanilla.save_draft
               expect(vanilla.draft.create?).to eql true
             end
+
+            it 'has a new `updated_at`' do
+              time = vanilla.updated_at
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.updated_at).to be > time
+            end
           end
 
           context 'with no changes' do
@@ -499,6 +577,11 @@ describe Vanilla do
 
             it "doesn't change the number of drafts" do
               expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+            end
+
+            it 'has the original `updated_at`' do
+              vanilla.save_draft
+              expect(vanilla.reload.updated_at).to eq vanilla.created_at
             end
           end
         end
@@ -559,6 +642,13 @@ describe Vanilla do
               vanilla.reload
               expect(vanilla.draft.update?).to eql true
             end
+
+            it 'has a new `updated_at`' do
+              time = vanilla.updated_at
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.updated_at).to be > time
+            end
           end # with changes
 
           context 'with no changes' do
@@ -599,6 +689,13 @@ describe Vanilla do
             it "does not update the draft's `name`" do
               vanilla.save_draft
               expect(vanilla.draft.reify.name).to eql 'Sam'
+            end
+
+            it 'does not update `updated_at`' do
+              time = vanilla.updated_at
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.updated_at).to eq time
             end
           end # with no changes
         end # with existing `update` draft
