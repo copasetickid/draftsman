@@ -90,7 +90,11 @@ module Draftsman
         self.trashed_at_attribute_name = options[:trashed_at] || :trashed_at
 
         # `belongs_to :draft` association
-        belongs_to(self.draft_association_name, class_name: self.draft_class_name, dependent: :destroy, optional: true)
+        if ::Draftsman.active_record_belongs_to_required?
+          belongs_to(self.draft_association_name, class_name: self.draft_class_name, dependent: :destroy, optional: true)
+        else
+          belongs_to(self.draft_association_name, class_name: self.draft_class_name, dependent: :destroy)
+        end
 
         # Scopes
         scope :drafted, -> (referenced_table_name = nil) {

@@ -40,8 +40,3 @@ RSpec.configure do |config|
 
   config.mock_with :rspec
 end
-
-#require 'rails/railtie'
-#require 'active_record'
-#
-#require 'draftsman'

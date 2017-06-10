@@ -30,6 +30,11 @@ module Draftsman
     !!draftsman_store[:request_enabled_for_controller]
   end
 
+  # Returns whether or not ActiveRecord is configured to assume that `belongs_to` associations are required.
+  def self.active_record_belongs_to_required?
+    @active_record_belongs_to_required ||= ActiveRecord::VERSION::STRING.to_f >= 5.0
+  end
+
   # Returns whether or not ActiveRecord is configured to require mass assignment whitelisting via `attr_accessible`.
   def self.active_record_protected_attributes?
     @active_record_protected_attributes ||= ActiveRecord::VERSION::STRING.to_f < 4.0 || defined?(ProtectedAttributes)
