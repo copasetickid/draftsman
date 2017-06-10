@@ -1,6 +1,6 @@
-class Draftsman::Draft < ActiveRecord::Base
-  # Associations
-  belongs_to :item, polymorphic: true
+class Draftsman::SharedDraftMethods < ActiveRecord::Base
+
+  self.table_name = 'drafts'
 
   # Validations
   validates :event, presence: true
@@ -63,11 +63,11 @@ class Draftsman::Draft < ActiveRecord::Base
     dependencies = []
 
     my_item =
-      if Draftsman.stash_drafted_changes? && self.item.draft?
-        self.item.draft.reify
-      else
-        self.item
-      end
+    if Draftsman.stash_drafted_changes? && self.item.draft?
+      self.item.draft.reify
+    else
+      self.item
+    end
 
     case self.event.to_sym
     when :create, :update
@@ -75,11 +75,11 @@ class Draftsman::Draft < ActiveRecord::Base
 
       associations.each do |association|
         association_class =
-          if association.options.key?(:polymorphic)
-            my_item.send(association.foreign_key.sub('_id', '_type')).constantize
-          else
-            association.klass
-          end
+        if association.options.key?(:polymorphic)
+          my_item.send(association.foreign_key.sub('_id', '_type')).constantize
+        else
+          association.klass
+        end
 
         if association_class.draftable? && association.name != association_class.draft_association_name.to_sym
           dependency = my_item.send(association.name)
@@ -93,12 +93,12 @@ class Draftsman::Draft < ActiveRecord::Base
         if association.klass.draftable?
           # Reconcile different association types into an array, even if `has_one` produces a single-item
           associated_dependencies =
-            case association.macro
-            when :has_one
-              my_item.send(association.name).present? ? [my_item.send(association.name)] : []
-            when :has_many
-              my_item.send(association.name)
-            end
+          case association.macro
+          when :has_one
+            my_item.send(association.name).present? ? [my_item.send(association.name)] : []
+          when :has_many
+            my_item.send(association.name)
+          end
 
           associated_dependencies.each do |dependency|
             dependencies << dependency.draft if dependency.draft?
@@ -124,12 +124,12 @@ class Draftsman::Draft < ActiveRecord::Base
           # Reconcile different association types into an array, even if
           # `has_one` produces a single-item
           associated_dependencies =
-            case association.macro
-            when :has_one
-              self.item.send(association.name).present? ? [self.item.send(association.name)] : []
-            when :has_many
-              self.item.send(association.name)
-            end
+          case association.macro
+          when :has_one
+            self.item.send(association.name).present? ? [self.item.send(association.name)] : []
+          when :has_many
+            self.item.send(association.name)
+          end
 
           associated_dependencies.each do |dependency|
             dependencies << dependency.draft if dependency.draft?
@@ -141,11 +141,11 @@ class Draftsman::Draft < ActiveRecord::Base
 
       associations.each do |association|
         association_class =
-          if association.options.key?(:polymorphic)
-            self.item.send(association.foreign_key.sub('_id', '_type')).constantize
-          else
-            association.klass
-          end
+        if association.options.key?(:polymorphic)
+          self.item.send(association.foreign_key.sub('_id', '_type')).constantize
+        else
+          association.klass
+        end
 
         if association_class.draftable? && association_class.trashable? && association.name != association_class.draft_association_name.to_sym
           dependency = self.item.send(association.name)
@@ -169,7 +169,7 @@ class Draftsman::Draft < ActiveRecord::Base
       case self.event.to_sym
       when :create, :update
         # Parents must be published too
-        self.draft_publication_dependencies.each { |dependency| dependency.publish! }
+        self.draft_publication_dependencies.each { |dependency| dependency.publish! } if !self.item.class.multiple
 
         # Update drafts need to copy over data to main record
         self.item.attributes = self.reify.attributes if Draftsman.stash_drafted_changes? && self.update?
@@ -178,7 +178,7 @@ class Draftsman::Draft < ActiveRecord::Base
         self.item.send("#{self.item.class.published_at_attribute_name}=", current_time_from_proper_timezone)
 
         # Clear out draft
-        self.item.send("#{self.item.class.draft_association_name}_id=", nil)
+        self.item.send("#{self.item.class.draft_association_name}_id=", nil) if !self.item.class.multiple
 
         self.item.save(validate: false)
         self.item.reload
@@ -195,7 +195,10 @@ class Draftsman::Draft < ActiveRecord::Base
   #
   # Example usage:
   #
+  #     # for single draft
   #     `@category = @category.draft.reify if @category.draft?`
+  #     # for multiple drafts
+  #     `@category = @category.drafts.last.reify if @category.has_drafts?`
   def reify
     # This appears to be necessary if for some reason the draft's model
     # hasn't been loaded (such as when done in the console).
@@ -207,38 +210,15 @@ class Draftsman::Draft < ActiveRecord::Base
       # Create draft doesn't require reification.
       if self.create?
         self.item
-      # If a previous draft is stashed, restore that.
+        # If a previous draft is stashed, restore that.
       elsif self.previous_draft.present?
         reify_previous_draft.reify
-      # Prefer changeset for refication if it's present.
+        # Prefer changeset for refication if it's present.
       elsif self.changeset.present? && self.changeset.any?
-        self.changeset.each do |key, value|
-          # Skip counter_cache columns
-          if self.item.respond_to?("#{key}=") && !key.end_with?('_count')
-            self.item.send("#{key}=", value.last)
-          elsif !key.end_with?('_count')
-            logger.warn("Attribute #{key} does not exist on #{self.item_type} (Draft ID: #{self.id}).")
-          end
-        end
-
-        self.item.send("#{self.item.class.draft_association_name}=", self)
-        self.item
-      # Reify based on object if it's all that's available.
+        reify_changeset
+        # Reify based on object if it's all that's available.
       elsif self.object.present?
-        attrs = self.class.object_col_is_json? ? self.object : Draftsman.serializer.load(self.object)
-        self.item.class.unserialize_attributes_for_draftsman(attrs)
-
-        attrs.each do |key, value|
-          # Skip counter_cache columns
-          if self.item.respond_to?("#{key}=") && !key.end_with?('_count')
-            self.item.send("#{key}=", value)
-          elsif !key.end_with?('_count')
-            logger.warn("Attribute #{key} does not exist on #{self.item_type} (Draft ID: #{self.id}).")
-          end
-        end
-
-        self.item.send("#{self.item.class.draft_association_name}=", self)
-        self.item
+        reify_object
       end
     end
   end
@@ -264,24 +244,27 @@ class Draftsman::Draft < ActiveRecord::Base
           end
         end
         # Then clear out the draft ID.
-        self.item.send("#{self.item.class.draft_association_name}_id=", nil)
+        self.item.send("#{self.item.class.draft_association_name}_id=", nil) if !self.item.class.multiple
         self.item.save!(validate: false, touch: false)
+
         # Then destroy draft.
         self.destroy
       when :destroy
         # Parents must be restored too
-        self.draft_reversion_dependencies.each { |dependency| dependency.revert! }
+        self.draft_reversion_dependencies.each { |dependency| dependency.revert! } if !self.item.class.multiple
 
-        # Restore previous draft if one was stashed away
-        if self.previous_draft.present?
-          prev_draft = reify_previous_draft
-          prev_draft.save!
+        if !self.item.class.multiple
+          # Restore previous draft if one was stashed away
+          if self.previous_draft.present?
+            prev_draft = reify_previous_draft
+            prev_draft.save!
 
-          self.item.class.where(id: self.item).update_all "#{self.item.class.draft_association_name}_id".to_sym => prev_draft.id,
-                                                          self.item.class.trashed_at_attribute_name => nil
-        else
-          self.item.class.where(id: self.item).update_all "#{self.item.class.draft_association_name}_id".to_sym => nil,
-                                                          self.item.class.trashed_at_attribute_name => nil
+            self.item.class.where(id: self.item).update_all "#{self.item.class.draft_association_name}_id".to_sym => prev_draft.id,
+            self.item.class.trashed_at_attribute_name => nil
+          else
+            self.item.class.where(id: self.item).update_all "#{self.item.class.draft_association_name}_id".to_sym => nil,
+            self.item.class.trashed_at_attribute_name => nil
+          end
         end
 
         self.destroy
@@ -294,7 +277,7 @@ class Draftsman::Draft < ActiveRecord::Base
     self.event.to_sym == :update
   end
 
-private
+  private
 
   # Restores previous draft and returns it.
   def reify_previous_draft
@@ -337,5 +320,37 @@ private
     else
       Draftsman.serializer.load(self.object_changes)
     end
+  end
+
+  # override this if you want custom reifying behavior
+  def reify_changeset
+
+    self.changeset.each do |key, value|
+      # Skip counter_cache columns
+      if self.item.respond_to?("#{key}=") && !key.end_with?('_count')
+        self.item.send("#{key}=", value.last)
+      elsif !key.end_with?('_count')
+        logger.warn("Attribute #{key} does not exist on #{self.item_type} (Draft ID: #{self.id}).")
+      end
+    end
+    self.item
+  end
+
+  # override this if you want custom reifying behavior
+  def reify_object
+    attrs = self.class.object_col_is_json? ? self.object : Draftsman.serializer.load(self.object)
+    self.item.class.unserialize_attributes_for_draftsman(attrs)
+
+    attrs.each do |key, value|
+      # Skip counter_cache columns
+      if self.item.respond_to?("#{key}=") && !key.end_with?('_count')
+        self.item.send("#{key}=", value)
+      elsif !key.end_with?('_count')
+        logger.warn("Attribute #{key} does not exist on #{self.item_type} (Draft ID: #{self.id}).")
+      end
+    end
+
+    self.item.send("#{self.item.class.draft_association_name}=", self) if self.item.class.multiple
+    self.item
   end
 end
