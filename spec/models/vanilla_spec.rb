@@ -157,9 +157,11 @@ describe Vanilla do
           end
 
           it 'has the original `updated_at`' do
-            vanilla.save_draft
-            vanilla.reload
-            expect(vanilla.updated_at).to eq vanilla.created_at
+            if activerecord_save_touch_option?
+              vanilla.save_draft
+              vanilla.reload
+              expect(vanilla.updated_at).to eq vanilla.created_at
+            end
           end
         end
 
