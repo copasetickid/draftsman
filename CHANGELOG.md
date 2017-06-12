@@ -1,6 +1,37 @@
 # CHANGELOG
 
-## 0.6.0 - November 16, 2015
+## 0.7.0 - June 12, 2017
+
+### Enhancements
+
+- [@jmfederico](https://github.com/jmfederico)
+  [implemented](https://github.com/liveeditor/draftsman/commit/87f242374ad9fd97f7dba2e485d68da407c46fed)
+  [#67](https://github.com/liveeditor/draftsman/pull/67)
+  5.1 compatibility
+- [@chrisdpeters](https://github.com/chrisdpeters)
+  [implemented](https://github.com/liveeditor/draftsman/commit/e2c8e497899a453daf4c60d6ce02cacbf15a0f12)
+  Change Draft.object_col_is_json? to skip over itself if not stashing drafted changes
+- [@npezza93](https://github.com/npezza93)
+  [implemented](https://github.com/liveeditor/draftsman/commit/936d5a37c044c5ca0a5699a553d9bc111f2d91d2)
+  [#58](https://github.com/liveeditor/draftsman/pull/58)
+  Only update attributes that get changed instead of all of them
+- [@jmfederico](https://github.com/jmfederico)
+  [implemented](https://github.com/liveeditor/draftsman/commit/e8ba201db6bb88ea0ebc47c1262eb24e892e9a0b)
+  [#65](https://github.com/liveeditor/draftsman/pull/65)
+  Do not "touch" models when not updating the base table content
+
+### Bug Fixes
+
+- [@jokius](https://github.com/jokius)
+  [fixed](https://github.com/liveeditor/draftsman/commit/5ca7d6717109d753959a5d56c0fe81c3cd7b75f1)
+  [#57](https://github.com/liveeditor/draftsman/pull/57)
+  Fix if self.changeset is nil
+- [@jmfederico](https://github.com/jmfederico)
+  [fixed](https://github.com/liveeditor/draftsman/commit/207d158d054ed13ca6dc0a15ae2c499b0aac5f5f)
+  [#64](https://github.com/liveeditor/draftsman/pull/64)
+  Fix error when saving a draft when one already existed
+
+## 0.6.0 - November 16, 2016
 
 ### Enhancements
 
