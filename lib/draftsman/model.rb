@@ -17,8 +17,8 @@ module Draftsman
       #
       # :class_name
       # The name of a custom `Draft` class. This class should inherit from
-      # `Draftsman::Draft`. A global default can be set for this using
-      # `Draftsman.draft_class_name=` if the default of `Draftsman::Draft` needs
+      # `Draftsman::Single::Draft`. A global default can be set for this using
+      # `Draftsman.draft_class_name=` if the default of `Draftsman::Single::Draft` needs
       # to be overridden.
       #
       # :ignore
@@ -63,9 +63,6 @@ module Draftsman
         class_attribute :multiple
         self.multiple = options[:multiple] || false
 
-        # defualt draft_class_name is Draftsman::Single::Draft
-        Draftsman.draft_class_name = 'Draftsman::Multiple::Draft' if self.multiple
-
         # Lazily include the instance methods so we don't clutter up
         # any more ActiveRecord models than we need to.
         send :include, Draftsman::Multiple::InstanceMethods if self.multiple
@@ -89,7 +86,8 @@ module Draftsman
         end
 
         class_attribute :draft_class_name
-        self.draft_class_name = options[:class_name] || Draftsman.draft_class_name
+        self.draft_class_name = options[:class_name] || Draftsman.multiple_draft_class_name if self.multiple
+        self.draft_class_name = options[:class_name] || Draftsman.single_draft_class_name if !self.multiple
 
         [:ignore, :skip, :only].each do |key|
           draftsman_options[key] = ([draftsman_options[key]].flatten.compact || []).map(&:to_s)

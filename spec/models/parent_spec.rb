@@ -34,11 +34,11 @@ describe Parent do
       end
 
       it 'destroys 1 draft' do
-        expect { subject }.to change(Draftsman::Draft, :count).by(-1)
+        expect { subject }.to change(Draftsman::Single::Draft, :count).by(-1)
       end
 
       it "destroys the parent's draft" do
-        expect { subject }.to change(Draftsman::Draft.where(:item_type => 'Parent'), :count).by(-1)
+        expect { subject }.to change(Draftsman::Single::Draft.where(:item_type => 'Parent'), :count).by(-1)
       end
     end
 
@@ -60,7 +60,7 @@ describe Parent do
       end
 
       it 'destroys 2 drafts' do
-        expect { subject }.to change(Draftsman::Draft, :count).by(-2)
+        expect { subject }.to change(Draftsman::Single::Draft, :count).by(-2)
       end
     end
   end
@@ -83,7 +83,7 @@ describe Parent do
       end
 
       it 'destroys both drafts' do
-        expect { subject }.to change(Draftsman::Draft, :count).by(-2)
+        expect { subject }.to change(Draftsman::Single::Draft, :count).by(-2)
       end
     end
 
@@ -113,11 +113,11 @@ describe Parent do
       end
 
       it "keeps the child's draft" do
-        expect { subject }.to_not change(Draftsman::Draft.where(:item_type => 'Child'), :count)
+        expect { subject }.to_not change(Draftsman::Single::Draft.where(:item_type => 'Child'), :count)
       end
 
       it "deletes the parent's draft" do
-        expect { subject }.to change(Draftsman::Draft.where(:item_type => 'Parent'), :count).by(-1)
+        expect { subject }.to change(Draftsman::Single::Draft.where(:item_type => 'Parent'), :count).by(-1)
       end
 
       it "keeps the child's draft" do

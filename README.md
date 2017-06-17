@@ -143,7 +143,7 @@ Add `has_drafts` to the models you want to have drafts on.
 Draftsman provides a helper extension that acts similarly to the controller
 mixin it provides for Rails applications.
 
-It will set `Draftsman::Draft#whodunnit` to whatever is returned by a method
+It will set `Draftsman::Single::Draft#whodunnit` to whatever is returned by a method
 named `user_for_paper_trail`, which you can define inside your Sinatra
 application. (By default, it attempts to invoke a method named `current_user`.)
 
@@ -169,8 +169,8 @@ the following options:
 ##### `:class_name`
 
 The name of a custom `Draft` class. This class should inherit from
-`Draftsman::Draft`. A global default can be set for this using
-`Draftsman.draft_class_name=` if the default of `Draftsman::Draft` needs to be
+`Draftsman::Single::Draft`. A global default can be set for this using
+`Draftsman.draft_class_name=` if the default of `Draftsman::Single::Draft` needs to be
 overridden.
 
 ##### `:ignore`
@@ -276,22 +276,22 @@ Widget.live.includes(:gears, :sprockets).live(:gears)
 
 ### Draft Class Methods
 
-The `Draftsman::Draft` class has the following scopes:
+The `Draftsman::Single::Draft` class has the following scopes:
 
 ```ruby
 # Returns all drafts created by the `create` event.
-Draftsman::Draft.creates
+Draftsman::Single::Draft.creates
 
 # Returns all drafts created by the `update` event.
-Draftsman::Draft.updates
+Draftsman::Single::Draft.updates
 
 # Returns all drafts created by the `destroy` event.
-Draftsman::Draft.destroys
+Draftsman::Single::Draft.destroys
 ```
 
 ### Draft Instance Methods
 
-And a `Draftsman::Draft` instance has these methods:
+And a `Draftsman::Single::Draft` instance has these methods:
 
 ```ruby
 # Return the associated item in its state before the draft.
@@ -479,7 +479,7 @@ class Admin::DraftsController < Admin::BaseController
   before_action :find_draft, only: [:show, :update, :destroy]
 
   def index
-    @drafts = Draftsman::Draft.includes(:item).order(updated_at: :desc)
+    @drafts = Draftsman::Single::Draft.includes(:item).order(updated_at: :desc)
   end
 
   def show
@@ -535,7 +535,7 @@ private
 
   # Finds draft by `params[:id]`.
   def find_draft
-    @draft = Draftsman::Draft.find(params[:id])
+    @draft = Draftsman::Single::Draft.find(params[:id])
   end
 end
 

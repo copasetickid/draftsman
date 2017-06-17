@@ -108,7 +108,7 @@ describe Vanilla do
           end
 
           it 'creates a new draft' do
-            expect { vanilla.save_draft }.to change(Draftsman::Draft, :count).by(1)
+            expect { vanilla.save_draft }.to change(Draftsman::Single::Draft, :count).by(1)
           end
 
           it 'has the original `updated_at`' do
@@ -153,7 +153,7 @@ describe Vanilla do
           end
 
           it 'destroys the draft' do
-            expect { vanilla.save_draft }.to change(Draftsman::Draft.where(id: vanilla.draft_id), :count).by(-1)
+            expect { vanilla.save_draft }.to change(Draftsman::Single::Draft.where(id: vanilla.draft_id), :count).by(-1)
           end
 
           it 'has the original `updated_at`' do
@@ -200,7 +200,7 @@ describe Vanilla do
             end
 
             it 'updates the existing draft' do
-              expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+              expect { vanilla.save_draft }.to_not change(Draftsman::Single::Draft.where(id: vanilla.draft_id), :count)
             end
 
             it "updates the draft's `name`" do
@@ -260,7 +260,7 @@ describe Vanilla do
             end
 
             it "doesn't change the number of drafts" do
-              expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+              expect { vanilla.save_draft }.to_not change(Draftsman::Single::Draft.where(id: vanilla.draft_id), :count)
             end
 
             it 'has the original `updated_at`' do
@@ -313,7 +313,7 @@ describe Vanilla do
             end
 
             it 'updates the existing draft' do
-              expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+              expect { vanilla.save_draft }.to_not change(Draftsman::Single::Draft.where(id: vanilla.draft_id), :count)
             end
 
             it "updates the draft's `name`" do
@@ -371,7 +371,7 @@ describe Vanilla do
             end
 
             it "doesn't change the number of drafts" do
-              expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+              expect { vanilla.save_draft }.to_not change(Draftsman::Single::Draft.where(id: vanilla.draft_id), :count)
             end
 
             it "does not update the draft's `name`" do
@@ -435,7 +435,7 @@ describe Vanilla do
           end
 
           it 'creates a new draft' do
-            expect { vanilla.save_draft }.to change(Draftsman::Draft, :count).by(1)
+            expect { vanilla.save_draft }.to change(Draftsman::Single::Draft, :count).by(1)
           end
 
           it 'has a new `updated_at`' do
@@ -481,7 +481,7 @@ describe Vanilla do
           end
 
           it 'destroys the draft' do
-            expect { vanilla.save_draft }.to change(Draftsman::Draft.where(id: vanilla.draft_id), :count).by(-1)
+            expect { vanilla.save_draft }.to change(Draftsman::Single::Draft.where(id: vanilla.draft_id), :count).by(-1)
           end
 
           it 'has a new `updated_at`' do
@@ -524,7 +524,7 @@ describe Vanilla do
             end
 
             it 'updates the existing draft' do
-              expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+              expect { vanilla.save_draft }.to_not change(Draftsman::Single::Draft.where(id: vanilla.draft_id), :count)
             end
 
             it "updates the draft's `name`" do
@@ -576,7 +576,7 @@ describe Vanilla do
             end
 
             it "doesn't change the number of drafts" do
-              expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+              expect { vanilla.save_draft }.to_not change(Draftsman::Single::Draft.where(id: vanilla.draft_id), :count)
             end
 
             it 'has the original `updated_at`' do
@@ -628,7 +628,7 @@ describe Vanilla do
             end
 
             it 'updates the existing draft' do
-              expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+              expect { vanilla.save_draft }.to_not change(Draftsman::Single::Draft.where(id: vanilla.draft_id), :count)
             end
 
             it "updates the draft's `name`" do
@@ -683,7 +683,7 @@ describe Vanilla do
             end
 
             it "doesn't change the number of drafts" do
-              expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
+              expect { vanilla.save_draft }.to_not change(Draftsman::Single::Draft.where(id: vanilla.draft_id), :count)
             end
 
             it "does not update the draft's `name`" do

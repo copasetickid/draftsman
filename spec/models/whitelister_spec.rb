@@ -72,7 +72,7 @@ describe Whitelister do
           end
 
           it 'creates a new draft' do
-            expect { whitelister.save_draft }.to change(Draftsman::Draft, :count).by(1)
+            expect { whitelister.save_draft }.to change(Draftsman::Single::Draft, :count).by(1)
           end
 
           it 'has an `update` draft' do
@@ -124,7 +124,7 @@ describe Whitelister do
             end
 
             it 'destroys the draft' do
-              expect { whitelister.save_draft }.to change(Draftsman::Draft.where(id: whitelister.draft_id), :count).by(-1)
+              expect { whitelister.save_draft }.to change(Draftsman::Single::Draft.where(id: whitelister.draft_id), :count).by(-1)
             end
           end
         end
@@ -171,7 +171,7 @@ describe Whitelister do
             end
 
             it 'updates the existing draft' do
-              expect { whitelister.save_draft }.to_not change(Draftsman::Draft.where(id: whitelister.draft_id), :count)
+              expect { whitelister.save_draft }.to_not change(Draftsman::Single::Draft.where(id: whitelister.draft_id), :count)
             end
 
             it "updates the draft's `name`" do
@@ -224,7 +224,7 @@ describe Whitelister do
             end
 
             it "doesn't change the number of drafts" do
-              expect { whitelister.save_draft }.to_not change(Draftsman::Draft.where(id: whitelister.draft_id), :count)
+              expect { whitelister.save_draft }.to_not change(Draftsman::Single::Draft.where(id: whitelister.draft_id), :count)
             end
           end
         end
@@ -280,7 +280,7 @@ describe Whitelister do
             end
 
             it 'updates the existing draft' do
-              expect { whitelister.save_draft }.to_not change(Draftsman::Draft.where(id: whitelister.draft_id), :count)
+              expect { whitelister.save_draft }.to_not change(Draftsman::Single::Draft.where(id: whitelister.draft_id), :count)
             end
 
             it "updates its draft's `name`" do
@@ -327,7 +327,7 @@ describe Whitelister do
             end
 
             it "doesn't change the number of drafts" do
-              expect { whitelister.save_draft }.to_not change(Draftsman::Draft.where(id: whitelister.draft_id), :count)
+              expect { whitelister.save_draft }.to_not change(Draftsman::Single::Draft.where(id: whitelister.draft_id), :count)
             end
 
             it "does not update its draft's `name`" do
@@ -388,7 +388,7 @@ describe Whitelister do
           end
 
           it 'does not create a draft' do
-            expect { whitelister.save_draft }.to_not change(Draftsman::Draft, :count)
+            expect { whitelister.save_draft }.to_not change(Draftsman::Single::Draft, :count)
           end
 
           # Not affected by this customization
@@ -438,7 +438,7 @@ describe Whitelister do
           end
 
           it 'updates the existing draft' do
-            expect { whitelister.save_draft }.to_not change(Draftsman::Draft.where(id: whitelister.draft_id), :count)
+            expect { whitelister.save_draft }.to_not change(Draftsman::Single::Draft.where(id: whitelister.draft_id), :count)
           end
 
           it "updates its draft's `ignored` attribute" do
@@ -505,7 +505,7 @@ describe Whitelister do
             end
 
             it 'updates the existing draft' do
-              expect { whitelister.save_draft }.to_not change(Draftsman::Draft.where(id: whitelister.draft_id), :count)
+              expect { whitelister.save_draft }.to_not change(Draftsman::Single::Draft.where(id: whitelister.draft_id), :count)
             end
 
             it "updates its draft's `name`" do
@@ -564,7 +564,7 @@ describe Whitelister do
             end
 
             it "doesn't change the number of drafts" do
-              expect { whitelister.save_draft }.to_not change(Draftsman::Draft.where(id: whitelister.draft_id), :count)
+              expect { whitelister.save_draft }.to_not change(Draftsman::Single::Draft.where(id: whitelister.draft_id), :count)
             end
 
             it "does not update its draft's `name`" do

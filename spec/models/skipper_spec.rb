@@ -102,7 +102,7 @@ RSpec.describe Skipper, type: :model do
         end
 
         it 'creates a new draft' do
-          expect { subject }.to change(Draftsman::Draft, :count).by(1)
+          expect { subject }.to change(Draftsman::Single::Draft, :count).by(1)
         end
 
         it 'has a newer `updated_at`' do
@@ -143,7 +143,7 @@ RSpec.describe Skipper, type: :model do
         end
 
         it 'destroys the draft' do
-          expect { subject }.to change(Draftsman::Draft.where(:id => skipper.draft_id), :count).by(-1)
+          expect { subject }.to change(Draftsman::Single::Draft.where(:id => skipper.draft_id), :count).by(-1)
         end
 
         it 'has a newer `updated_at`' do
@@ -193,7 +193,7 @@ RSpec.describe Skipper, type: :model do
           end
 
           it 'updates the existing draft' do
-            expect { subject }.to_not change(Draftsman::Draft.where(:id => skipper.draft_id), :count)
+            expect { subject }.to_not change(Draftsman::Single::Draft.where(:id => skipper.draft_id), :count)
           end
 
           it "updates the draft's `name`" do
@@ -258,7 +258,7 @@ RSpec.describe Skipper, type: :model do
           end
 
           it "doesn't change the number of drafts" do
-            expect { subject }.to_not change(Draftsman::Draft.where(:id => skipper.draft_id), :count)
+            expect { subject }.to_not change(Draftsman::Single::Draft.where(:id => skipper.draft_id), :count)
           end
 
           it 'has the original `updated_at`' do
@@ -310,7 +310,7 @@ RSpec.describe Skipper, type: :model do
           end
 
           it 'updates the existing draft' do
-            expect { subject }.to_not change(Draftsman::Draft.where(:id => skipper.draft_id), :count)
+            expect { subject }.to_not change(Draftsman::Single::Draft.where(:id => skipper.draft_id), :count)
           end
 
           it "updates the draft's `name`" do
@@ -357,7 +357,7 @@ RSpec.describe Skipper, type: :model do
           end
 
           it 'updates the existing draft' do
-            expect { subject }.to_not change(Draftsman::Draft.where(:id => skipper.draft_id), :count)
+            expect { subject }.to_not change(Draftsman::Single::Draft.where(:id => skipper.draft_id), :count)
           end
 
           it "keeps the draft's `name`" do
@@ -404,7 +404,7 @@ RSpec.describe Skipper, type: :model do
           end
 
           it "doesn't change the number of drafts" do
-            expect { subject }.to_not change(Draftsman::Draft.where(:id => skipper.draft_id), :count)
+            expect { subject }.to_not change(Draftsman::Single::Draft.where(:id => skipper.draft_id), :count)
           end
 
           it "does not update the draft's `name`" do

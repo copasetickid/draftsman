@@ -1,6 +1,6 @@
-require 'draftsman/draft'
+require 'draftsman/single/draft'
 
-class OverriddenDraft < Draftsman::Draft
+class OverriddenDraft < Draftsman::Single::Draft
   def im_overridden
     true
   end

@@ -65,7 +65,7 @@ describe Trashable do
       end
 
       it 'keeps the associated draft' do
-        expect { subject }.to_not change(Draftsman::Draft.where(:id => trashable.draft_id), :count)
+        expect { subject }.to_not change(Draftsman::Single::Draft.where(:id => trashable.draft_id), :count)
       end
 
       it 'retains its `name` in the draft' do
@@ -129,7 +129,7 @@ describe Trashable do
       end
 
       it 'keeps the associated draft' do
-        expect { subject }.to_not change(Draftsman::Draft.where(:id => trashable.draft_id), :count)
+        expect { subject }.to_not change(Draftsman::Single::Draft.where(:id => trashable.draft_id), :count)
       end
 
       it "retains the updated draft's name in the draft" do
@@ -190,7 +190,7 @@ describe Trashable do
       end
 
       it 'creates a draft' do
-        expect { subject }.to change(Draftsman::Draft, :count).by(1)
+        expect { subject }.to change(Draftsman::Single::Draft, :count).by(1)
       end
     end
   end

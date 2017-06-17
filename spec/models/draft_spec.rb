@@ -1,23 +1,23 @@
 require 'spec_helper'
 
-describe Draftsman::Draft do
+describe Draftsman::Single::Draft do
   let(:trashable) { Trashable.new(name: 'Bob') }
 
   describe '.object_col_is_json?' do
     it 'does not have a JSON object column' do
-      expect(Draftsman::Draft.object_col_is_json?).to eql false
+      expect(Draftsman::Single::Draft.object_col_is_json?).to eql false
     end
   end
 
   describe '.object_changes_col_is_json?' do
     it 'does not have a JSON object_changes column' do
-      expect(Draftsman::Draft.object_changes_col_is_json?).to eql false
+      expect(Draftsman::Single::Draft.object_changes_col_is_json?).to eql false
     end
   end
 
   describe '.previous_draft_col_is_json?' do
     it 'does not have a JSON previous_draft column' do
-      expect(Draftsman::Draft.previous_draft_col_is_json?).to eql false
+      expect(Draftsman::Single::Draft.previous_draft_col_is_json?).to eql false
     end
   end
 
@@ -518,7 +518,7 @@ describe Draftsman::Draft do
         end
 
         it 'deletes the draft record' do
-          expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
+          expect { trashable.draft.publish! }.to change(Draftsman::Single::Draft, :count).by(-1)
         end
       end # with `create` draft
 
@@ -574,7 +574,7 @@ describe Draftsman::Draft do
         end
 
         it 'destroys the draft' do
-          expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
+          expect { trashable.draft.publish! }.to change(Draftsman::Single::Draft, :count).by(-1)
         end
 
         it 'does not delete the associated item' do
@@ -590,7 +590,7 @@ describe Draftsman::Draft do
           end
 
           it 'destroys the draft' do
-            expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
+            expect { trashable.draft.publish! }.to change(Draftsman::Single::Draft, :count).by(-1)
           end
 
           it 'deletes the associated item' do
@@ -605,7 +605,7 @@ describe Draftsman::Draft do
           end
 
           it 'destroys the draft' do
-            expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
+            expect { trashable.draft.publish! }.to change(Draftsman::Single::Draft, :count).by(-1)
           end
 
           it 'deletes the associated item' do
@@ -662,7 +662,7 @@ describe Draftsman::Draft do
         end
 
         it 'deletes the draft record' do
-          expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
+          expect { trashable.draft.publish! }.to change(Draftsman::Single::Draft, :count).by(-1)
         end
       end
 
@@ -718,7 +718,7 @@ describe Draftsman::Draft do
         end
 
         it 'destroys the draft' do
-          expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
+          expect { trashable.draft.publish! }.to change(Draftsman::Single::Draft, :count).by(-1)
         end
 
         it 'does not delete the associated item' do
@@ -734,7 +734,7 @@ describe Draftsman::Draft do
           end
 
           it 'destroys the draft' do
-            expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
+            expect { trashable.draft.publish! }.to change(Draftsman::Single::Draft, :count).by(-1)
           end
 
           it 'deletes the associated item' do
@@ -749,7 +749,7 @@ describe Draftsman::Draft do
           end
 
           it 'destroys the draft' do
-            expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
+            expect { trashable.draft.publish! }.to change(Draftsman::Single::Draft, :count).by(-1)
           end
 
           it 'deletes the associated item' do
@@ -770,7 +770,7 @@ describe Draftsman::Draft do
         end
 
         it 'destroys the draft' do
-          expect { trashable.draft.revert! }.to change(Draftsman::Draft, :count).by(-1)
+          expect { trashable.draft.revert! }.to change(Draftsman::Single::Draft, :count).by(-1)
         end
 
         it 'destroys associated item' do
@@ -810,7 +810,7 @@ describe Draftsman::Draft do
         end
 
         it 'destroys the draft record' do
-          expect { trashable.draft.revert! }.to change(Draftsman::Draft, :count).by(-1)
+          expect { trashable.draft.revert! }.to change(Draftsman::Single::Draft, :count).by(-1)
         end
 
         it 'does not destroy the associated item' do
@@ -855,7 +855,7 @@ describe Draftsman::Draft do
           end
 
           it 'destroys the draft record' do
-            expect { trashable.draft.revert! }.to change(Draftsman::Draft, :count).by(-1)
+            expect { trashable.draft.revert! }.to change(Draftsman::Single::Draft, :count).by(-1)
           end
 
           it 'does not destroy the associated item' do
@@ -899,11 +899,11 @@ describe Draftsman::Draft do
           end
 
           it 'destroys the `destroy` draft record' do
-            expect { trashable.draft.revert! }.to change(Draftsman::Draft.where(event: :destroy), :count).by(-1)
+            expect { trashable.draft.revert! }.to change(Draftsman::Single::Draft.where(event: :destroy), :count).by(-1)
           end
 
           it 'reifies the previous `create` draft record' do
-            expect { trashable.draft.revert! }.to change(Draftsman::Draft.where(event: :create), :count).by(1)
+            expect { trashable.draft.revert! }.to change(Draftsman::Single::Draft.where(event: :create), :count).by(1)
           end
 
           it 'does not destroy the associated item' do
@@ -930,7 +930,7 @@ describe Draftsman::Draft do
         end
 
         it 'destroys the draft' do
-          expect { trashable.draft.revert! }.to change(Draftsman::Draft, :count).by(-1)
+          expect { trashable.draft.revert! }.to change(Draftsman::Single::Draft, :count).by(-1)
         end
 
         it 'destroys associated item' do
@@ -970,7 +970,7 @@ describe Draftsman::Draft do
         end
 
         it 'destroys the draft record' do
-          expect { trashable.draft.revert! }.to change(Draftsman::Draft, :count).by(-1)
+          expect { trashable.draft.revert! }.to change(Draftsman::Single::Draft, :count).by(-1)
         end
 
         it 'does not destroy the associated item' do
@@ -1015,7 +1015,7 @@ describe Draftsman::Draft do
           end
 
           it 'destroys the draft record' do
-            expect { trashable.draft.revert! }.to change(Draftsman::Draft, :count).by(-1)
+            expect { trashable.draft.revert! }.to change(Draftsman::Single::Draft, :count).by(-1)
           end
 
           it 'does not destroy the associated item' do
@@ -1059,11 +1059,11 @@ describe Draftsman::Draft do
           end
 
           it 'destroys the `destroy` draft record' do
-            expect { trashable.draft.revert! }.to change(Draftsman::Draft.where(event: :destroy), :count).by(-1)
+            expect { trashable.draft.revert! }.to change(Draftsman::Single::Draft.where(event: :destroy), :count).by(-1)
           end
 
           it 'reifies the previous `create` draft record' do
-            expect { trashable.draft.revert! }.to change(Draftsman::Draft.where(event: :create), :count).by(1)
+            expect { trashable.draft.revert! }.to change(Draftsman::Single::Draft.where(event: :create), :count).by(1)
           end
 
           it 'does not destroy the associated item' do

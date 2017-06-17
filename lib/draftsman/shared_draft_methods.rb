@@ -172,7 +172,7 @@ class Draftsman::SharedDraftMethods < ActiveRecord::Base
         self.draft_publication_dependencies.each { |dependency| dependency.publish! } if !self.item.class.multiple
 
         # Update drafts need to copy over data to main record
-        self.item.attributes = self.reify.attributes if Draftsman.stash_drafted_changes? && self.update?
+        reify if Draftsman.stash_drafted_changes? && self.update?
 
         # Write `published_at` attribute
         self.item.send("#{self.item.class.published_at_attribute_name}=", current_time_from_proper_timezone)
@@ -212,7 +212,7 @@ class Draftsman::SharedDraftMethods < ActiveRecord::Base
         self.item
         # If a previous draft is stashed, restore that.
       elsif self.previous_draft.present?
-        reify_previous_draft.reify
+        reify_previous_draft
         # Prefer changeset for refication if it's present.
       elsif self.changeset.present? && self.changeset.any?
         reify_changeset
@@ -350,7 +350,7 @@ class Draftsman::SharedDraftMethods < ActiveRecord::Base
       end
     end
 
-    self.item.send("#{self.item.class.draft_association_name}=", self) if self.item.class.multiple
+    self.item.send("#{self.item.class.draft_association_name}=", self) if !self.item.class.multiple
     self.item
   end
 end

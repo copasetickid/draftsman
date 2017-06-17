@@ -49,13 +49,23 @@ module Draftsman
   end
 
   # Returns default class name used for drafts.
-  def self.draft_class_name
-    draftsman_store[:draft_class_name]
+  def self.single_draft_class_name
+    draftsman_store[:single_draft_class_name]
+  end
+
+  # Returns default class name used for drafts.
+  def self.multiple_draft_class_name
+    draftsman_store[:multiple_draft_class_name]
   end
 
   # Sets default class name to use for drafts.
-  def self.draft_class_name=(class_name)
-    draftsman_store[:draft_class_name] = class_name
+  def self.single_draft_class_name=(class_name)
+    draftsman_store[:single_draft_class_name] = class_name
+  end
+
+  # Sets default class name to use for drafts.
+  def self.multiple_draft_class_name=(class_name)
+    draftsman_store[:multiple_draft_class_name] = class_name
   end
 
   # Set the field which records when a draft was created.
@@ -116,7 +126,7 @@ private
 
   # Thread-safe hash to hold Draftman's data. Initializing with needed default values.
   def self.draftsman_store
-    Thread.current[:draft] ||= { draft_class_name: 'Draftsman::Single::Draft' }
+    Thread.current[:draft] ||= { single_draft_class_name: 'Draftsman::Single::Draft', multiple_draft_class_name: 'Draftsman::Multiple::Draft' }
   end
 
   # Returns Draftman's configuration object.

@@ -18,7 +18,7 @@
 # Field which records who last recorded the draft.
 # Draftsman.whodunnit_field = :whodunnit
 
-# Whether or not to stash draft data in the `Draftsman::Draft` record. If set to
+# Whether or not to stash draft data in the `Draftsman::Single::Draft` record. If set to
 # `false`, all changes will be persisted to the main record and will not be
 # persisted to the draft record's `object` column.
 # Draftsman.stash_drafted_changes = true

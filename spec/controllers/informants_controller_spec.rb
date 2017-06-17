@@ -6,7 +6,7 @@ describe InformantsController, type: :controller do
 
   describe 'create' do
     before { post :create }
-    subject { Draftsman::Draft.last }
+    subject { Draftsman::Single::Draft.last }
 
     it 'records `ip` from custom `info_for_draftsman`' do
       expect(subject.ip).to eql '123.45.67.89'
@@ -19,7 +19,7 @@ describe InformantsController, type: :controller do
 
   describe 'update' do
     before { put :update, params: { id: trashable.id } }
-    subject { Draftsman::Draft.last }
+    subject { Draftsman::Single::Draft.last }
 
     it 'records `ip` from custom `info_for_draftsman`' do
       expect(subject.ip).to eql '123.45.67.89'
@@ -32,7 +32,7 @@ describe InformantsController, type: :controller do
 
   describe 'destroy' do
     before { delete :destroy, params: { id: trashable.id } }
-    subject { Draftsman::Draft.last }
+    subject { Draftsman::Single::Draft.last }
 
     it 'records `ip` from custom `info_for_draftsman`' do
       expect(subject.ip).to eql '123.45.67.89'
