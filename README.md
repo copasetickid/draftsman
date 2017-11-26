@@ -1,6 +1,6 @@
 # Draftsman v0.7.0
 
-[![Build Status](https://secure.travis-ci.org/liveeditor/draftsman.svg?branch=master)](http://travis-ci.org/liveeditor/draftsman)
+[![Build Status](https://secure.travis-ci.org/jmfederico/draftsman.svg?branch=master)](http://travis-ci.org/jmfederico/draftsman)
 
 Draftsman is a Ruby gem that lets you create draft versions of your database
 records. If you're developing a system in need of simple drafts or a publishing
@@ -70,7 +70,7 @@ gem 'draftsman', '~> 0.7.0'
 Or if you want to grab the latest from `master`:
 
 ```ruby
-gem 'draftsman', github: 'liveeditor/draftsman'
+gem 'draftsman', github: 'jmfederico/draftsman'
 ```
 
 Generate a migration which will add a `drafts` table to your database.
@@ -120,7 +120,7 @@ your app with Draftsman will look something like this:
 Add Draftsman to your `Gemfile`.
 
 ```ruby
-gem 'draftsman', github: 'liveeditor/draftsman'
+gem 'draftsman', github: 'jmfederico/draftsman'
 ```
 
 Generate a migration to add a `drafts` table to your database.
