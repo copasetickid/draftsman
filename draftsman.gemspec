@@ -6,9 +6,9 @@ Gem::Specification.new do |s|
   s.version       = Draftsman::VERSION
   s.summary       = 'Create draft versions of your database records.'
   s.description   = "Stores draft versions of your ActiveRecord models' data in a single table or split up into separate tables. Works with Ruby on Rails and Sinatra."
-  s.homepage      = 'https://github.com/liveeditor/draftsman'
-  s.authors       = ['Chris Peters']
-  s.email         = 'chris@minimalorange.com'
+  s.homepage      = 'https://github.com/jmfederico/draftsman'
+  s.authors       = ['Chris Peters', 'Federico Jaramillo']
+  s.email         = ['chris@minimalorange.com', 'federicojaramillom@gmail.com']
   s.license       = 'MIT'
 
   s.files         = `git ls-files`.split("\n")
