@@ -648,7 +648,7 @@ Draftsman is released under the [MIT License][9].
 [4]: http://railscasts.com/episodes/416-form-objects
 [5]: http://www.sinatrarb.com/
 [6]: https://github.com/janko-m/sinatra-activerecord
-[7]: https://raw.github.com/liveeditor/draftsman/master/lib/generators/draftsman/templates/create_drafts.rb
+[7]: https://raw.github.com/jmfederico/draftsman/master/lib/generators/draftsman/templates/create_drafts.rb
 [8]: http://www.sinatrarb.com/intro.html#Modular%20vs.%20Classic%20Style
 [9]: http://www.opensource.org/licenses/MIT
 [10]: http://semver.org/
