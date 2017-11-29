@@ -52,6 +52,10 @@ module Draftsman
       # :trashed_at
       # The name to use for the method which returns the soft delete timestamp.
       # Default is `trashed_at`.
+      #
+      # :publish_options
+      # The hash of options that will be passed to #save when publishing the draft.
+      # Default is { valdiate: false }
       def has_drafts(options = {})
         # Lazily include the instance methods so we don't clutter up
         # any more ActiveRecord models than we need to.
@@ -80,6 +84,8 @@ module Draftsman
         draftsman_options[:ignore] << "#{self.draft_association_name}_id"
 
         draftsman_options[:meta] ||= {}
+
+        draftsman_options[:publish_options] ||= { validate: false }
 
         attr_accessor :draftsman_event
 
