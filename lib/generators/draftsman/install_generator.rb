@@ -2,6 +2,8 @@ require 'rails/generators'
 require 'rails/generators/migration'
 require 'rails/generators/active_record'
 
+require 'support/feature_detection'
+
 module Draftsman
   class InstallGenerator < ::Rails::Generators::Base
     include ::Rails::Generators::Migration
@@ -13,19 +15,26 @@ module Draftsman
     class_option :with_pg_json, :type => :boolean, :default => false, :desc => 'Use PostgreSQL JSON data type for serialized data.'
 
     def create_migration_file
+
+      config = {
+        api_version: activerecord_migrations_versioned? ? '[4.2]' : ''
+      }
+
       if options.with_pg_json?
-        migration_template 'create_drafts_json.rb', 'db/migrate/create_drafts.rb'
+        migration_template 'create_drafts_json.rb', 'db/migrate/create_drafts.rb', config
 
         if options.with_changes?
           migration_template 'add_object_changes_column_to_drafts_json.rb',
-                             'db/migrate/add_object_changes_column_to_drafts.rb'
+                             'db/migrate/add_object_changes_column_to_drafts.rb',
+                             config
         end
       else
-        migration_template 'create_drafts.rb', 'db/migrate/create_drafts.rb'
+        migration_template 'create_drafts.rb', 'db/migrate/create_drafts.rb', config
 
         if options.with_changes?
           migration_template 'add_object_changes_column_to_drafts.rb',
-                             'db/migrate/add_object_changes_column_to_drafts.rb'
+                             'db/migrate/add_object_changes_column_to_drafts.rb',
+                             config
         end
       end
     end

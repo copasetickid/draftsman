@@ -1,4 +1,4 @@
-class CreateDrafts < ActiveRecord::Migration
+class CreateDrafts < ActiveRecord::Migration<%= config[:api_version] %>
   def change
     create_table :drafts do |t|
       t.string  :item_type, :null => false

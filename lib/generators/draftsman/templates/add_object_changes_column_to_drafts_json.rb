@@ -1,4 +1,4 @@
-class AddObjectChangesColumnToDrafts < ActiveRecord::Migration
+class AddObjectChangesColumnToDrafts < ActiveRecord::Migration<%= config[:api_version] %>
   def self.up
     add_column :drafts, :object_changes, :json
   end
