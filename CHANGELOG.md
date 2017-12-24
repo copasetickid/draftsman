@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.7.1 - December 24, 2017
+
+### Bug Fixes
+
+- [@jmfederico](https://github.com/jmfederico)
+  [fixed](https://github.com/jmfederico/draftsman/commit/ff46e510c7d82331fcad7ea1eb2d2d2728ed1bd5)
+  [#73](https://github.com/jmfederico/draftsman/issues/73)
+  Rails 5 migration error
+
+
 ## 0.7.0 - June 12, 2017
 
 ### Enhancements
