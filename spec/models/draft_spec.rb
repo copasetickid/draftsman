@@ -520,6 +520,14 @@ describe Draftsman::Draft do
         it 'deletes the draft record' do
           expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
         end
+
+        context 'when publish options is { validate: true }' do
+          it 'validates the record before publishing' do
+            expect(trashable.draft.item).to receive(:valid?).and_call_original
+
+            trashable.draft.publish!(validate: true)
+          end
+        end
       end # with `create` draft
 
       context 'with `update` draft' do
@@ -579,6 +587,14 @@ describe Draftsman::Draft do
 
         it 'does not delete the associated item' do
           expect { trashable.draft.publish! }.to_not change(Trashable, :count)
+        end
+
+        context 'when publish options is { validate: true }' do
+          it 'validates the record before publishing' do
+            expect(trashable.draft.item).to receive(:valid?).and_call_original
+
+            trashable.draft.publish!(validate: true)
+          end
         end
       end # with `update` draft
 

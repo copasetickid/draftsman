@@ -164,7 +164,11 @@ class Draftsman::Draft < ActiveRecord::Base
   # -  For `update` drafts, applies the drafted changes to the item and destroys
   #    the draft.
   # -  For `destroy` drafts, destroys the item and the draft.
-  def publish!
+  #
+  # Params:
+  # -  A hash of options that will be passed to item.save,
+  #    override publish_options defined with has_drafts
+  def publish!(**options)
     ActiveRecord::Base.transaction do
       case self.event.to_sym
       when :create, :update
@@ -180,7 +184,7 @@ class Draftsman::Draft < ActiveRecord::Base
         # Clear out draft
         self.item.send("#{self.item.class.draft_association_name}_id=", nil)
 
-        self.item.save(validate: false)
+        self.item.save(self.item.draftsman_options[:publish_options].merge(options))
         self.item.reload
 
         # Destroy draft
