@@ -167,7 +167,7 @@ class Draftsman::Draft < ActiveRecord::Base
   #
   # Params:
   # -  A hash of options that will be passed to item.save,
-  #    override publish_options defined with has_drafts
+  #    override publish_options defined with has_drafts.
   def publish!(**options)
     ActiveRecord::Base.transaction do
       case self.event.to_sym
