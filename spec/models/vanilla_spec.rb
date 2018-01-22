@@ -5,13 +5,13 @@ describe Vanilla do
   let(:vanilla) { Vanilla.new(name: 'Bob') }
   it { should be_draftable }
 
-  describe '#draftsman_options' do    
+  describe '#draftsman_options' do
     describe '[:publish_options]' do
       subject { vanilla.draftsman_options[:publish_options] }
 
       it { is_expected.to be_present }
       it { is_expected.to be_a(Hash) }
-      it { is_expected.to include(validate: false) }
+      it { is_expected.to match(validate: false) }
     end
   end
 

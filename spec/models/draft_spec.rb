@@ -521,9 +521,15 @@ describe Draftsman::Draft do
           expect { trashable.draft.publish! }.to change(Draftsman::Draft, :count).by(-1)
         end
 
-        context 'when publish options is { validate: true }' do
-          it 'validates the record before publishing' do
-            expect(trashable.draft.item).to receive(:valid?).and_call_original
+        context 'with additional `arguments`' do
+          it 'merges with `publish_options`' do
+            expect(trashable.draft.item).to receive(:save).with(validate: false, foo: :bar).and_call_original
+
+            trashable.draft.publish!(foo: :bar)
+          end
+
+          it 'overrides existing `publish_options` items' do
+            expect(trashable.draft.item).to receive(:save).with(validate: true).and_call_original
 
             trashable.draft.publish!(validate: true)
           end
@@ -589,9 +595,15 @@ describe Draftsman::Draft do
           expect { trashable.draft.publish! }.to_not change(Trashable, :count)
         end
 
-        context 'when publish options is { validate: true }' do
-          it 'validates the record before publishing' do
-            expect(trashable.draft.item).to receive(:valid?).and_call_original
+        context 'with custom `options`' do
+          it 'merges with existing `publish_options`' do
+            expect(trashable.draft.item).to receive(:save).with(validate: false, foo: :bar).and_call_original
+
+            trashable.draft.publish!(foo: :bar)
+          end
+
+          it 'overrides existing `publish_options`' do
+            expect(trashable.draft.item).to receive(:save).with(validate: true).and_call_original
 
             trashable.draft.publish!(validate: true)
           end
