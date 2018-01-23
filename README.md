@@ -1,4 +1,4 @@
-# Draftsman v0.7.1
+# Draftsman v0.8.dev
 
 [![Build Status](https://travis-ci.org/jmfederico/draftsman.svg?branch=master)](https://travis-ci.org/jmfederico/draftsman)
 
