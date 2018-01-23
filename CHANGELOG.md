@@ -2,6 +2,10 @@
 
 ## 0.8.dev
 
+### Breaking Changes
+
+- Now only supports ActiveRecord 4.2+.
+
 ### Enhancements
 
 - [@Looooong](https://github.com/Looooong)
