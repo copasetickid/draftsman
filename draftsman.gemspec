@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'appraisal'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'railties', ['>= 4.0', '< 5.2']
-  s.add_development_dependency 'sinatra', '~> 1.0'
+  s.add_development_dependency 'sinatra', ['>= 1.0', '<3']
   s.add_development_dependency 'rspec-rails', '~> 3.5'
 
   # JRuby support for the test ENV
