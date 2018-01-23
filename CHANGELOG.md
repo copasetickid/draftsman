@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.8.dev
+
+### Enhancements
+
+- [@Looooong](https://github.com/Looooong)
+  [implemented](https://github.com/jmfederico/draftsman/commit/181e3599aba9f9d6c76a3f37e65837cefababbb3)
+  [#76](https://github.com/jmfederico/draftsman/pull/76)
+  Options passed to `#save` whe publishing a draft can now be customized.
+
 ## 0.7.1 - December 24, 2017
 
 ### Bug Fixes

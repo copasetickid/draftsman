@@ -212,6 +212,11 @@ The name to use for the method which returns the published timestamp. Default is
 The name to use for the method which returns the soft delete timestamp. Default
 is `trashed_at`.
 
+##### `:publish_options`
+
+The hash of options that will be passed to `#save` when publishing the draft.
+Default is `{ valdiate: false }`
+
 ### Drafted Item Class Methods
 
 When you install the Draftsman gem, you get these methods on each model class:
