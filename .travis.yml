@@ -17,5 +17,8 @@ gemfile:
   - gemfiles/sinatra_1.4.gemfile
   - gemfiles/sinatra_2.0.gemfile
 
+before_install:
+  - gem update --system
+
 before_script:
   - bundle exec rake -f spec/dummy/Rakefile db:schema:load
