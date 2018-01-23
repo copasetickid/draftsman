@@ -525,13 +525,13 @@ describe Draftsman::Draft do
           it 'merges with existing `publish_options`' do
             expect(trashable.draft.item).to receive(:save).with(validate: false, foo: :bar).and_call_original
 
-            trashable.draft.publish!(foo: :bar)
+            trashable.draft.publish! foo: :bar
           end
 
           it 'overrides existing `publish_options`' do
             expect(trashable.draft.item).to receive(:save).with(validate: true).and_call_original
 
-            trashable.draft.publish!(validate: true)
+            trashable.draft.publish! validate: true
           end
         end
       end # with `create` draft
@@ -599,13 +599,13 @@ describe Draftsman::Draft do
           it 'merges with existing `publish_options`' do
             expect(trashable.draft.item).to receive(:save).with(validate: false, foo: :bar).and_call_original
 
-            trashable.draft.publish!(foo: :bar)
+            trashable.draft.publish! foo: :bar
           end
 
           it 'overrides existing `publish_options`' do
             expect(trashable.draft.item).to receive(:save).with(validate: true).and_call_original
 
-            trashable.draft.publish!(validate: true)
+            trashable.draft.publish! validate: true
           end
         end
       end # with `update` draft

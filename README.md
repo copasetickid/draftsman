@@ -321,6 +321,10 @@ draft.destroy?
 # -  For `update` drafts, applies the drafted changes to the item and destroys
 #    the draft.
 # -  For `destroy` drafts, destroys the item and the draft.
+#
+# Params:
+# -  A hash of options that will be passed to item.save,
+#    override publish_options defined with has_drafts.
 draft.publish!
 
 # Reverts this draft's associated `item` to its previous state, reverts its
