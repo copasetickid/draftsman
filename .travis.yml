@@ -10,9 +10,12 @@ rvm:
   - 2.2.9
 
 gemfile:
-  - gemfiles/activerecord_4.2.gemfile
-  - gemfiles/activerecord_5.0.gemfile
   - gemfiles/activerecord_5.1.gemfile
+  - gemfiles/activerecord_5.0.gemfile
+  - gemfiles/activerecord_4.2.gemfile
+  - gemfiles/sinatra_1.0.gemfile
+  - gemfiles/sinatra_1.4.gemfile
+  - gemfiles/sinatra_2.0.gemfile
 
 before_script:
   - bundle exec rake -f spec/dummy/Rakefile db:schema:load
