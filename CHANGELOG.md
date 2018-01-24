@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.8.dev
+## 0.8.0.dev
 
 ### Breaking Changes
 
