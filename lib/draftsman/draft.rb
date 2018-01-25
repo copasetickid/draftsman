@@ -166,7 +166,7 @@ class Draftsman::Draft < ActiveRecord::Base
   # -  For `destroy` drafts, destroys the item and the draft.
   #
   # Params:
-  # -  A hash of options that will be merged with `publish_options` defined in
+  # -  A hash of options that get merged with `publish_options` defined in
   #    `has_drafts` and passed to `item.save`.
   def publish!(**options)
     ActiveRecord::Base.transaction do

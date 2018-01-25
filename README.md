@@ -328,8 +328,8 @@ draft.destroy?
 # -  For `destroy` drafts, destroys the item and the draft.
 #
 # Params:
-# -  A hash of options that will be passed to item.save,
-#    override publish_options defined with has_drafts.
+# -  A hash of options that get merged with `publish_options` defined in
+#    `has_drafts` and passed to `item.save`.
 draft.publish!
 
 # Reverts this draft's associated `item` to its previous state, reverts its
