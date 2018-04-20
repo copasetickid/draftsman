@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.7.dev
+## 0.7.2 - April 20, 2018
 
 ### Enhancements
 

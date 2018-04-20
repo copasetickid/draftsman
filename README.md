@@ -1,4 +1,4 @@
-# Draftsman v0.7.1
+# Draftsman v0.7.2
 
 [![Build Status](https://travis-ci.org/jmfederico/draftsman.svg?branch=0.7-stable)](https://travis-ci.org/jmfederico/draftsman)
 
@@ -64,7 +64,7 @@ ActiveRecord.
 Add Draftsman to your `Gemfile`.
 
 ```ruby
-gem 'draftsman', '~> 0.7.1'
+gem 'draftsman', '~> 0.7.2'
 ```
 
 Or if you want to grab the latest from `master`:
