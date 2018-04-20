@@ -18,6 +18,11 @@ appraise "activerecord-4.2" do
   gem 'railties', '~> 4.2.0'
 end
 
+appraise "activerecord-4.0" do
+  gem 'activerecord', '~> 4.0.0'
+  gem 'railties', '~> 4.0.0'
+end
+
 appraise "sinatra-1.0" do
   gem 'sinatra', '~> 1.0.0'
   gem 'rack', '~> 1.0'
