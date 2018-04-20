@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.7.dev
+
+### Enhancements
+
+- [@iggant](https://github.com/iggant)
+  [implemented](https://github.com/jmfederico/draftsman/pull/80/commits/74e290d895b272b45a4b611403afa5d554955938)
+  [#67](https://github.com/jmfederico/draftsman/pull/80)
+  ActiveRecord 5.2 compatibility
+
+
 ## 0.7.1 - December 24, 2017
 
 ### Bug Fixes
