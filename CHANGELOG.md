@@ -8,10 +8,17 @@
 
 ### Enhancements
 
+- [@iggant](https://github.com/iggant)
+  [implemented](https://github.com/jmfederico/draftsman/pull/80/commits/74e290d895b272b45a4b611403afa5d554955938)
+  [#67](https://github.com/jmfederico/draftsman/pull/80)
+  ActiveRecord 5.2 compatibility
+
+### Enhancements
+
 - [@Looooong](https://github.com/Looooong)
   [implemented](https://github.com/jmfederico/draftsman/commit/181e3599aba9f9d6c76a3f37e65837cefababbb3)
   [#76](https://github.com/jmfederico/draftsman/pull/76)
-  Options passed to `#save` whe publishing a draft can now be customized.
+  Options passed to `#save` when publishing a draft can now be customized.
 
 ## 0.7.1 - December 24, 2017
 
