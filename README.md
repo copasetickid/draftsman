@@ -215,7 +215,7 @@ is `trashed_at`.
 ##### `:publish_options`
 
 The hash of options that will be passed to `#save` when publishing the draft.
-Default is `{ valdiate: false }`
+Default is `{ validate: false }`
 
 ### Drafted Item Class Methods
 
