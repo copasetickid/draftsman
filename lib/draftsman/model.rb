@@ -55,7 +55,7 @@ module Draftsman
       #
       # :publish_options
       # The hash of options that will be passed to `#save` when publishing the draft.
-      # Default is `{ valdiate: false }`
+      # Default is `{ validate: false }`
       def has_drafts(options = {})
         # Lazily include the instance methods so we don't clutter up
         # any more ActiveRecord models than we need to.
