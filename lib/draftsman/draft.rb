@@ -76,12 +76,13 @@ class Draftsman::Draft < ActiveRecord::Base
       associations.each do |association|
         association_class =
           if association.options.key?(:polymorphic)
-            my_item.send(association.foreign_key.sub('_id', '_type')).constantize
+            association_class_name = my_item.send(association.foreign_key.sub('_id', '_type'))
+            association_class_name.constantize if association_class_name
           else
             association.klass
           end
 
-        if association_class.draftable? && association.name != association_class.draft_association_name.to_sym
+        if association_class && association_class.draftable? && association.name != association_class.draft_association_name.to_sym
           dependency = my_item.send(association.name)
           dependencies << dependency.draft if dependency.present? && dependency.draft? && dependency.draft.create?
         end
