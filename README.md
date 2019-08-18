@@ -63,7 +63,7 @@ ActiveRecord.
 
 ## Installation
 
-### Rails 4 and 5
+### Rails 4, 5 and 6
 
 Add Draftsman to your `Gemfile`.
 

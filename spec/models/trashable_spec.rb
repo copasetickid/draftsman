@@ -140,7 +140,7 @@ describe Trashable do
     context 'without draft' do
       before do
         trashable.save!
-        trashable.update_attributes! :published_at => Time.now
+        trashable.update! :published_at => Time.now
       end
 
       subject { trashable.draft_destruction; return trashable.reload }
