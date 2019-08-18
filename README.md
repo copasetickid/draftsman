@@ -56,7 +56,7 @@ Sinatra.
 
 ## Compatibility
 
-Compatible with ActiveRecord 4 and 5.
+Compatible with ActiveRecord 4, 5 and 6.
 
 Works well with Rails, Sinatra, or any other application that depends on
 ActiveRecord.
