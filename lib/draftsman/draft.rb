@@ -83,7 +83,7 @@ class Draftsman::Draft < ActiveRecord::Base
 
         if association_class.draftable? && association.name != association_class.draft_association_name.to_sym
           dependency = my_item.send(association.name)
-          dependencies << dependency.draft if dependency.present? && dependency.draft? && dependency.draft.create?
+          dependencies << dependency.draft if dependency.present? && dependency.draft? && dependency.draft&.create?
         end
       end
     when :destroy
