@@ -389,8 +389,8 @@ module Draftsman
             end
           end
         end
-      rescue Exception => e
-        false
+      #rescue Exception => e
+      #  false
       end
 
       # Returns hash of attributes that have changed for the object, similar to
