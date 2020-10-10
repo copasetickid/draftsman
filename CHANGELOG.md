@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.8.1.dev
+
+- Enable propagation of exceptions to calling model
+
 ## 0.8.0.dev
 
 ### Breaking Changes

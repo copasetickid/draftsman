@@ -1,8 +1,8 @@
 # Project status #
 
-🚨 Drfatsman is [looking for a new Steward](https://github.com/jmfederico/draftsman/issues/85) 🚨
+🚨 Draftsman is [looking for a new Steward](https://github.com/jmfederico/draftsman/issues/85) 🚨
 
-# Draftsman v0.8.0.dev
+# Draftsman v0.8.1.dev
 
 [![Build Status](https://travis-ci.org/jmfederico/draftsman.svg?branch=master)](https://travis-ci.org/jmfederico/draftsman)
 
