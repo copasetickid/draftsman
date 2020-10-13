@@ -98,7 +98,7 @@ RSpec.describe Skipper, type: :model do
         end
 
         it 'has the updated skipped attribute' do
-          expect(subject.skip_me).to eql 'Skipped 2'
+          expect(subject.skip_me).to eql 'Skipped 1'
         end
 
         it 'creates a new draft' do
@@ -306,7 +306,7 @@ RSpec.describe Skipper, type: :model do
           end
 
           it "has the updated skipped attribute's value" do
-            expect(subject.skip_me).to eql 'Skipped 2'
+            expect(subject.skip_me).to eql 'Skipped 1'
           end
 
           it 'updates the existing draft' do
@@ -400,7 +400,7 @@ RSpec.describe Skipper, type: :model do
           end
 
           it "has the updated skipped attributes' value" do
-            expect(subject.skip_me).to eql 'Skipped 2'
+            expect(subject.skip_me).to eql 'Skipped 1'
           end
 
           it "doesn't change the number of drafts" do

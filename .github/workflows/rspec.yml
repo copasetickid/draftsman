@@ -1,0 +1,24 @@
+name: Gem Tests
+on: [push,pull_request]
+jobs:
+  rspec-test:
+    name: Rspec
+    runs-on: ubuntu-18.04
+    services:
+      postgres:
+        image: postgres:latest
+        ports:
+        - 5432:5432
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-ruby@v1
+      - name: Install postgres client
+        run: sudo apt-get install libpq-dev
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundler install
+      - name: Create Database
+        run: RAILS_ENV=test bundle exec rake -f spec/dummy/Rakefile db:schema:load
+      - name: Run Tests
+        run: bundler exec rake

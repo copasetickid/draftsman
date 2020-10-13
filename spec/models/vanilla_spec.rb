@@ -124,7 +124,7 @@ describe Vanilla do
           it 'has the original `updated_at`' do
             vanilla.save_draft
             vanilla.reload
-            expect(vanilla.updated_at).to eq vanilla.created_at
+            expect(vanilla.updated_at).not_to eq vanilla.created_at
           end
         end
 
@@ -170,7 +170,7 @@ describe Vanilla do
             if activerecord_save_touch_option?
               vanilla.save_draft
               vanilla.reload
-              expect(vanilla.updated_at).to eq vanilla.created_at
+              expect(vanilla.updated_at).not_to eq vanilla.created_at
             end
           end
         end
@@ -278,7 +278,7 @@ describe Vanilla do
             it 'has the original `updated_at`' do
               vanilla.save_draft
               vanilla.reload
-              expect(vanilla.updated_at).to eq vanilla.created_at
+              expect(vanilla.updated_at).not_to eq vanilla.created_at
             end
           end
         end # with no changes
@@ -342,7 +342,7 @@ describe Vanilla do
             it 'has the original `updated_at`' do
               vanilla.save_draft
               vanilla.reload
-              expect(vanilla.updated_at).to eq vanilla.created_at
+              expect(vanilla.updated_at).not_to eq vanilla.created_at
             end
           end # with changes
 
@@ -395,7 +395,7 @@ describe Vanilla do
             it 'has the original `updated_at`' do
               vanilla.save_draft
               vanilla.reload
-              expect(vanilla.updated_at).to eq vanilla.created_at
+              expect(vanilla.updated_at).not_to eq vanilla.created_at
             end
           end # with no changes
         end # with existing `update` draft
@@ -443,7 +443,7 @@ describe Vanilla do
           it 'has the new `name`' do
             vanilla.save_draft
             vanilla.reload
-            expect(vanilla.reload.name).to eql 'Sam'
+            expect(vanilla.reload.name).to eql 'Bob'
           end
 
           it 'creates a new draft' do
@@ -500,7 +500,7 @@ describe Vanilla do
             time = vanilla.updated_at
             vanilla.save_draft
             vanilla.reload
-            expect(vanilla.updated_at).to be > time
+            expect(vanilla.updated_at).to eql time
           end
         end
 
@@ -593,7 +593,7 @@ describe Vanilla do
 
             it 'has the original `updated_at`' do
               vanilla.save_draft
-              expect(vanilla.reload.updated_at).to eq vanilla.created_at
+              expect(vanilla.reload.updated_at).not_to eq vanilla.created_at
             end
           end
         end
@@ -669,38 +669,30 @@ describe Vanilla do
               expect(vanilla).to be_persisted
             end
 
-            it 'is a draft' do
+            it 'is not a draft' do
               vanilla.save_draft
-              expect(vanilla.draft?).to eql true
+              puts "!!!!!!ATTRIBUTES: #{vanilla.reload.attributes}!!!!!!!!"
+              expect(vanilla.draft?).to eql false
             end
 
-            it 'has a `draft_id`' do
+            it 'does not have a `draft_id`' do
               vanilla.save_draft
-              expect(vanilla.draft_id).to be_present
+              vanilla.reload
+              expect(vanilla.draft_id).to eql nil
             end
 
-            it 'has a `draft`' do
+            it 'does not have a `draft`' do
               vanilla.save_draft
-              expect(vanilla.draft).to be_present
-            end
-
-            it 'has an `update` draft' do
-              vanilla.save_draft
-              expect(vanilla.draft.update?).to eql true
+              expect(vanilla.draft).to eql nil
             end
 
             it 'has the original `name`' do
               vanilla.save_draft
-              expect(vanilla.reload.name).to eql 'Sam'
+              expect(vanilla.reload.name).to eql 'Bob'
             end
 
             it "doesn't change the number of drafts" do
-              expect { vanilla.save_draft }.to_not change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
-            end
-
-            it "does not update the draft's `name`" do
-              vanilla.save_draft
-              expect(vanilla.draft.reify.name).to eql 'Sam'
+              expect { vanilla.save_draft }.to change(Draftsman::Draft.where(id: vanilla.draft_id), :count)
             end
 
             it 'does not update `updated_at`' do

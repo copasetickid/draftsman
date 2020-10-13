@@ -81,8 +81,8 @@ RSpec.describe Talkative, type: :model do
       end
 
       describe '`before_save_draft` callback' do
-        it 'changes `before_comment` attribute' do
-          expect(talkative.before_comment).to eql 'I changed before save'
+        it 'does not persist updated `before_comment` attribute' do
+          expect(talkative.before_comment).to be_nil
         end
 
         it 'persists updated `before_comment` attribute to draft' do
@@ -92,9 +92,6 @@ RSpec.describe Talkative, type: :model do
       end
 
       describe '`around_save_draft` callback' do
-        it 'changes `around_early_comment` attribute (before yield)' do
-          expect(talkative.around_early_comment).to eql 'I changed around save (before yield)'
-        end
 
         it 'does not persist updated `around_early_comment` attribute' do
           talkative.reload

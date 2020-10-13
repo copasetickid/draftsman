@@ -248,9 +248,10 @@ module Draftsman
             send("build_#{self.class.draft_association_name}", data)
 
             if send(self.class.draft_association_name).save
+              self.restore_attributes
               fk = "#{self.class.draft_association_name}_id"
               id = send(self.class.draft_association_name).id
-              self.update_column(fk, id)
+              self.update_attribute(fk, id)
             else
               raise ActiveRecord::Rollback and return false
             end
@@ -360,9 +361,8 @@ module Draftsman
                 # If there's already a draft, update it.
                 if self.draft?
                   send(self.class.draft_association_name).update(data)
-
                   if Draftsman.stash_drafted_changes?
-                    update_skipped_attributes
+                    update_skipped_attributes(changed_attributes)
                   else
                     self.save
                   end
@@ -371,10 +371,11 @@ module Draftsman
                   send("build_#{self.class.draft_association_name}", data)
 
                   if send(self.class.draft_association_name).save
-                    update_column("#{self.class.draft_association_name}_id", send(self.class.draft_association_name).id)
-
+                    object_changed_attributes = changed_attributes
+                    self.restore_attributes
+                    update_attribute("#{self.class.draft_association_name}_id", send(self.class.draft_association_name).id)
                     if Draftsman.stash_drafted_changes?
-                      update_skipped_attributes
+                      update_skipped_attributes(object_changed_attributes)
                     else
                       self.save
                     end
@@ -478,9 +479,9 @@ module Draftsman
       end
 
       # Updates skipped attributes' values on this model.
-      def update_skipped_attributes
+      def update_skipped_attributes(object_changed_attributes)
         # Skip over this if nothing's being skipped.
-        skipped_changed = changed_attributes.keys & draftsman_options[:skip]
+        skipped_changed = object_changed_attributes.keys & draftsman_options[:skip]
         return true unless skipped_changed.present?
 
         keys = self.attributes.keys.select { |key| draftsman_options[:skip].include?(key) }

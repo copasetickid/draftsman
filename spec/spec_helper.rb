@@ -39,4 +39,6 @@ RSpec.configure do |config|
   config.order = 'random'
 
   config.mock_with :rspec
+
+  config.filter_run_when_matching :focus
 end
