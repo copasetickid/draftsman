@@ -671,7 +671,6 @@ describe Vanilla do
 
             it 'is not a draft' do
               vanilla.save_draft
-              puts "!!!!!!ATTRIBUTES: #{vanilla.reload.attributes}!!!!!!!!"
               expect(vanilla.draft?).to eql false
             end
 

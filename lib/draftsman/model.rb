@@ -253,7 +253,7 @@ module Draftsman
               id = send(self.class.draft_association_name).id
               self.update_attribute(fk, id)
             else
-              raise ActiveRecord::Rollback and return false
+              raise ActiveRecord::Rollback
             end
           end
         end
@@ -380,7 +380,7 @@ module Draftsman
                       self.save
                     end
                   else
-                    raise ActiveRecord::Rollback and return false
+                    raise ActiveRecord::Rollback
                   end
                 end
               # Otherwise, just save the record.
