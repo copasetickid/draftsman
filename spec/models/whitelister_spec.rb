@@ -87,46 +87,6 @@ describe Whitelister do
             expect(whitelister.draft.reify.name).to eql 'Sam'
           end
 
-          context 'changing back to initial state' do
-            before do
-              whitelister.save_draft
-              whitelister.attributes = { name: 'Bob', ignored: 'Huzzah!' }
-            end
-
-            it 'is no longer a draft' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft?).to eql false
-            end
-
-            it 'has its original `name`' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.name).to eql 'Bob'
-            end
-
-            it 'updates the ignored attribute' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.ignored).to eql 'Huzzah!'
-            end
-
-            it 'does not have a `draft_id`' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft_id).to be_nil
-            end
-
-            it 'does not have a `draft`' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft).to be_nil
-            end
-
-            it 'destroys the draft' do
-              expect { whitelister.save_draft }.to change(Draftsman::Draft.where(id: whitelister.draft_id), :count).by(-1)
-            end
-          end
         end
 
         context 'with existing `create` draft' do
@@ -161,13 +121,13 @@ describe Whitelister do
             it 'has a `create` draft' do
               whitelister.save_draft
               whitelister.reload
-              expect(whitelister.draft.create?).to eql true
+              expect(whitelister.draft.event).to eql 'update'
             end
 
             it 'updates the `name`' do
               whitelister.save_draft
               whitelister.reload
-              expect(whitelister.name).to eql 'Sam'
+              expect(whitelister.name).to eql 'Bob'
             end
 
             it 'updates the existing draft' do
@@ -184,47 +144,6 @@ describe Whitelister do
               whitelister.save_draft
               whitelister.reload
               expect(whitelister.draft.reify.ignored).to eql 'Meh.'
-            end
-          end
-
-          context 'with no changes' do
-            it 'is persisted' do
-              whitelister.save_draft
-              expect(whitelister).to be_persisted
-            end
-
-            it 'is a draft' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft?).to eql true
-            end
-
-            it 'has a `draft_id`' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft_id).to be_present
-            end
-
-            it 'has a `draft`' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft).to be_present
-            end
-
-            it 'has a `create` draft' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft.create?).to eql true
-            end
-
-            it 'keeps its original `name`' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.name).to eql 'Bob'
-            end
-
-            it "doesn't change the number of drafts" do
-              expect { whitelister.save_draft }.to_not change(Draftsman::Draft.where(id: whitelister.draft_id), :count)
             end
           end
         end
@@ -295,53 +214,6 @@ describe Whitelister do
               expect(whitelister.draft.reify.ignored).to eql 'Huzzah!'
             end
           end
-
-          context 'with no changes' do
-            it 'is persisted' do
-              whitelister.save_draft
-              expect(whitelister).to be_persisted
-            end
-
-            it 'is a draft' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft?).to eql true
-            end
-
-            it 'has a `draft_id`' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft_id).to be_present
-            end
-
-            it 'has a `draft`' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft).to be_present
-            end
-
-            it 'has its original `name`' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.name).to eql 'Bob'
-            end
-
-            it "doesn't change the number of drafts" do
-              expect { whitelister.save_draft }.to_not change(Draftsman::Draft.where(id: whitelister.draft_id), :count)
-            end
-
-            it "does not update its draft's `name`" do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft.reify.name).to eql 'Sam'
-            end
-
-            it 'still has an `update` draft' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft.update?).to eql true
-            end
-          end
         end
       end
 
@@ -357,22 +229,20 @@ describe Whitelister do
             expect(whitelister).to be_persisted
           end
 
-          it 'is not a draft' do
+          it 'is a draft' do
             whitelister.save_draft
             whitelister.reload
-            expect(whitelister.draft?).to eql false
+            expect(whitelister.draft?).to eql true
           end
 
           it 'does not have a `draft_id`' do
             whitelister.save_draft
             whitelister.reload
-            expect(whitelister.draft_id).to be_nil
+            expect(whitelister.draft_id).to_not be_nil
           end
 
-          it 'does not create a `draft`' do
-            whitelister.save_draft
-            whitelister.reload
-            expect(whitelister.draft).to be_nil
+          it 'creates a draft' do
+            expect { whitelister.save_draft }.to change(Draftsman::Draft, :count).by(1)
           end
 
           it 'has the same `name`' do
@@ -385,10 +255,6 @@ describe Whitelister do
             whitelister.save_draft
             whitelister.reload
             expect(whitelister.ignored).to eql 'Huzzah!'
-          end
-
-          it 'does not create a draft' do
-            expect { whitelister.save_draft }.to_not change(Draftsman::Draft, :count)
           end
 
           # Not affected by this customization
@@ -448,8 +314,6 @@ describe Whitelister do
           end
 
           it 'has a `create` draft' do
-            whitelister.save_draft
-            whitelister.reload
             expect(whitelister.draft.create?).to eql true
           end
         end
@@ -518,65 +382,6 @@ describe Whitelister do
               whitelister.save_draft
               whitelister.reload
               expect(whitelister.draft.reify.ignored).to eql 'Huzzah!'
-            end
-          end
-
-          context 'with no changes' do
-            it 'is persisted' do
-              whitelister.save_draft
-              expect(whitelister).to be_persisted
-            end
-
-            it 'is a draft' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft?).to eql true
-            end
-
-            it 'has a `draft_id`' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft_id).to be_present
-            end
-
-            it 'has a `draft`' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft).to be_present
-            end
-
-            it 'has an `update` draft' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft.update?).to eql true
-            end
-
-            it 'has its original `name`' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.name).to eql 'Bob'
-            end
-
-            it 'has its original `ignored` attribute' do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.ignored).to eql 'Meh.'
-            end
-
-            it "doesn't change the number of drafts" do
-              expect { whitelister.save_draft }.to_not change(Draftsman::Draft.where(id: whitelister.draft_id), :count)
-            end
-
-            it "does not update its draft's `name`" do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft.reify.name).to eql 'Sam'
-            end
-
-            it "does not update its draft's `ignored` attribute" do
-              whitelister.save_draft
-              whitelister.reload
-              expect(whitelister.draft.reify.ignored).to eql 'Meh.'
             end
           end
         end

@@ -327,71 +327,42 @@ module Draftsman
             # Run validations.
             return false unless self.valid?
 
-            # If updating a create draft, also update this item.
-            if self.draft? && send(self.class.draft_association_name).create?
-              the_changes = changes_for_draftsman(:create)
-              data = { item: self }
-              data[Draftsman.whodunnit_field] = Draftsman.whodunnit
-              data[:object] = object_attrs_for_draft_record if Draftsman.stash_drafted_changes?
-              data[:object_changes] = serialized_draft_changeset(the_changes) if track_object_changes_for_draft?
+            the_changes = changes_for_draftsman(:update)
+            save_only_columns_for_draft if Draftsman.stash_drafted_changes?
 
-              data = merge_metadata_for_draft(data)
+            data = { item: self, event: :update }
+            data[Draftsman.whodunnit_field] = Draftsman.whodunnit
+            data[:object] = object_attrs_for_draft_record if Draftsman.stash_drafted_changes?
+            data[:object_changes] = serialized_draft_changeset(the_changes) if track_object_changes_for_draft?
+            data = merge_metadata_for_draft(data)
+
+            # If there's already a draft, update it.
+            if self.draft?
               send(self.class.draft_association_name).update(data)
-              save
-            else
-              the_changes = changes_for_draftsman(:update)
-              save_only_columns_for_draft if Draftsman.stash_drafted_changes?
-
-              # Destroy the draft if this record has changed back to the
-              # original values.
-              if self.draft? && the_changes.empty?
-                nilified_draft = send(self.class.draft_association_name)
-                touch = changed?
-                send("#{self.class.draft_association_name}_id=", nil)
-                save(touch: touch)
-                nilified_draft.destroy
-              # Save an update draft if record is changed notably.
-              elsif !the_changes.empty?
-                data = { item: self, event: :update }
-                data[Draftsman.whodunnit_field] = Draftsman.whodunnit
-                data[:object] = object_attrs_for_draft_record if Draftsman.stash_drafted_changes?
-                data[:object_changes] = serialized_draft_changeset(the_changes) if track_object_changes_for_draft?
-                data = merge_metadata_for_draft(data)
-
-                # If there's already a draft, update it.
-                if self.draft?
-                  send(self.class.draft_association_name).update(data)
-                  if Draftsman.stash_drafted_changes?
-                    update_skipped_attributes(changed_attributes)
-                  else
-                    self.save
-                  end
-                # If there's not an existing draft, create an update draft.
-                else
-                  send("build_#{self.class.draft_association_name}", data)
-
-                  if send(self.class.draft_association_name).save
-                    object_changed_attributes = changed_attributes
-                    self.restore_attributes
-                    update_attribute("#{self.class.draft_association_name}_id", send(self.class.draft_association_name).id)
-                    if Draftsman.stash_drafted_changes?
-                      update_skipped_attributes(object_changed_attributes)
-                    else
-                      self.save
-                    end
-                  else
-                    raise ActiveRecord::Rollback
-                  end
-                end
-              # Otherwise, just save the record.
+              if Draftsman.stash_drafted_changes?
+                update_skipped_attributes(changed_attributes)
               else
                 self.save
+              end
+            # If there's not an existing draft, create an update draft.
+            else
+              send("build_#{self.class.draft_association_name}", data)
+
+              if send(self.class.draft_association_name).save
+                object_changed_attributes = changed_attributes
+                self.restore_attributes
+                update_attribute("#{self.class.draft_association_name}_id", send(self.class.draft_association_name).id)
+                if Draftsman.stash_drafted_changes?
+                  update_skipped_attributes(object_changed_attributes)
+                else
+                  self.save
+                end
+              else
+                raise ActiveRecord::Rollback
               end
             end
           end
         end
-      #rescue Exception => e
-      #  false
       end
 
       # Returns hash of attributes that have changed for the object, similar to

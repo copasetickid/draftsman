@@ -71,20 +71,20 @@ describe Draftsman::Draft do
           trashable.save_draft
         end
 
-        it 'identifies as a `create` event' do
-          expect(trashable.draft.create?).to eql true
+        it 'identifies as a `update` event' do
+          expect(trashable.draft.update?).to eql true
         end
 
-        it 'does not identify as an `update` event' do
-          expect(trashable.draft.update?).to eql false
+        it 'does not identify as an `create` event' do
+          expect(trashable.draft.create?).to eql false
         end
 
         it 'does not identify as a `destroy` event' do
           expect(trashable.draft.destroy?).to eql false
         end
 
-        it 'is a `create` event' do
-          expect(trashable.draft.event).to eql 'create'
+        it 'is a `update` event' do
+          expect(trashable.draft.event).to eql 'update'
         end
 
         it 'has an `id` in the `changeset`' do
@@ -1126,7 +1126,7 @@ describe Draftsman::Draft do
         end
 
         it 'has an updated `name`' do
-          expect(trashable.draft.reify.name).to eql 'Sam'
+          expect(trashable.draft.reify.name).to eql 'Bob'
         end
 
         it 'has no `title`' do
