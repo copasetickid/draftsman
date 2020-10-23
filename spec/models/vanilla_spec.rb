@@ -180,12 +180,6 @@ describe Vanilla do
               expect(vanilla.draft.event).to eql 'update'
             end
 
-            it 'has a new `updated_at`' do
-              time = vanilla.updated_at
-              vanilla.save_draft
-              vanilla.reload
-              expect(vanilla.updated_at).to eql time
-            end
           end # with changes
 
           context 'with no changes' do

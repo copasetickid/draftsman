@@ -169,11 +169,6 @@ RSpec.describe Skipper, type: :model do
           before do
             skipper.name = 'Sam'
           end
-
-          it 'has a newer `updated_at`' do
-            time = skipper.updated_at
-            expect(subject.updated_at).to eql time
-          end
         end
 
         context 'with changes to skipped attribute' do
