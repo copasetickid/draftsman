@@ -1,22 +1,12 @@
 # Project status #
 
-🚨 Draftsman is [looking for a new Steward](https://github.com/jmfederico/draftsman/issues/85) 🚨
+Draftsman for spectrum is a fork of a gem (https://github.com/copasetickid/draftsman) with some minor changes to it.
 
-# Draftsman v0.8.1.dev
-
-[![Build Status](https://travis-ci.org/jmfederico/draftsman.svg?branch=master)](https://travis-ci.org/jmfederico/draftsman)
+# Draftsman v0.8.4.dev
 
 Draftsman is a Ruby gem that lets you create draft versions of your database
 records. If you're developing a system in need of simple drafts or a publishing
 approval queue, then Draftsman just might be what you need.
-
--  The largest risk at this time is functionality that assists with publishing
-   or reverting dependencies through associations (for example, "publishing" a
-   child also publishes its parent if it's a new item). We'll be putting this
-   functionality through its paces in the coming months.
--  The RSpec tests are lacking in some areas, so I will be adding to those over
-   time as well. (Unfortunately, this gem was not developed with TDD best
-   practices because it was lifted from PaperTrail and modified from there.)
 
 This gem is inspired by the [Kentouzu][1] gem, which is based heavily on
 [PaperTrail][2]. In fact, much of the structure for this gem emulates PaperTrail
@@ -28,7 +18,6 @@ Sinatra.
 
 -  Provides API for storing drafts of creations, updates, and destroys.
 -  A max of one draft per record (via `belongs_to` association).
--  Does not store drafts for updates that don't change anything.
 -  Allows you to specify attributes (by inclusion or exclusion) that must change
    for a draft to be stored.
 -  Ability to query drafts based on the current drafted item, or query all
@@ -68,13 +57,7 @@ ActiveRecord.
 Add Draftsman to your `Gemfile`.
 
 ```ruby
-gem 'draftsman', '~> 0.7.1'
-```
-
-Or if you want to grab the latest from `master`:
-
-```ruby
-gem 'draftsman', github: 'jmfederico/draftsman'
+gem 'draftsman', git: 'https://github.com/spectrum-md/draftsman.git', branch: 'master'
 ```
 
 Generate a migration which will add a `drafts` table to your database.
@@ -124,7 +107,7 @@ your app with Draftsman will look something like this:
 Add Draftsman to your `Gemfile`.
 
 ```ruby
-gem 'draftsman', github: 'jmfederico/draftsman'
+gem 'draftsman', git: 'https://github.com/spectrum-md/draftsman.git', branch: 'master'
 ```
 
 Generate a migration to add a `drafts` table to your database.
