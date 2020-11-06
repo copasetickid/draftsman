@@ -1,9 +1,13 @@
+require 'draftsman/validators/draft_object_validator'
+
 class Draftsman::Draft < ActiveRecord::Base
   # Associations
   belongs_to :item, polymorphic: true
 
   # Validations
   validates :event, presence: true
+
+  validates_with Draftsman::Validators::DraftObjectValidator
 
   # Scopes
   # Returns `where` that filters to only `create` drafts.
